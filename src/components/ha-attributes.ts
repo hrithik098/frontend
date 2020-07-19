@@ -17,7 +17,7 @@ let jsYamlPromise: Promise<typeof import("js-yaml")>;
 class HaAttributes extends LitElement {
   @property() public stateObj?: HassEntity;
 
-  @property({ attribute: "extra-filters" }) public extraFilters?: string;
+  @property() public extraFilters?: string;
 
   protected render(): TemplateResult {
     if (!this.stateObj) {

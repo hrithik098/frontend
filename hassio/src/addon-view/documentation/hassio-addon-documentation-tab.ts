@@ -1,3 +1,5 @@
+import "@polymer/paper-spinner/paper-spinner-lite";
+import "@polymer/paper-card/paper-card";
 import {
   css,
   CSSResult,
@@ -5,19 +7,18 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
-import "../../../../src/components/ha-markdown";
-import {
-  fetchHassioAddonDocumentation,
-  HassioAddonDetails,
-} from "../../../../src/data/hassio/addon";
-import "../../../../src/layouts/hass-loading-screen";
-import "../../../../src/components/ha-circular-progress";
-import { haStyle } from "../../../../src/resources/styles";
+
 import { HomeAssistant } from "../../../../src/types";
+import {
+  HassioAddonDetails,
+  fetchHassioAddonDocumentation,
+} from "../../../../src/data/hassio/addon";
+import "../../../../src/components/ha-markdown";
+import "../../../../src/layouts/loading-screen";
 import { hassioStyle } from "../../resources/hassio-style";
+import { haStyle } from "../../../../src/resources/styles";
 
 @customElement("hassio-addon-documentation-tab")
 class HassioAddonDocumentationDashboard extends LitElement {
@@ -25,9 +26,9 @@ class HassioAddonDocumentationDashboard extends LitElement {
 
   @property({ attribute: false }) public addon?: HassioAddonDetails;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _content?: string;
+  @property() private _content?: string;
 
   public async connectedCallback(): Promise<void> {
     super.connectedCallback();
@@ -36,18 +37,18 @@ class HassioAddonDocumentationDashboard extends LitElement {
 
   protected render(): TemplateResult {
     if (!this.addon) {
-      return html`<ha-circular-progress active></ha-circular-progress>`;
+      return html` <paper-spinner-lite active></paper-spinner-lite> `;
     }
     return html`
       <div class="content">
-        <ha-card>
+        <paper-card>
           ${this._error ? html` <div class="errors">${this._error}</div> ` : ""}
           <div class="card-content">
             ${this._content
               ? html`<ha-markdown .content=${this._content}></ha-markdown>`
-              : html`<hass-loading-screen no-toolbar></hass-loading-screen>`}
+              : html`<loading-screen></loading-screen>`}
           </div>
-        </ha-card>
+        </paper-card>
       </div>
     `;
   }
@@ -57,16 +58,13 @@ class HassioAddonDocumentationDashboard extends LitElement {
       haStyle,
       hassioStyle,
       css`
-        ha-card {
+        paper-card {
           display: block;
         }
         .content {
           margin: auto;
           padding: 8px;
           max-width: 1024px;
-        }
-        ha-markdown {
-          padding: 16px;
         }
       `,
     ];

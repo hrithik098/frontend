@@ -7,13 +7,10 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import "../../components/dialog/ha-paper-dialog";
-import "../../components/ha-circular-progress";
 import "../../components/ha-switch";
-import "../../components/ha-formfield";
 import type { HaSwitch } from "../../components/ha-switch";
 import {
   getConfigEntrySystemOptions,
@@ -23,21 +20,20 @@ import type { PolymerChangedEvent } from "../../polymer-types";
 import { haStyleDialog } from "../../resources/styles";
 import type { HomeAssistant } from "../../types";
 import { ConfigEntrySystemOptionsDialogParams } from "./show-dialog-config-entry-system-options";
-import { computeRTLDirection } from "../../common/util/compute_rtl";
 
 @customElement("dialog-config-entry-system-options")
 class DialogConfigEntrySystemOptions extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _disableNewEntities!: boolean;
+  @property() private _disableNewEntities!: boolean;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _params?: ConfigEntrySystemOptionsDialogParams;
+  @property() private _params?: ConfigEntrySystemOptionsDialogParams;
 
-  @internalProperty() private _loading?: boolean;
+  @property() private _loading?: boolean;
 
-  @internalProperty() private _submitting?: boolean;
+  @property() private _submitting?: boolean;
 
   public async showDialog(
     params: ConfigEntrySystemOptionsDialogParams
@@ -78,7 +74,7 @@ class DialogConfigEntrySystemOptions extends LitElement {
           ${this._loading
             ? html`
                 <div class="init-spinner">
-                  <ha-circular-progress active></ha-circular-progress>
+                  <paper-spinner-lite active></paper-spinner-lite>
                 </div>
               `
             : html`
@@ -86,8 +82,13 @@ class DialogConfigEntrySystemOptions extends LitElement {
                   ? html` <div class="error">${this._error}</div> `
                   : ""}
                 <div class="form">
-                  <ha-formfield
-                    .label=${html`<p>
+                  <ha-switch
+                    .checked=${!this._disableNewEntities}
+                    @change=${this._disableNewEntitiesChanged}
+                    .disabled=${this._submitting}
+                  >
+                    <div>
+                      <p>
                         ${this.hass.localize(
                           "ui.dialogs.config_entry_system_options.enable_new_entities_label"
                         )}
@@ -100,16 +101,9 @@ class DialogConfigEntrySystemOptions extends LitElement {
                             `component.${this._params.entry.domain}.title`
                           ) || this._params.entry.domain
                         )}
-                      </p>`}
-                    .dir=${computeRTLDirection(this.hass)}
-                  >
-                    <ha-switch
-                      .checked=${!this._disableNewEntities}
-                      @change=${this._disableNewEntitiesChanged}
-                      .disabled=${this._submitting}
-                    >
-                    </ha-switch>
-                  </ha-formfield>
+                      </p>
+                    </div>
+                  </ha-switch>
                 </div>
               `}
         </paper-dialog-scrollable>
@@ -178,12 +172,15 @@ class DialogConfigEntrySystemOptions extends LitElement {
           padding-bottom: 24px;
           color: var(--primary-text-color);
         }
+        p {
+          margin: 0;
+        }
         .secondary {
           color: var(--secondary-text-color);
         }
 
         .error {
-          color: var(--error-color);
+          color: var(--google-red-500);
         }
       `,
     ];

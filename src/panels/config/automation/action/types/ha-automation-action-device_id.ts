@@ -1,10 +1,4 @@
-import {
-  customElement,
-  html,
-  LitElement,
-  property,
-  internalProperty,
-} from "lit-element";
+import { customElement, html, LitElement, property } from "lit-element";
 import memoizeOne from "memoize-one";
 import { fireEvent } from "../../../../../common/dom/fire_event";
 import "../../../../../components/device/ha-device-action-picker";
@@ -19,13 +13,13 @@ import { HomeAssistant } from "../../../../../types";
 
 @customElement("ha-automation-action-device_id")
 export class HaDeviceAction extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public action!: DeviceAction;
 
-  @internalProperty() private _deviceId?: string;
+  @property() private _deviceId?: string;
 
-  @internalProperty() private _capabilities?;
+  @property() private _capabilities?;
 
   private _origAction?: DeviceAction;
 
@@ -57,18 +51,14 @@ export class HaDeviceAction extends LitElement {
         .value=${deviceId}
         @value-changed=${this._devicePicked}
         .hass=${this.hass}
-        label=${this.hass.localize(
-          "ui.panel.config.automation.editor.actions.type.device_id.label"
-        )}
+        label="Device"
       ></ha-device-picker>
       <ha-device-action-picker
         .value=${this.action}
         .deviceId=${deviceId}
         @value-changed=${this._deviceActionPicked}
         .hass=${this.hass}
-        label=${this.hass.localize(
-          "ui.panel.config.automation.editor.actions.type.device_id.action"
-        )}
+        label="Action"
       ></ha-device-action-picker>
       ${extraFieldsData
         ? html`
@@ -135,7 +125,7 @@ export class HaDeviceAction extends LitElement {
     // Returns a callback for ha-form to calculate labels per schema object
     return (schema) =>
       localize(
-        `ui.panel.config.automation.editor.actions.type.device_id.extra_fields.${schema.name}`
+        `ui.panel.config.automation.editor.actions.type.device.extra_fields.${schema.name}`
       ) || schema.name;
   }
 }

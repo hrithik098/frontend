@@ -15,7 +15,7 @@ import "../../components/ha-card";
 import "../../components/ha-menu-button";
 import { EventsMixin } from "../../mixins/events-mixin";
 import LocalizeMixin from "../../mixins/localize-mixin";
-import "../../styles/polymer-ha-style";
+import "../../resources/ha-style";
 
 let registeredDialog = false;
 
@@ -76,7 +76,7 @@ class HaPanelMailbox extends EventsMixin(LocalizeMixin(PolymerElement)) {
         }
       </style>
 
-      <app-header-layout>
+      <app-header-layout has-scrolling-region>
         <app-header slot="header" fixed>
           <app-toolbar>
             <ha-menu-button

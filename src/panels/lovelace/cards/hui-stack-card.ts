@@ -4,7 +4,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -26,15 +25,15 @@ export abstract class HuiStackCard extends LitElement implements LovelaceCard {
     return { cards: [] };
   }
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public editMode?: boolean;
 
   @property() protected _cards?: LovelaceCard[];
 
-  @internalProperty() private _config?: StackCardConfig;
+  @property() private _config?: StackCardConfig;
 
-  public getCardSize(): number | Promise<number> {
+  public getCardSize(): number {
     return 1;
   }
 
@@ -59,12 +58,8 @@ export abstract class HuiStackCard extends LitElement implements LovelaceCard {
     }
 
     for (const element of this._cards) {
-      if (this.hass) {
-        element.hass = this.hass;
-      }
-      if (this.editMode !== undefined) {
-        element.editMode = this.editMode;
-      }
+      element.hass = this.hass;
+      element.editMode = this.editMode;
     }
   }
 
@@ -116,9 +111,7 @@ export abstract class HuiStackCard extends LitElement implements LovelaceCard {
     config: LovelaceCardConfig
   ): void {
     const newCardEl = this._createCardElement(config);
-    if (cardElToReplace.parentElement) {
-      cardElToReplace.parentElement.replaceChild(newCardEl, cardElToReplace);
-    }
+    cardElToReplace.parentElement!.replaceChild(newCardEl, cardElToReplace);
     this._cards = this._cards!.map((curCardEl) =>
       curCardEl === cardElToReplace ? newCardEl : curCardEl
     );

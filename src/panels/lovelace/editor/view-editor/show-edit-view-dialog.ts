@@ -1,6 +1,5 @@
 import { fireEvent, HASSDomEvent } from "../../../../common/dom/fire_event";
 import { Lovelace } from "../../types";
-import { LovelaceViewConfig } from "../../../../data/lovelace";
 
 declare global {
   // for fire event
@@ -21,7 +20,6 @@ const dialogTag = "hui-dialog-edit-view";
 export interface EditViewDialogParams {
   lovelace: Lovelace;
   viewIndex?: number;
-  saveCallback?: (viewIndex: number, viewConfig: LovelaceViewConfig) => void;
 }
 
 const registerEditViewDialog = (element: HTMLElement): Event =>

@@ -1,3 +1,5 @@
+import "@polymer/paper-spinner/paper-spinner-lite";
+
 import {
   css,
   CSSResult,
@@ -7,11 +9,12 @@ import {
   property,
   TemplateResult,
 } from "lit-element";
-import { HassioAddonDetails } from "../../../../src/data/hassio/addon";
-import "../../../../src/components/ha-circular-progress";
-import { haStyle } from "../../../../src/resources/styles";
+
 import { HomeAssistant } from "../../../../src/types";
+import { HassioAddonDetails } from "../../../../src/data/hassio/addon";
 import { hassioStyle } from "../../resources/hassio-style";
+import { haStyle } from "../../../../src/resources/styles";
+
 import "./hassio-addon-logs";
 
 @customElement("hassio-addon-log-tab")
@@ -22,7 +25,7 @@ class HassioAddonLogDashboard extends LitElement {
 
   protected render(): TemplateResult {
     if (!this.addon) {
-      return html` <ha-circular-progress active></ha-circular-progress> `;
+      return html` <paper-spinner-lite active></paper-spinner-lite> `;
     }
     return html`
       <div class="content">

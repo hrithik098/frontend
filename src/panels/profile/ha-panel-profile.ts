@@ -11,7 +11,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../common/dom/fire_event";
@@ -23,6 +22,7 @@ import {
   getOptimisticFrontendUserDataCollection,
 } from "../../data/frontend";
 import { showConfirmationDialog } from "../../dialogs/generic/show-dialog-box";
+import "../../resources/ha-style";
 import { haStyle } from "../../resources/styles";
 import { HomeAssistant } from "../../types";
 import "./ha-advanced-mode-row";
@@ -36,16 +36,15 @@ import "./ha-pick-theme-row";
 import "./ha-push-notifications-row";
 import "./ha-refresh-tokens-card";
 import "./ha-set-vibrate-row";
-import "./ha-set-suspend-row";
 
 class HaPanelProfile extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public narrow!: boolean;
 
-  @internalProperty() private _refreshTokens?: unknown[];
+  @property() private _refreshTokens?: unknown[];
 
-  @internalProperty() private _coreUserData?: CoreFrontendUserData | null;
+  @property() private _coreUserData?: CoreFrontendUserData | null;
 
   private _unsubCoreData?: UnsubscribeFunc;
 
@@ -70,7 +69,7 @@ class HaPanelProfile extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <app-header-layout>
+      <app-header-layout has-scrolling-region>
         <app-header slot="header" fixed>
           <app-toolbar>
             <ha-menu-button
@@ -139,10 +138,6 @@ class HaPanelProfile extends LitElement {
                   ></ha-advanced-mode-row>
                 `
               : ""}
-            <ha-set-suspend-row
-              .narrow=${this.narrow}
-              .hass=${this.hass}
-            ></ha-set-suspend-row>
 
             <div class="card-actions">
               <mwc-button class="warning" @click=${this._handleLogOut}>

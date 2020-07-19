@@ -3,7 +3,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -22,7 +21,7 @@ const INTERVAL_FORMAT = ["relative", "total"];
 
 @customElement("hui-timestamp-display")
 class HuiTimestampDisplay extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public ts?: Date;
 
@@ -33,7 +32,7 @@ class HuiTimestampDisplay extends LitElement {
     | "datetime"
     | "time";
 
-  @internalProperty() private _relative?: string;
+  @property() private _relative?: string;
 
   private _connected?: boolean;
 

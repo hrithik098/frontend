@@ -4,7 +4,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -40,20 +39,20 @@ let resourcesLoaded = false;
 class LovelacePanel extends LitElement {
   @property() public panel?: PanelInfo<LovelacePanelConfig>;
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public narrow?: boolean;
 
   @property() public route?: Route;
 
-  @internalProperty() private _columns?: number;
+  @property() private _columns?: number;
 
   @property()
   private _state?: "loading" | "loaded" | "error" | "yaml-editor" = "loading";
 
-  @internalProperty() private _errorMsg?: string;
+  @property() private _errorMsg?: string;
 
-  @internalProperty() private lovelace?: Lovelace;
+  @property() private lovelace?: Lovelace;
 
   private mqls?: MediaQueryList[];
 
@@ -289,8 +288,7 @@ class LovelacePanel extends LitElement {
         this._errorMsg = err.message;
         return;
       }
-      const localize = await this.hass!.loadBackendTranslation("title");
-      conf = await generateLovelaceConfigFromHass(this.hass!, localize);
+      conf = await generateLovelaceConfigFromHass(this.hass!);
       confMode = "generated";
     } finally {
       // Ignore updates for another 2 seconds.
@@ -372,9 +370,8 @@ class LovelacePanel extends LitElement {
         const { config: previousConfig, mode: previousMode } = this.lovelace!;
         try {
           // Optimistic update
-          const localize = await this.hass!.loadBackendTranslation("title");
           this._updateLovelace({
-            config: await generateLovelaceConfigFromHass(this.hass!, localize),
+            config: await generateLovelaceConfigFromHass(this.hass!),
             mode: "generated",
             editMode: false,
           });

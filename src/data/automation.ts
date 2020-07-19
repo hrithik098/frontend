@@ -20,8 +20,6 @@ export interface AutomationConfig {
   trigger: Trigger[];
   condition?: Condition[];
   action: Action[];
-  mode?: "single" | "restart" | "queued" | "parallel";
-  max?: number;
 }
 
 export interface ForDict {

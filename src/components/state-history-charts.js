@@ -1,4 +1,4 @@
-import "./ha-circular-progress";
+import "@polymer/paper-spinner/paper-spinner";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";

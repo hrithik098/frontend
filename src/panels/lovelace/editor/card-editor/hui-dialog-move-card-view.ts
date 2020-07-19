@@ -5,7 +5,7 @@ import {
   customElement,
   html,
   LitElement,
-  internalProperty,
+  property,
   TemplateResult,
 } from "lit-element";
 import "../../../../components/dialog/ha-paper-dialog";
@@ -17,7 +17,7 @@ import type { MoveCardViewDialogParams } from "./show-move-card-view-dialog";
 
 @customElement("hui-dialog-move-card-view")
 export class HuiDialogMoveCardView extends LitElement {
-  @internalProperty() private _params?: MoveCardViewDialogParams;
+  @property() private _params?: MoveCardViewDialogParams;
 
   public async showDialog(params: MoveCardViewDialogParams): Promise<void> {
     this._params = params;

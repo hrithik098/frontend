@@ -2,13 +2,12 @@ import "@material/mwc-button";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
-import "../../components/ha-circular-progress";
+import "@polymer/paper-spinner/paper-spinner";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 import { computeStateName } from "../../common/entity/compute_state_name";
 import "../../components/ha-card";
-import "../../styles/polymer-ha-style";
 
 class HaEntityConfig extends PolymerElement {
   static get template() {
@@ -65,10 +64,7 @@ class HaEntityConfig extends PolymerElement {
                 </template>
 
                 <template is="dom-if" if="[[computeShowSpinner(formState)]]">
-                  <ha-circular-progress
-                    active=""
-                    alt="[[formState]]"
-                  ></ha-circular-progress>
+                  <paper-spinner active="" alt="[[formState]]"></paper-spinner>
                   [[formState]]
                 </template>
               </div>

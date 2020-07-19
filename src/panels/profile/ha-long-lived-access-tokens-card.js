@@ -4,15 +4,10 @@ import { html } from "@polymer/polymer/lib/utils/html-tag";
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 import { formatDateTime } from "../../common/datetime/format_date_time";
 import "../../components/ha-card";
-import "../../components/ha-icon-button";
-import {
-  showAlertDialog,
-  showPromptDialog,
-  showConfirmationDialog,
-} from "../../dialogs/generic/show-dialog-box";
+import { showAlertDialog } from "../../dialogs/generic/show-dialog-box";
 import { EventsMixin } from "../../mixins/events-mixin";
 import LocalizeMixin from "../../mixins/localize-mixin";
-import "../../styles/polymer-ha-style";
+import "../../resources/ha-style";
 import "./ha-settings-row";
 
 /*
@@ -29,7 +24,7 @@ class HaLongLivedTokens extends LocalizeMixin(EventsMixin(PolymerElement)) {
         a {
           color: var(--primary-color);
         }
-        ha-icon-button {
+        paper-icon-button {
           color: var(--primary-text-color);
         }
       </style>
@@ -57,10 +52,10 @@ class HaLongLivedTokens extends LocalizeMixin(EventsMixin(PolymerElement)) {
           <ha-settings-row two-line>
             <span slot="heading">[[item.client_name]]</span>
             <div slot="description">[[_formatCreatedAt(item.created_at)]]</div>
-            <ha-icon-button
+            <paper-icon-button
               icon="hass:delete"
               on-click="_handleDelete"
-            ></ha-icon-button>
+            ></paper-icon-button>
           </ha-settings-row>
         </template>
         <div class="card-actions">
@@ -106,11 +101,9 @@ class HaLongLivedTokens extends LocalizeMixin(EventsMixin(PolymerElement)) {
   }
 
   async _handleCreate() {
-    const name = await showPromptDialog(this, {
-      text: this.localize(
-        "ui.panel.profile.long_lived_access_tokens.prompt_name"
-      ),
-    });
+    const name = prompt(
+      this.localize("ui.panel.profile.long_lived_access_tokens.prompt_name")
+    );
     if (!name) return;
     try {
       const token = await this.hass.callWS({
@@ -118,13 +111,12 @@ class HaLongLivedTokens extends LocalizeMixin(EventsMixin(PolymerElement)) {
         lifespan: 3650,
         client_name: name,
       });
-      await showPromptDialog(this, {
-        title: name,
-        text: this.localize(
+      prompt(
+        this.localize(
           "ui.panel.profile.long_lived_access_tokens.prompt_copy_token"
         ),
-        defaultValue: token,
-      });
+        token
+      );
       this.fire("hass-refresh-tokens");
     } catch (err) {
       // eslint-disable-next-line
@@ -138,22 +130,21 @@ class HaLongLivedTokens extends LocalizeMixin(EventsMixin(PolymerElement)) {
   }
 
   async _handleDelete(ev) {
-    const token = ev.model.item;
     if (
-      !(await showConfirmationDialog(this, {
-        text: this.localize(
+      !confirm(
+        this.localize(
           "ui.panel.profile.long_lived_access_tokens.confirm_delete",
           "name",
-          token.client_name
-        ),
-      }))
+          ev.model.item.client_name
+        )
+      )
     ) {
       return;
     }
     try {
       await this.hass.callWS({
         type: "auth/delete_refresh_token",
-        refresh_token_id: token.id,
+        refresh_token_id: ev.model.item.id,
       });
       this.fire("hass-refresh-tokens");
     } catch (err) {

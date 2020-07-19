@@ -1,3 +1,4 @@
+import "@polymer/paper-icon-button/paper-icon-button-light";
 import type { HassEntity } from "home-assistant-js-websocket";
 import {
   customElement,
@@ -15,7 +16,7 @@ import type { HaEntityPickerEntityFilterFunc } from "./ha-entity-picker";
 
 @customElement("ha-entities-picker")
 class HaEntitiesPickerLight extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public value?: string[];
 

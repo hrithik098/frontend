@@ -6,12 +6,10 @@ import {
   LitElement,
   property,
   TemplateResult,
-  eventOptions,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import "../components/ha-menu-button";
-import "../components/ha-icon-button-arrow-prev";
-import { restoreScroll } from "../common/decorators/restore-scroll";
+import "../components/ha-paper-icon-button-arrow-prev";
 
 @customElement("hass-subpage")
 class HassSubpage extends LitElement {
@@ -24,28 +22,21 @@ class HassSubpage extends LitElement {
   @property({ type: Boolean })
   public hassio = false;
 
-  // @ts-ignore
-  @restoreScroll(".content") private _savedScrollPos?: number;
-
   protected render(): TemplateResult {
     return html`
       <div class="toolbar">
-        <ha-icon-button-arrow-prev
+        <ha-paper-icon-button-arrow-prev
           aria-label="Back"
+          .hassio=${this.hassio}
           @click=${this._backTapped}
           class=${classMap({ hidden: !this.showBackButton })}
-        ></ha-icon-button-arrow-prev>
+        ></ha-paper-icon-button-arrow-prev>
 
-        <div class="main-title">${this.header}</div>
+        <div main-title>${this.header}</div>
         <slot name="toolbar-icon"></slot>
       </div>
-      <div class="content" @scroll=${this._saveScrollPos}><slot></slot></div>
+      <div class="content"><slot></slot></div>
     `;
-  }
-
-  @eventOptions({ passive: true })
-  private _saveScrollPos(e: Event) {
-    this._savedScrollPos = (e.target as HTMLDivElement).scrollTop;
   }
 
   private _backTapped(): void {
@@ -74,16 +65,17 @@ class HassSubpage extends LitElement {
         box-sizing: border-box;
       }
 
-      ha-icon-button-arrow-prev,
+      ha-menu-button,
+      ha-paper-icon-button-arrow-prev,
       ::slotted([slot="toolbar-icon"]) {
         pointer-events: auto;
       }
 
-      ha-icon-button-arrow-prev.hidden {
+      ha-paper-icon-button-arrow-prev.hidden {
         visibility: hidden;
       }
 
-      .main-title {
+      [main-title] {
         margin: 0 0 0 24px;
         line-height: 20px;
         flex-grow: 1;

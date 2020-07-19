@@ -6,8 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
-  TemplateResult,
 } from "lit-element";
 import { ifDefined } from "lit-html/directives/if-defined";
 import memoizeOne from "memoize-one";
@@ -15,7 +13,7 @@ import { isComponentLoaded } from "../../../common/config/is_component_loaded";
 import { computeStateName } from "../../../common/entity/compute_state_name";
 import { createValidEntityId } from "../../../common/entity/valid_entity_id";
 import { compare } from "../../../common/string/compare";
-import "../../../components/entity/ha-battery-icon";
+import "../../../components/entity/ha-state-icon";
 import "../../../components/ha-icon-next";
 import { AreaRegistryEntry } from "../../../data/area_registry";
 import { ConfigEntry } from "../../../data/config_entries";
@@ -27,7 +25,6 @@ import {
 import {
   EntityRegistryEntry,
   findBatteryEntity,
-  findBatteryChargingEntity,
   updateEntityRegistryEntry,
 } from "../../../data/entity_registry";
 import { SceneEntities, showSceneEditor } from "../../../data/scene";
@@ -41,17 +38,18 @@ import "../../../layouts/hass-tabs-subpage";
 import { HomeAssistant, Route } from "../../../types";
 import "../ha-config-section";
 import { configSections } from "../ha-panel-config";
+import "./device-detail/ha-device-card-mqtt";
 import "./device-detail/ha-device-entities-card";
 import "./device-detail/ha-device-info-card";
 import { showDeviceAutomationDialog } from "./device-detail/show-dialog-device-automation";
 
 export interface EntityRegistryStateEntry extends EntityRegistryEntry {
-  stateName?: string | null;
+  stateName?: string;
 }
 
 @customElement("ha-config-device-page")
 export class HaConfigDevicePage extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public devices!: DeviceRegistryEntry[];
 
@@ -71,7 +69,7 @@ export class HaConfigDevicePage extends LitElement {
 
   @property() public route!: Route;
 
-  @internalProperty() private _related?: RelatedResult;
+  @property() private _related?: RelatedResult;
 
   private _device = memoizeOne(
     (
@@ -119,11 +117,6 @@ export class HaConfigDevicePage extends LitElement {
     | EntityRegistryEntry
     | undefined => findBatteryEntity(this.hass, entities));
 
-  private _batteryChargingEntity = memoizeOne(
-    (entities: EntityRegistryEntry[]): EntityRegistryEntry | undefined =>
-      findBatteryChargingEntity(this.hass, entities)
-  );
-
   protected firstUpdated(changedProps) {
     super.firstUpdated(changedProps);
     loadDeviceRegistryDetailDialog();
@@ -152,12 +145,8 @@ export class HaConfigDevicePage extends LitElement {
     const integrations = this._integrations(device, this.entries);
     const entities = this._entities(this.deviceId, this.entities);
     const batteryEntity = this._batteryEntity(entities);
-    const batteryChargingEntity = this._batteryChargingEntity(entities);
     const batteryState = batteryEntity
       ? this.hass.states[batteryEntity.entity_id]
-      : undefined;
-    const batteryChargingState = batteryChargingEntity
-      ? this.hass.states[batteryChargingEntity.entity_id]
       : undefined;
     const area = this._computeArea(this.areas, device);
 
@@ -178,11 +167,11 @@ export class HaConfigDevicePage extends LitElement {
             : ""
         }
 
-        <ha-icon-button
+        <paper-icon-button
           slot="toolbar-icon"
-          icon="hass:cog"
+          icon="hass:settings"
           @click=${this._showSettings}
-        ></ha-icon-button>
+        ></paper-icon-button>
 
         <div class="container">
           <div class="header fullwidth">
@@ -212,11 +201,10 @@ export class HaConfigDevicePage extends LitElement {
                       ? html`
                           <div class="battery">
                             ${batteryState.state}%
-                            <ha-battery-icon
+                            <ha-state-icon
                               .hass=${this.hass!}
-                              .batteryStateObj=${batteryState}
-                              .batteryChargingStateObj=${batteryChargingState}
-                            ></ha-battery-icon>
+                              .stateObj=${batteryState}
+                            ></ha-state-icon>
                           </div>
                         `
                       : ""
@@ -238,7 +226,16 @@ export class HaConfigDevicePage extends LitElement {
                 .devices=${this.devices}
                 .device=${device}
               >
-              ${this._renderIntegrationInfo(device, integrations)}
+              ${
+                integrations.includes("mqtt")
+                  ? html`
+                      <ha-device-card-mqtt
+                        .hass=${this.hass}
+                        .device=${device}
+                      ></ha-device-card-mqtt>
+                    `
+                  : html``
+              }
               </ha-device-info-card>
 
             ${
@@ -262,13 +259,13 @@ export class HaConfigDevicePage extends LitElement {
                         ${this.hass.localize(
                           "ui.panel.config.devices.automation.automations"
                         )}
-                        <ha-icon-button
+                        <paper-icon-button
                           @click=${this._showAutomationDialog}
                           title=${this.hass.localize(
                             "ui.panel.config.devices.automation.create"
                           )}
                           icon="hass:plus-circle"
-                        ></ha-icon-button>
+                        ></paper-icon-button>
                       </div>
                       ${this._related?.automation?.length
                         ? this._related.automation.map((automation) => {
@@ -328,13 +325,13 @@ export class HaConfigDevicePage extends LitElement {
                             "ui.panel.config.devices.scene.scenes"
                           )}
 
-                                  <ha-icon-button
+                                  <paper-icon-button
                                     @click=${this._createScene}
                                     title=${this.hass.localize(
                                       "ui.panel.config.devices.scene.create"
                                     )}
                                     icon="hass:plus-circle"
-                                  ></ha-icon-button>
+                                  ></paper-icon-button>
                         </div>
 
                         ${
@@ -395,13 +392,13 @@ export class HaConfigDevicePage extends LitElement {
                           ${this.hass.localize(
                             "ui.panel.config.devices.script.scripts"
                           )}
-                          <ha-icon-button
+                          <paper-icon-button
                             @click=${this._showScriptDialog}
                             title=${this.hass.localize(
                               "ui.panel.config.devices.script.create"
                             )}
                             icon="hass:plus-circle"
-                          ></ha-icon-button>
+                          ></paper-icon-button>
                         </div>
                         ${this._related?.script?.length
                           ? this._related.script.map((script) => {
@@ -442,7 +439,7 @@ export class HaConfigDevicePage extends LitElement {
       </hass-tabs-subpage>    `;
   }
 
-  private _computeEntityName(entity: EntityRegistryEntry) {
+  private _computeEntityName(entity) {
     if (entity.name) {
       return entity.name;
     }
@@ -481,43 +478,6 @@ export class HaConfigDevicePage extends LitElement {
       deviceId: this.deviceId,
       script: false,
     });
-  }
-
-  private _renderIntegrationInfo(
-    device,
-    integrations: string[]
-  ): TemplateResult[] {
-    const templates: TemplateResult[] = [];
-    if (integrations.includes("mqtt")) {
-      import(
-        "./device-detail/integration-elements/mqtt/ha-device-actions-mqtt"
-      );
-      templates.push(html`
-        <div class="card-actions" slot="actions">
-          <ha-device-actions-mqtt
-            .hass=${this.hass}
-            .device=${device}
-          ></ha-device-actions-mqtt>
-        </div>
-      `);
-    }
-    if (integrations.includes("zha")) {
-      import("./device-detail/integration-elements/zha/ha-device-actions-zha");
-      import("./device-detail/integration-elements/zha/ha-device-info-zha");
-      templates.push(html`
-        <ha-device-info-zha
-          .hass=${this.hass}
-          .device=${device}
-        ></ha-device-info-zha>
-        <div class="card-actions" slot="actions">
-          <ha-device-actions-zha
-            .hass=${this.hass}
-            .device=${device}
-          ></ha-device-actions-zha>
-        </div>
-      `);
-    }
-    return templates;
   }
 
   private async _showSettings() {
@@ -597,7 +557,7 @@ export class HaConfigDevicePage extends LitElement {
         justify-content: space-between;
       }
 
-      .card-header ha-icon-button {
+      .card-header paper-icon-button {
         margin-right: -8px;
         color: var(--primary-color);
         height: auto;

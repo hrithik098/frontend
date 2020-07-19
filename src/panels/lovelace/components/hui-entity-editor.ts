@@ -1,4 +1,4 @@
-import "../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import {
   css,
   CSSResult,
@@ -46,20 +46,20 @@ export class HuiEntityEditor extends LitElement {
                 @change="${this._valueChanged}"
                 allow-custom-entity
               ></ha-entity-picker>
-              <ha-icon-button
+              <paper-icon-button
                 title="Move entity down"
                 icon="hass:arrow-down"
                 .index="${index}"
                 @click="${this._entityDown}"
                 ?disabled="${index === this.entities!.length - 1}"
-              ></ha-icon-button>
-              <ha-icon-button
+              ></paper-icon-button>
+              <paper-icon-button
                 title="Move entity up"
                 icon="hass:arrow-up"
                 .index="${index}"
                 @click="${this._entityUp}"
                 ?disabled="${index === 0}"
-              ></ha-icon-button>
+              ></paper-icon-button>
             </div>
           `;
         })}

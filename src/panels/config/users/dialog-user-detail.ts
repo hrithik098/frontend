@@ -8,12 +8,10 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { createCloseHeading } from "../../../components/ha-dialog";
 import "../../../components/ha-switch";
-import "../../../components/ha-formfield";
 import {
   SYSTEM_GROUP_ID_ADMIN,
   SYSTEM_GROUP_ID_USER,
@@ -22,21 +20,20 @@ import { PolymerChangedEvent } from "../../../polymer-types";
 import { haStyleDialog } from "../../../resources/styles";
 import { HomeAssistant } from "../../../types";
 import { UserDetailDialogParams } from "./show-dialog-user-detail";
-import { computeRTLDirection } from "../../../common/util/compute_rtl";
 
 @customElement("dialog-user-detail")
 class DialogUserDetail extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _name!: string;
+  @property() private _name!: string;
 
-  @internalProperty() private _isAdmin?: boolean;
+  @property() private _isAdmin?: boolean;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _params?: UserDetailDialogParams;
+  @property() private _params?: UserDetailDialogParams;
 
-  @internalProperty() private _submitting = false;
+  @property() private _submitting = false;
 
   public async showDialog(params: UserDetailDialogParams): Promise<void> {
     this._params = params;
@@ -102,23 +99,20 @@ class DialogUserDetail extends LitElement {
                 "ui.panel.config.users.editor.name"
               )}"
             ></paper-input>
-            <ha-formfield
-              .label=${this.hass.localize("ui.panel.config.users.editor.admin")}
-              .dir=${computeRTLDirection(this.hass)}
+            <ha-switch
+              .disabled=${user.system_generated}
+              .checked=${this._isAdmin}
+              @change=${this._adminChanged}
             >
-              <ha-switch
-                .disabled=${user.system_generated}
-                .checked=${this._isAdmin}
-                @change=${this._adminChanged}
-              >
-              </ha-switch>
-            </ha-formfield>
+              ${this.hass.localize("ui.panel.config.users.editor.admin")}
+            </ha-switch>
             ${!this._isAdmin
               ? html`
                   <br />
-                  ${this.hass.localize(
-                    "ui.panel.config.users.users_privileges_note"
-                  )}
+                  The users group is a work in progress. The user will be unable
+                  to administer the instance via the UI. We're still auditing
+                  all management API endpoints to ensure that they correctly
+                  limit access to administrators.
                 `
               : ""}
           </div>

@@ -1,3 +1,4 @@
+import "@polymer/paper-spinner/paper-spinner-lite";
 import {
   css,
   CSSResult,
@@ -7,7 +8,6 @@ import {
   property,
   TemplateResult,
 } from "lit-element";
-import "../../components/ha-circular-progress";
 
 @customElement("step-flow-loading")
 class StepFlowLoading extends LitElement {
@@ -17,7 +17,7 @@ class StepFlowLoading extends LitElement {
     return html`
       <div class="init-spinner">
         ${this.label ? html` <div>${this.label}</div> ` : ""}
-        <ha-circular-progress active></ha-circular-progress>
+        <paper-spinner-lite active></paper-spinner-lite>
       </div>
     `;
   }
@@ -28,7 +28,7 @@ class StepFlowLoading extends LitElement {
         padding: 50px 100px;
         text-align: center;
       }
-      ha-circular-progress {
+      paper-spinner-lite {
         margin-top: 16px;
       }
     `;

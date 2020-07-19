@@ -1,4 +1,4 @@
-import "./ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
@@ -18,27 +18,27 @@ class HaCoverControls extends PolymerElement {
       </style>
 
       <div class="state">
-        <ha-icon-button
+        <paper-icon-button
           aria-label="Open cover"
           icon="[[computeOpenIcon(stateObj)]]"
           on-click="onOpenTap"
           invisible$="[[!entityObj.supportsOpen]]"
           disabled="[[computeOpenDisabled(stateObj, entityObj)]]"
-        ></ha-icon-button>
-        <ha-icon-button
+        ></paper-icon-button>
+        <paper-icon-button
           aria-label="Stop the cover from moving"
           icon="hass:stop"
           on-click="onStopTap"
           invisible$="[[!entityObj.supportsStop]]"
-          disabled="[[computeStopDisabled(stateObj)]]"
-        ></ha-icon-button>
-        <ha-icon-button
+          disabled="[[computStopDisabled(stateObj)]]"
+        ></paper-icon-button>
+        <paper-icon-button
           aria-label="Close cover"
           icon="[[computeCloseIcon(stateObj)]]"
           on-click="onCloseTap"
           invisible$="[[!entityObj.supportsClose]]"
           disabled="[[computeClosedDisabled(stateObj, entityObj)]]"
-        ></ha-icon-button>
+        ></paper-icon-button>
       </div>
     `;
   }
@@ -65,7 +65,6 @@ class HaCoverControls extends PolymerElement {
   computeOpenIcon(stateObj) {
     switch (stateObj.attributes.device_class) {
       case "awning":
-      case "door":
       case "gate":
         return "hass:arrow-expand-horizontal";
       default:
@@ -76,7 +75,6 @@ class HaCoverControls extends PolymerElement {
   computeCloseIcon(stateObj) {
     switch (stateObj.attributes.device_class) {
       case "awning":
-      case "door":
       case "gate":
         return "hass:arrow-collapse-horizontal";
       default:

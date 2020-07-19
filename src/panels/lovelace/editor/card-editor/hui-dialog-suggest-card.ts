@@ -1,4 +1,3 @@
-import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
 import deepFreeze from "deep-freeze";
 import {
   css,
@@ -7,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
@@ -29,13 +27,13 @@ import { SuggestCardDialogParams } from "./show-suggest-card-dialog";
 export class HuiDialogSuggestCard extends LitElement {
   @property() protected hass!: HomeAssistant;
 
-  @internalProperty() private _params?: SuggestCardDialogParams;
+  @property() private _params?: SuggestCardDialogParams;
 
-  @internalProperty() private _cardConfig?: LovelaceCardConfig[];
+  @property() private _cardConfig?: LovelaceCardConfig[];
 
-  @internalProperty() private _saving = false;
+  @property() private _saving = false;
 
-  @internalProperty() private _yamlMode = false;
+  @property() private _yamlMode = false;
 
   @query("ha-paper-dialog") private _dialog?: HaPaperDialog;
 
@@ -113,10 +111,7 @@ export class HuiDialogSuggestCard extends LitElement {
                 <mwc-button ?disabled="${this._saving}" @click="${this._save}">
                   ${this._saving
                     ? html`
-                        <ha-circular-progress
-                          active
-                          alt="Saving"
-                        ></ha-circular-progress>
+                        <paper-spinner active alt="Saving"></paper-spinner>
                       `
                     : this.hass!.localize(
                         "ui.panel.lovelace.editor.suggest_card.add"
@@ -148,7 +143,7 @@ export class HuiDialogSuggestCard extends LitElement {
         ha-paper-dialog {
           max-width: 845px;
         }
-        mwc-button ha-circular-progress {
+        mwc-button paper-spinner {
           width: 14px;
           height: 14px;
           margin-right: 20px;

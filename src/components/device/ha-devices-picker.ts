@@ -1,3 +1,4 @@
+import "@polymer/paper-icon-button/paper-icon-button-light";
 import {
   customElement,
   html,
@@ -12,7 +13,7 @@ import "./ha-device-picker";
 
 @customElement("ha-devices-picker")
 class HaDevicesPicker extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public value?: string[];
 

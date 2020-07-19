@@ -5,7 +5,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -22,17 +21,17 @@ import type { HomeAssistant } from "../../../types";
 
 @customElement("ha-registry-basic-editor")
 export class HaEntityRegistryBasicEditor extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public entry!: ExtEntityRegistryEntry;
 
-  @internalProperty() private _origEntityId!: string;
+  @property() private _origEntityId!: string;
 
-  @internalProperty() private _entityId!: string;
+  @property() private _entityId!: string;
 
-  @internalProperty() private _disabledBy!: string | null;
+  @property() private _disabledBy!: string | null;
 
-  @internalProperty() private _submitting?: boolean;
+  @property() private _submitting?: boolean;
 
   public async updateEntry(): Promise<void> {
     this._submitting = true;
@@ -89,31 +88,31 @@ export class HaEntityRegistryBasicEditor extends LitElement {
           .checked=${!this._disabledBy}
           @change=${this._disabledByChanged}
         >
-        </ha-switch>
-        <div>
           <div>
-            ${this.hass.localize(
-              "ui.dialogs.entity_registry.editor.enabled_label"
-            )}
-          </div>
-          <div class="secondary">
-            ${this._disabledBy && this._disabledBy !== "user"
-              ? this.hass.localize(
-                  "ui.dialogs.entity_registry.editor.enabled_cause",
-                  "cause",
-                  this.hass.localize(
-                    `config_entry.disabled_by.${this._disabledBy}`
+            <div>
+              ${this.hass.localize(
+                "ui.dialogs.entity_registry.editor.enabled_label"
+              )}
+            </div>
+            <div class="secondary">
+              ${this._disabledBy && this._disabledBy !== "user"
+                ? this.hass.localize(
+                    "ui.dialogs.entity_registry.editor.enabled_cause",
+                    "cause",
+                    this.hass.localize(
+                      `config_entry.disabled_by.${this._disabledBy}`
+                    )
                   )
-                )
-              : ""}
-            ${this.hass.localize(
-              "ui.dialogs.entity_registry.editor.enabled_description"
-            )}
-            <br />${this.hass.localize(
-              "ui.dialogs.entity_registry.editor.note"
-            )}
+                : ""}
+              ${this.hass.localize(
+                "ui.dialogs.entity_registry.editor.enabled_description"
+              )}
+              <br />${this.hass.localize(
+                "ui.dialogs.entity_registry.editor.note"
+              )}
+            </div>
           </div>
-        </div>
+        </ha-switch>
       </div>
     `;
   }
@@ -128,14 +127,9 @@ export class HaEntityRegistryBasicEditor extends LitElement {
 
   static get styles() {
     return css`
-      ha-switch {
-        margin-right: 16px;
-      }
       .row {
         margin-top: 8px;
         color: var(--primary-text-color);
-        display: flex;
-        align-items: center;
       }
       .secondary {
         color: var(--secondary-text-color);

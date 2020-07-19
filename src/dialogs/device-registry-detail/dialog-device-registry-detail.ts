@@ -11,7 +11,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import "../../components/dialog/ha-paper-dialog";
@@ -24,15 +23,15 @@ import { DeviceRegistryDetailDialogParams } from "./show-dialog-device-registry-
 
 @customElement("dialog-device-registry-detail")
 class DialogDeviceRegistryDetail extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _nameByUser!: string;
+  @property() private _nameByUser!: string;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _params?: DeviceRegistryDetailDialogParams;
+  @property() private _params?: DeviceRegistryDetailDialogParams;
 
-  @internalProperty() private _areaId?: string;
+  @property() private _areaId?: string;
 
   private _submitting?: boolean;
 
@@ -67,7 +66,7 @@ class DialogDeviceRegistryDetail extends LitElement {
             <paper-input
               .value=${this._nameByUser}
               @value-changed=${this._nameChanged}
-              .label=${this.hass.localize("ui.panel.config.devices.name")}
+              .label=${this.hass.localize("ui.dialogs.devices.name")}
               .placeholder=${device.name || ""}
               .disabled=${this._submitting}
             ></paper-input>
@@ -133,7 +132,7 @@ class DialogDeviceRegistryDetail extends LitElement {
           margin-right: auto;
         }
         .error {
-          color: var(--error-color);
+          color: var(--google-red-500);
         }
       `,
     ];

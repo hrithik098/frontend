@@ -5,7 +5,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { ifDefined } from "lit-html/directives/if-defined";
@@ -20,9 +19,9 @@ import { ImageElementConfig, LovelaceElement } from "./types";
 
 @customElement("hui-image-element")
 export class HuiImageElement extends LitElement implements LovelaceElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: ImageElementConfig;
+  @property() private _config?: ImageElementConfig;
 
   public setConfig(config: ImageElementConfig): void {
     if (!config) {

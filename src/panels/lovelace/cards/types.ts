@@ -34,8 +34,7 @@ export interface EntitiesCardEntityConfig extends EntityConfig {
     | "last-changed"
     | "last-triggered"
     | "position"
-    | "tilt-position"
-    | "brightness";
+    | "tilt-position";
   action_name?: string;
   service?: string;
   service_data?: object;
@@ -71,7 +70,6 @@ export interface ButtonCardConfig extends LovelaceCardConfig {
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;
   state_color?: boolean;
-  show_state?: boolean;
 }
 
 export interface EntityFilterCardConfig extends LovelaceCardConfig {
@@ -132,12 +130,6 @@ export interface GlanceCardConfig extends LovelaceCardConfig {
   entities: Array<string | ConfigEntity>;
   columns?: number;
   state_color?: boolean;
-}
-
-export interface HumidifierCardConfig extends LovelaceCardConfig {
-  entity: string;
-  theme?: string;
-  name?: string;
 }
 
 export interface IframeCardConfig extends LovelaceCardConfig {
@@ -283,5 +275,4 @@ export interface WeatherForecastCardConfig extends LovelaceCardConfig {
   entity: string;
   name?: string;
   show_forecast?: boolean;
-  secondary_info_attribute?: string;
 }

@@ -12,10 +12,6 @@ export interface FormatsType {
   time: FormatType;
 }
 
-if (!Intl.PluralRules) {
-  import("@formatjs/intl-pluralrules/polyfill-locales");
-}
-
 /**
  * Adapted from Polymer app-localize-behavior.
  *

@@ -181,13 +181,6 @@
             "active": "aktyvus",
             "paused": "pristabdytas"
         },
-        "weather": {
-            "clear-night": "Giedra naktis",
-            "cloudy": "Debesuota",
-            "partlycloudy": "Nepastoviai debesuota",
-            "sunny": "Saulėta",
-            "windy": "Vėjuota"
-        },
         "zwave": {
             "query_stage": {
                 "dead": " ({query_stage})",
@@ -199,25 +192,6 @@
         "card": {
             "alarm_control_panel": {
                 "arm_custom_bypass": "Individualizuotas apėjimas"
-            },
-            "weather": {
-                "attributes": {
-                    "air_pressure": "Atmosferos slėgis",
-                    "humidity": "Santykinė oro drėgmė",
-                    "temperature": "Temperatūra",
-                    "wind_speed": "Vėjo greitis"
-                },
-                "cardinal_direction": {
-                    "e": "R",
-                    "n": "Š",
-                    "ne": "ŠR",
-                    "nw": "ŠV",
-                    "s": "P",
-                    "se": "PR",
-                    "sw": "PV",
-                    "w": "V"
-                },
-                "forecast": "Prognozė"
             }
         },
         "common": {
@@ -340,9 +314,6 @@
                                     "source": "Šaltinis",
                                     "zone": "Zona"
                                 },
-                                "mqtt": {
-                                    "label": "MQTT"
-                                },
                                 "sun": {
                                     "event": "Ivykis"
                                 },
@@ -408,9 +379,6 @@
                     },
                     "details": "Integravimo informacija"
                 },
-                "mqtt": {
-                    "title": "MQTT"
-                },
                 "person": {
                     "caption": "Asmenys",
                     "detail": {
@@ -454,17 +422,15 @@
                     "question_trust": "Ar pasitikite išoriniu skydeliu {name} adresu {link}?"
                 }
             },
-            "history": {
-                "ranges": {
-                    "today": "Šiandien",
-                    "yesterday": "Vakar"
+            "developer-tools": {
+                "tabs": {
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
                 }
             },
             "logbook": {
-                "period": "Laikotarpis",
-                "ranges": {
-                    "today": "Šiandien"
-                }
+                "period": "Laikotarpis"
             },
             "lovelace": {
                 "cards": {
@@ -575,10 +541,6 @@
                     "current_password": "Dabartinis slaptažodis",
                     "header": "Keisti slaptažodį",
                     "new_password": "Naujas slaptažodis"
-                },
-                "language": {
-                    "dropdown_label": "Kalba",
-                    "header": "Kalba"
                 },
                 "mfa_setup": {
                     "close": "Uždaryti",

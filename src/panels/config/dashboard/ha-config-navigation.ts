@@ -1,3 +1,4 @@
+import "@polymer/iron-icon/iron-icon";
 import "@polymer/paper-item/paper-icon-item";
 import "@polymer/paper-item/paper-item-body";
 import {
@@ -18,7 +19,7 @@ import { HomeAssistant } from "../../../types";
 
 @customElement("ha-config-navigation")
 class HaConfigNavigation extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public showAdvanced!: boolean;
 
@@ -38,10 +39,7 @@ class HaConfigNavigation extends LitElement {
                 tabindex="-1"
               >
                 <paper-icon-item>
-                  <ha-svg-icon
-                    .path=${page.iconPath}
-                    slot="item-icon"
-                  ></ha-svg-icon>
+                  <ha-icon .icon=${page.icon} slot="item-icon"></ha-icon>
                   <paper-item-body two-line>
                     ${this.hass.localize(
                       page.translationKey ||
@@ -91,7 +89,7 @@ class HaConfigNavigation extends LitElement {
         display: block;
         outline: 0;
       }
-      ha-svg-icon,
+      ha-icon,
       ha-icon-next {
         color: var(--secondary-text-color);
       }

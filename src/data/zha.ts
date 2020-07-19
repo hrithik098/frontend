@@ -3,7 +3,6 @@ import { HomeAssistant } from "../types";
 
 export interface ZHAEntityReference extends HassEntity {
   name: string;
-  original_name?: string;
 }
 
 export interface ZHADevice {
@@ -25,12 +24,6 @@ export interface ZHADevice {
   area_id?: string;
   device_type: string;
   signature: any;
-}
-
-export interface ZHADeviceEndpoint {
-  device: ZHADevice;
-  endpoint_id: number;
-  entities: ZHAEntityReference[];
 }
 
 export interface Attribute {
@@ -63,12 +56,7 @@ export interface ReadAttributeServiceData {
 export interface ZHAGroup {
   name: string;
   group_id: number;
-  members: ZHADeviceEndpoint[];
-}
-
-export interface ZHAGroupMember {
-  ieee: string;
-  endpoint_id: string;
+  members: ZHADevice[];
 }
 
 export const reconfigureNode = (
@@ -225,7 +213,7 @@ export const fetchGroup = (
 
 export const fetchGroupableDevices = (
   hass: HomeAssistant
-): Promise<ZHADeviceEndpoint[]> =>
+): Promise<ZHADevice[]> =>
   hass.callWS({
     type: "zha/devices/groupable",
   });
@@ -233,7 +221,7 @@ export const fetchGroupableDevices = (
 export const addMembersToGroup = (
   hass: HomeAssistant,
   groupId: number,
-  membersToAdd: ZHAGroupMember[]
+  membersToAdd: string[]
 ): Promise<ZHAGroup> =>
   hass.callWS({
     type: "zha/group/members/add",
@@ -244,7 +232,7 @@ export const addMembersToGroup = (
 export const removeMembersFromGroup = (
   hass: HomeAssistant,
   groupId: number,
-  membersToRemove: ZHAGroupMember[]
+  membersToRemove: string[]
 ): Promise<ZHAGroup> =>
   hass.callWS({
     type: "zha/group/members/remove",
@@ -255,7 +243,7 @@ export const removeMembersFromGroup = (
 export const addGroup = (
   hass: HomeAssistant,
   groupName: string,
-  membersToAdd?: ZHAGroupMember[]
+  membersToAdd?: string[]
 ): Promise<ZHAGroup> =>
   hass.callWS({
     type: "zha/group/add",

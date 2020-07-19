@@ -5,15 +5,13 @@ import { computeStateName } from "../common/entity/compute_state_name";
 import { LocalizeFunc } from "../common/translations/localize";
 import { HomeAssistant } from "../types";
 
-const DOMAINS_USE_LAST_UPDATED = ["climate", "humidifier", "water_heater"];
+const DOMAINS_USE_LAST_UPDATED = ["climate", "water_heater"];
 const LINE_ATTRIBUTES_TO_KEEP = [
   "temperature",
   "current_temperature",
   "target_temp_low",
   "target_temp_high",
   "hvac_action",
-  "humidity",
-  "mode",
 ];
 
 export interface LineChartState {
@@ -58,8 +56,7 @@ export const fetchRecent = (
   startTime,
   endTime,
   skipInitialState = false,
-  significantChangesOnly?: boolean,
-  minimalResponse = true
+  significantChangesOnly?: boolean
 ): Promise<HassEntity[][]> => {
   let url = "history/period";
   if (startTime) {
@@ -75,9 +72,6 @@ export const fetchRecent = (
   if (significantChangesOnly !== undefined) {
     url += `&significant_changes_only=${Number(significantChangesOnly)}`;
   }
-  if (minimalResponse) {
-    url += "&minimal_response";
-  }
 
   return hass.callApi("GET", url);
 };
@@ -89,17 +83,14 @@ export const fetchDate = (
 ): Promise<HassEntity[][]> => {
   return hass.callApi(
     "GET",
-    `history/period/${startTime.toISOString()}?end_time=${endTime.toISOString()}&minimal_response`
+    `history/period/${startTime.toISOString()}?end_time=${endTime.toISOString()}`
   );
 };
 
 const equalState = (obj1: LineChartState, obj2: LineChartState) =>
   obj1.state === obj2.state &&
-  // Only compare attributes if both states have an attributes object.
-  // When `minimal_response` is sent, only the first and last state
-  // will have attributes except for domains in DOMAINS_USE_LAST_UPDATED.
+  // They either both have an attributes object or not
   (!obj1.attributes ||
-    !obj2.attributes ||
     LINE_ATTRIBUTES_TO_KEEP.every(
       (attr) => obj1.attributes![attr] === obj2.attributes![attr]
     ));
@@ -110,18 +101,10 @@ const processTimelineEntity = (
   states: HassEntity[]
 ): TimelineEntity => {
   const data: TimelineState[] = [];
-  const last_element = states.length - 1;
 
   for (const state of states) {
     if (data.length > 0 && state.state === data[data.length - 1].state) {
       continue;
-    }
-
-    // Copy the data from the last element as its the newest
-    // and is only needed to localize the data
-    if (!state.entity_id) {
-      state.attributes = states[last_element].attributes;
-      state.entity_id = states[last_element].entity_id;
     }
 
     data.push({
@@ -215,7 +198,7 @@ export const computeHistory = (
     }
 
     const stateWithUnit = stateInfo.find(
-      (state) => state.attributes && "unit_of_measurement" in state.attributes
+      (state) => "unit_of_measurement" in state.attributes
     );
 
     let unit: string | undefined;
@@ -226,8 +209,6 @@ export const computeHistory = (
       unit = hass.config.unit_system.temperature;
     } else if (computeStateDomain(stateInfo[0]) === "water_heater") {
       unit = hass.config.unit_system.temperature;
-    } else if (computeStateDomain(stateInfo[0]) === "humidifier") {
-      unit = "%";
     }
 
     if (!unit) {

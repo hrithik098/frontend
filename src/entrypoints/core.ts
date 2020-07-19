@@ -1,5 +1,3 @@
-// Compat needs to be first import
-import "../resources/compatibility";
 import {
   Auth,
   Connection,
@@ -28,7 +26,6 @@ import { HomeAssistant } from "../types";
 declare global {
   interface Window {
     hassConnection: Promise<{ auth: Auth; conn: Connection }>;
-    hassConnectionReady?: (hassConnection: Window["hassConnection"]) => void;
   }
 }
 
@@ -83,11 +80,6 @@ window.hassConnection = (authProm() as Promise<Auth | ExternalAuth>).then(
   connProm
 );
 
-// This is set if app was somehow loaded before core.
-if (window.hassConnectionReady) {
-  window.hassConnectionReady(window.hassConnection);
-}
-
 // Start fetching some of the data that we will need.
 window.hassConnection.then(({ conn }) => {
   const noop = () => {
@@ -112,11 +104,6 @@ window.hassConnection.then(({ conn }) => {
 });
 
 window.addEventListener("error", (e) => {
-  if (!__DEV__ && e.message === "ResizeObserver loop limit exceeded") {
-    e.stopImmediatePropagation();
-    e.stopPropagation();
-    return;
-  }
   const homeAssistant = document.querySelector("home-assistant") as any;
   if (
     homeAssistant &&

@@ -20,21 +20,8 @@ export const evaluateFilter = (stateObj: HassEntity, filter: any): boolean => {
       return state > value;
     case "!=":
       return state !== value;
-    case "in":
-      if (Array.isArray(state) || typeof state === "string") {
-        return state.includes(value);
-      }
-      return false;
-    case "not in":
-      if (Array.isArray(state) || typeof state === "string") {
-        return !state.includes(value);
-      }
-      return false;
     case "regex": {
-      if (state !== null && typeof state === "object") {
-        return RegExp(value).test(JSON.stringify(state));
-      }
-      return RegExp(value).test(state);
+      return state.match(value);
     }
     default:
       return false;

@@ -4,7 +4,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
@@ -42,7 +41,7 @@ export class HaYamlEditor extends LitElement {
 
   @property() public label?: string;
 
-  @internalProperty() private _yaml = "";
+  @property() private _yaml = "";
 
   @query("ha-code-editor") private _editor?: HaCodeEditor;
 

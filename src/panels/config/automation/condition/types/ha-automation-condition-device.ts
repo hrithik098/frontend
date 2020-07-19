@@ -1,10 +1,4 @@
-import {
-  customElement,
-  html,
-  LitElement,
-  property,
-  internalProperty,
-} from "lit-element";
+import { customElement, html, LitElement, property } from "lit-element";
 import { fireEvent } from "../../../../../common/dom/fire_event";
 import "../../../../../components/device/ha-device-condition-picker";
 import "../../../../../components/device/ha-device-picker";
@@ -18,13 +12,13 @@ import { HomeAssistant } from "../../../../../types";
 
 @customElement("ha-automation-condition-device")
 export class HaDeviceCondition extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public condition!: DeviceCondition;
 
-  @internalProperty() private _deviceId?: string;
+  @property() private _deviceId?: string;
 
-  @internalProperty() private _capabilities?;
+  @property() private _capabilities?;
 
   private _origCondition?: DeviceCondition;
 
@@ -51,18 +45,14 @@ export class HaDeviceCondition extends LitElement {
         .value=${deviceId}
         @value-changed=${this._devicePicked}
         .hass=${this.hass}
-        label=${this.hass.localize(
-          "ui.panel.config.automation.editor.conditions.type.device.label"
-        )}
+        label="Device"
       ></ha-device-picker>
       <ha-device-condition-picker
         .value=${this.condition}
         .deviceId=${deviceId}
         @value-changed=${this._deviceConditionPicked}
         .hass=${this.hass}
-        label=${this.hass.localize(
-          "ui.panel.config.automation.editor.conditions.type.device.condition"
-        )}
+        label="Condition"
       ></ha-device-condition-picker>
       ${extraFieldsData
         ? html`

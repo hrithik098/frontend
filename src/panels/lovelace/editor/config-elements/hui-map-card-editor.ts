@@ -6,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
@@ -25,9 +24,7 @@ import {
   EntitiesEditorEvent,
 } from "../types";
 import "../../../../components/ha-switch";
-import "../../../../components/ha-formfield";
 import { configElementStyle } from "./config-elements-style";
-import { computeRTLDirection } from "../../../../common/util/compute_rtl";
 
 const cardConfigStruct = struct({
   type: "string",
@@ -42,11 +39,11 @@ const cardConfigStruct = struct({
 
 @customElement("hui-map-card-editor")
 export class HuiMapCardEditor extends LitElement implements LovelaceCardEditor {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: MapCardConfig;
+  @property() private _config?: MapCardConfig;
 
-  @internalProperty() private _configEntities?: EntityConfig[];
+  @property() private _configEntities?: EntityConfig[];
 
   public setConfig(config: MapCardConfig): void {
     config = cardConfigStruct(config);
@@ -122,18 +119,14 @@ export class HuiMapCardEditor extends LitElement implements LovelaceCardEditor {
           ></paper-input>
         </div>
         <div class="side-by-side">
-          <ha-formfield
-            .label=${this.hass.localize(
+          <ha-switch
+            .checked="${this._dark_mode}"
+            .configValue="${"dark_mode"}"
+            @change="${this._valueChanged}"
+            >${this.hass.localize(
               "ui.panel.lovelace.editor.card.map.dark_mode"
-            )}
-            .dir=${computeRTLDirection(this.hass)}
+            )}</ha-switch
           >
-            <ha-switch
-              .checked="${this._dark_mode}"
-              .configValue="${"dark_mode"}"
-              @change="${this._valueChanged}"
-            ></ha-switch
-          ></ha-formfield>
           <paper-input
             .label="${this.hass.localize(
               "ui.panel.lovelace.editor.card.map.hours_to_show"

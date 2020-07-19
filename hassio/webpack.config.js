@@ -1,8 +1,11 @@
 const { createHassioConfig } = require("../build-scripts/webpack.js");
-const { isProdBuild, isStatsBuild } = require("../build-scripts/env.js");
+const { isProdBuild } = require("../build-scripts/env.js");
+
+// File just used for stats builds
+
+const latestBuild = false;
 
 module.exports = createHassioConfig({
   isProdBuild: isProdBuild(),
-  isStatsBuild: isStatsBuild(),
-  latestBuild: true,
+  latestBuild,
 });

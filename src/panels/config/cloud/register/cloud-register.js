@@ -7,7 +7,7 @@ import "../../../../components/ha-card";
 import "../../../../layouts/hass-subpage";
 import { EventsMixin } from "../../../../mixins/events-mixin";
 import LocalizeMixin from "../../../../mixins/localize-mixin";
-import "../../../../styles/polymer-ha-style";
+import "../../../../resources/ha-style";
 import "../../ha-config-section";
 
 /*
@@ -18,6 +18,10 @@ class CloudRegister extends LocalizeMixin(EventsMixin(PolymerElement)) {
   static get template() {
     return html`
     <style include="iron-flex ha-style">
+      .content {
+        direction: ltr;
+      }
+
       [slot=introduction] {
         margin: -1em 0;
       }
@@ -35,7 +39,7 @@ class CloudRegister extends LocalizeMixin(EventsMixin(PolymerElement)) {
         margin: 0;
       }
       .error {
-        color: var(--error-color);
+        color: var(--google-red-500);
       }
       .card-actions {
         display: flex;

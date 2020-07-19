@@ -2,8 +2,8 @@ import "@material/mwc-button";
 import "@polymer/app-layout/app-header-layout/app-header-layout";
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "../../components/ha-icon-button";
-import "../../components/ha-circular-progress";
+import "@polymer/paper-icon-button/paper-icon-button";
+import "@polymer/paper-spinner/paper-spinner";
 import { safeDump, safeLoad } from "js-yaml";
 import {
   css,
@@ -12,7 +12,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
@@ -37,15 +36,15 @@ const lovelaceStruct = struct.interface({
 
 @customElement("hui-editor")
 class LovelaceFullConfigEditor extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @property({ attribute: false }) public lovelace?: Lovelace;
+  @property() public lovelace?: Lovelace;
 
   @property() public closeEditor?: () => void;
 
-  @internalProperty() private _saving?: boolean;
+  @property() private _saving?: boolean;
 
-  @internalProperty() private _changed?: boolean;
+  @property() private _changed?: boolean;
 
   private _generation = 1;
 
@@ -54,10 +53,10 @@ class LovelaceFullConfigEditor extends LitElement {
       <app-header-layout>
         <app-header>
           <app-toolbar>
-            <ha-icon-button
+            <paper-icon-button
               icon="hass:close"
               @click="${this._closeEditor}"
-            ></ha-icon-button>
+            ></paper-icon-button>
             <div main-title>
               ${this.hass!.localize(
                 "ui.panel.lovelace.editor.raw_editor.header"

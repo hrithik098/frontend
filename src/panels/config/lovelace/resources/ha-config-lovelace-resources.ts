@@ -3,7 +3,6 @@ import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-icon-item";
 import "@polymer/paper-listbox/paper-listbox";
 import "@polymer/paper-tooltip/paper-tooltip";
-import "@material/mwc-fab";
 import {
   css,
   CSSResult,
@@ -11,7 +10,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -21,6 +19,7 @@ import {
   DataTableColumnContainer,
   RowClickedEvent,
 } from "../../../../components/data-table/ha-data-table";
+import "../../../../components/ha-fab";
 import "../../../../components/ha-icon";
 import {
   createResource,
@@ -39,13 +38,10 @@ import { HomeAssistant, Route } from "../../../../types";
 import { loadLovelaceResources } from "../../../lovelace/common/load-resources";
 import { lovelaceTabs } from "../ha-config-lovelace";
 import { showResourceDetailDialog } from "./show-dialog-lovelace-resource-detail";
-import "../../../../components/ha-svg-icon";
-import { mdiPlus } from "@mdi/js";
-import { computeRTL } from "../../../../common/util/compute_rtl";
 
 @customElement("ha-config-lovelace-resources")
 export class HaConfigLovelaceRescources extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public isWide!: boolean;
 
@@ -53,7 +49,7 @@ export class HaConfigLovelaceRescources extends LitElement {
 
   @property() public route!: Route;
 
-  @internalProperty() private _resources: LovelaceResource[] = [];
+  @property() private _resources: LovelaceResource[] = [];
 
   private _columns = memoize(
     (_language): DataTableColumnContainer => {
@@ -66,7 +62,6 @@ export class HaConfigLovelaceRescources extends LitElement {
           filterable: true,
           direction: "asc",
           grows: true,
-          forceLTR: true,
         },
         type: {
           title: this.hass.localize(
@@ -107,17 +102,15 @@ export class HaConfigLovelaceRescources extends LitElement {
         hasFab
       >
       </hass-tabs-subpage-data-table>
-      <mwc-fab
+      <ha-fab
         ?is-wide=${this.isWide}
         ?narrow=${this.narrow}
-        ?rtl=${computeRTL(this.hass!)}
+        icon="hass:plus"
         title=${this.hass.localize(
           "ui.panel.config.lovelace.resources.picker.add_resource"
         )}
         @click=${this._addResource}
-      >
-        <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-      </mwc-fab>
+      ></ha-fab>
     `;
   }
 
@@ -206,27 +199,18 @@ export class HaConfigLovelaceRescources extends LitElement {
 
   static get styles(): CSSResult {
     return css`
-      mwc-fab {
+      ha-fab {
         position: fixed;
         bottom: 16px;
         right: 16px;
         z-index: 1;
       }
-      mwc-fab[is-wide] {
+      ha-fab[is-wide] {
         bottom: 24px;
         right: 24px;
       }
-      mwc-fab[narrow] {
+      ha-fab[narrow] {
         bottom: 84px;
-      }
-      mwc-fab[rtl] {
-        right: auto;
-        left: 16px;
-      }
-      mwc-fab[is-wide][rtl] {
-        bottom: 24px;
-        left: 24px;
-        right: auto;
       }
     `;
   }

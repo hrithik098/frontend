@@ -1,5 +1,5 @@
 import "@material/mwc-button/mwc-button";
-import "../../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-input/paper-input";
 import type { PaperInputElement } from "@polymer/paper-input/paper-input";
 import "@polymer/paper-item/paper-item";
@@ -11,12 +11,12 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import "../../../../components/ha-icon-input";
+import "../../../../components/ha-switch";
 import type { InputSelect } from "../../../../data/input_select";
 import { showConfirmationDialog } from "../../../../dialogs/generic/show-dialog-box";
 import { haStyle } from "../../../../resources/styles";
@@ -24,17 +24,17 @@ import type { HomeAssistant } from "../../../../types";
 
 @customElement("ha-input_select-form")
 class HaInputSelectForm extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public new?: boolean;
 
   private _item?: InputSelect;
 
-  @internalProperty() private _name!: string;
+  @property() private _name!: string;
 
-  @internalProperty() private _icon!: string;
+  @property() private _icon!: string;
 
-  @internalProperty() private _options: string[] = [];
+  @property() private _options: string[] = [];
 
   @query("#option_input") private _optionInput?: PaperInputElement;
 
@@ -96,14 +96,14 @@ class HaInputSelectForm extends LitElement {
               return html`
                 <paper-item class="option">
                   <paper-item-body> ${option} </paper-item-body>
-                  <ha-icon-button
+                  <paper-icon-button
                     .index=${index}
                     .title=${this.hass.localize(
                       "ui.dialogs.helper_settings.input_select.remove_option"
                     )}
                     @click=${this._removeOption}
                     icon="hass:delete"
-                  ></ha-icon-button>
+                  ></paper-icon-button>
                 </paper-item>
               `;
             })
@@ -153,7 +153,6 @@ class HaInputSelectForm extends LitElement {
   }
 
   private async _removeOption(ev: Event) {
-    const index = (ev.target as any).index;
     if (
       !(await showConfirmationDialog(this, {
         title: "Delete this item?",
@@ -162,6 +161,7 @@ class HaInputSelectForm extends LitElement {
     ) {
       return;
     }
+    const index = (ev.target as any).index;
     const options = [...this._options];
     options.splice(index, 1);
     fireEvent(this, "value-changed", {

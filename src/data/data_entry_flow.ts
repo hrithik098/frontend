@@ -12,7 +12,6 @@ export interface DataEntryFlowProgressedEvent {
 export interface DataEntryFlowProgress {
   flow_id: string;
   handler: string;
-  step_id: string;
   context: {
     title_placeholders: { [key: string]: string };
     [key: string]: any;

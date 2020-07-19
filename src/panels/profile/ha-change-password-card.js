@@ -1,12 +1,12 @@
 import "@material/mwc-button";
 import "@polymer/paper-dialog/paper-dialog";
-import "../../components/ha-circular-progress";
+import "@polymer/paper-spinner/paper-spinner";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 import "../../components/ha-card";
 import LocalizeMixin from "../../mixins/localize-mixin";
-import "../../styles/polymer-ha-style";
+import "../../resources/ha-style";
 
 /*
  * @appliesMixin LocalizeMixin
@@ -71,7 +71,7 @@ class HaChangePasswordCard extends LocalizeMixin(PolymerElement) {
           </div>
           <div class="card-actions">
             <template is="dom-if" if="[[_loading]]">
-              <div><ha-circular-progress active></ha-circular-progress></div>
+              <div><paper-spinner active></paper-spinner></div>
             </template>
             <template is="dom-if" if="[[!_loading]]">
               <mwc-button on-click="_changePassword"

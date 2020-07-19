@@ -5,7 +5,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
@@ -27,11 +26,11 @@ export interface ToastActionParams {
 }
 
 class NotificationManager extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _action?: ToastActionParams;
+  @property() private _action?: ToastActionParams;
 
-  @internalProperty() private _noCancelOnOutsideClick = false;
+  @property() private _noCancelOnOutsideClick = false;
 
   @query("ha-toast") private _toast!: HaToast;
 

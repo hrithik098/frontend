@@ -4,7 +4,7 @@ import {
   customElement,
   html,
   LitElement,
-  internalProperty,
+  property,
   TemplateResult,
 } from "lit-element";
 import { HomeAssistant } from "../../../types";
@@ -16,7 +16,7 @@ import { safeDump } from "js-yaml";
 export class HuiErrorCard extends LitElement implements LovelaceCard {
   public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: ErrorCardConfig;
+  @property() private _config?: ErrorCardConfig;
 
   public getCardSize(): number {
     return 4;

@@ -7,12 +7,12 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
 import { fireEvent, HASSDomEvent } from "../../../../common/dom/fire_event";
 import "../../../../components/entity/ha-entity-picker";
+import "../../../../components/ha-switch";
 import { LovelaceConfig } from "../../../../data/lovelace";
 import { HomeAssistant } from "../../../../types";
 import { ConditionalCardConfig } from "../../cards/types";
@@ -39,26 +39,22 @@ const cardConfigStruct = struct({
 @customElement("hui-conditional-card-editor")
 export class HuiConditionalCardEditor extends LitElement
   implements LovelaceCardEditor {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @property({ attribute: false }) public lovelace?: LovelaceConfig;
+  @property() public lovelace?: LovelaceConfig;
 
-  @internalProperty() private _config?: ConditionalCardConfig;
+  @property() private _config?: ConditionalCardConfig;
 
-  @internalProperty() private _GUImode = true;
+  @property() private _GUImode = true;
 
-  @internalProperty() private _guiModeAvailable? = true;
+  @property() private _guiModeAvailable? = true;
 
-  @internalProperty() private _cardTab = false;
+  @property() private _cardTab = false;
 
   @query("hui-card-editor") private _cardEditorEl?: HuiCardEditor;
 
   public setConfig(config: ConditionalCardConfig): void {
     this._config = cardConfigStruct(config);
-  }
-
-  public refreshYamlEditor(focus) {
-    this._cardEditorEl?.refreshYamlEditor(focus);
   }
 
   protected render(): TemplateResult {
@@ -200,7 +196,7 @@ export class HuiConditionalCardEditor extends LitElement
   private _setMode(value: boolean): void {
     this._GUImode = value;
     if (this._cardEditorEl) {
-      this._cardEditorEl.GUImode = value;
+      this._cardEditorEl!.GUImode = value;
     }
   }
 

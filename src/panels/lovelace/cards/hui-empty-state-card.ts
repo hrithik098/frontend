@@ -15,7 +15,7 @@ import { EmptyStateCardConfig } from "./types";
 
 @customElement("hui-empty-state-card")
 export class HuiEmptyStateCard extends LitElement implements LovelaceCard {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   public getCardSize(): number {
     return 2;

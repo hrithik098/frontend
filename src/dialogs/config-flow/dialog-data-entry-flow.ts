@@ -1,7 +1,7 @@
 import "@material/mwc-button";
 import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
-import "../../components/ha-icon-button";
-import "../../components/ha-circular-progress";
+import "@polymer/paper-icon-button/paper-icon-button";
+import "@polymer/paper-spinner/paper-spinner";
 import "@polymer/paper-tooltip/paper-tooltip";
 import type { UnsubscribeFunc } from "home-assistant-js-websocket";
 import {
@@ -10,11 +10,12 @@ import {
   customElement,
   html,
   LitElement,
-  internalProperty,
+  property,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
-import "../../components/ha-dialog";
+import "../../components/dialog/ha-paper-dialog";
+import type { HaPaperDialog } from "../../components/dialog/ha-paper-dialog";
 import "../../components/ha-form/ha-form";
 import "../../components/ha-markdown";
 import {
@@ -26,6 +27,8 @@ import {
   DeviceRegistryEntry,
   subscribeDeviceRegistry,
 } from "../../data/device_registry";
+import { PolymerChangedEvent } from "../../polymer-types";
+import "../../resources/ha-style";
 import { haStyleDialog } from "../../resources/styles";
 import type { HomeAssistant } from "../../types";
 import { DataEntryFlowDialogParams } from "./show-dialog-data-entry-flow";
@@ -35,8 +38,6 @@ import "./step-flow-external";
 import "./step-flow-form";
 import "./step-flow-loading";
 import "./step-flow-pick-handler";
-import { fireEvent } from "../../common/dom/fire_event";
-import { computeRTL } from "../../common/util/compute_rtl";
 
 let instance = 0;
 
@@ -54,23 +55,23 @@ declare global {
 class DataEntryFlowDialog extends LitElement {
   public hass!: HomeAssistant;
 
-  @internalProperty() private _params?: DataEntryFlowDialogParams;
+  @property() private _params?: DataEntryFlowDialogParams;
 
-  @internalProperty() private _loading = true;
+  @property() private _loading = true;
 
   private _instance = instance;
 
-  @internalProperty() private _step:
+  @property() private _step:
     | DataEntryFlowStep
     | undefined
     // Null means we need to pick a config flow
     | null;
 
-  @internalProperty() private _devices?: DeviceRegistryEntry[];
+  @property() private _devices?: DeviceRegistryEntry[];
 
-  @internalProperty() private _areas?: AreaRegistryEntry[];
+  @property() private _areas?: AreaRegistryEntry[];
 
-  @internalProperty() private _handlers?: string[];
+  @property() private _handlers?: string[];
 
   private _unsubAreas?: UnsubscribeFunc;
 
@@ -90,6 +91,7 @@ class DataEntryFlowDialog extends LitElement {
       // We only load the handlers once
       if (this._handlers === undefined) {
         this._loading = true;
+        this.updateComplete.then(() => this._scheduleCenterDialog());
         try {
           this._handlers = await params.flowConfig.getFlowHandlers(this.hass);
         } finally {
@@ -97,6 +99,7 @@ class DataEntryFlowDialog extends LitElement {
         }
       }
       await this.updateComplete;
+      this._scheduleCenterDialog();
       return;
     }
 
@@ -113,17 +116,9 @@ class DataEntryFlowDialog extends LitElement {
 
     this._processStep(step);
     this._loading = false;
-  }
-
-  public closeDialog() {
-    if (this._step) {
-      this._flowDone();
-    } else if (this._step === null) {
-      // Flow aborted during picking flow
-      this._step = undefined;
-      this._params = undefined;
-    }
-    fireEvent(this, "dialog-closed", { dialog: this.localName });
+    // When the flow changes, center the dialog.
+    // Don't do it on each step or else the dialog keeps bouncing.
+    this._scheduleCenterDialog();
   }
 
   protected render(): TemplateResult {
@@ -132,85 +127,80 @@ class DataEntryFlowDialog extends LitElement {
     }
 
     return html`
-      <ha-dialog
-        open
-        @closed=${this.closeDialog}
-        scrimClickAction
-        escapeKeyAction
-        hideActions
+      <ha-paper-dialog
+        with-backdrop
+        opened
+        modal
+        @opened-changed=${this._openedChanged}
       >
-        <div>
-          ${this._loading ||
-          (this._step === null && this._handlers === undefined)
-            ? html`
-                <step-flow-loading
-                  .label=${this.hass.localize(
-                    "ui.panel.config.integrations.config_flow.loading_first_time"
-                  )}
-                ></step-flow-loading>
-              `
-            : this._step === undefined
-            ? // When we are going to next step, we render 1 round of empty
-              // to reset the element.
-              ""
-            : html`
-                <ha-icon-button
-                  aria-label=${this.hass.localize(
-                    "ui.panel.config.integrations.config_flow.dismiss"
-                  )}
-                  icon="hass:close"
-                  dialogAction="close"
-                  ?rtl=${computeRTL(this.hass)}
-                ></ha-icon-button>
-                ${this._step === null
-                  ? // Show handler picker
-                    html`
-                      <step-flow-pick-handler
-                        .flowConfig=${this._params.flowConfig}
-                        .hass=${this.hass}
-                        .handlers=${this._handlers}
-                        .showAdvanced=${this._params.showAdvanced}
-                      ></step-flow-pick-handler>
-                    `
-                  : this._step.type === "form"
-                  ? html`
-                      <step-flow-form
-                        .flowConfig=${this._params.flowConfig}
-                        .step=${this._step}
-                        .hass=${this.hass}
-                      ></step-flow-form>
-                    `
-                  : this._step.type === "external"
-                  ? html`
-                      <step-flow-external
-                        .flowConfig=${this._params.flowConfig}
-                        .step=${this._step}
-                        .hass=${this.hass}
-                      ></step-flow-external>
-                    `
-                  : this._step.type === "abort"
-                  ? html`
-                      <step-flow-abort
-                        .flowConfig=${this._params.flowConfig}
-                        .step=${this._step}
-                        .hass=${this.hass}
-                      ></step-flow-abort>
-                    `
-                  : this._devices === undefined || this._areas === undefined
-                  ? // When it's a create entry result, we will fetch device & area registry
-                    html` <step-flow-loading></step-flow-loading> `
-                  : html`
-                      <step-flow-create-entry
-                        .flowConfig=${this._params.flowConfig}
-                        .step=${this._step}
-                        .hass=${this.hass}
-                        .devices=${this._devices}
-                        .areas=${this._areas}
-                      ></step-flow-create-entry>
-                    `}
-              `}
-        </div>
-      </ha-dialog>
+        ${this._loading || (this._step === null && this._handlers === undefined)
+          ? html`
+              <step-flow-loading
+                .label=${this.hass.localize(
+                  "ui.panel.config.integrations.config_flow.loading_first_time"
+                )}
+              ></step-flow-loading>
+            `
+          : this._step === undefined
+          ? // When we are going to next step, we render 1 round of empty
+            // to reset the element.
+            ""
+          : html`
+              <paper-icon-button
+                aria-label=${this.hass.localize(
+                  "ui.panel.config.integrations.config_flow.dismiss"
+                )}
+                icon="hass:close"
+                dialog-dismiss
+              ></paper-icon-button>
+              ${this._step === null
+                ? // Show handler picker
+                  html`
+                    <step-flow-pick-handler
+                      .flowConfig=${this._params.flowConfig}
+                      .hass=${this.hass}
+                      .handlers=${this._handlers}
+                      .showAdvanced=${this._params.showAdvanced}
+                    ></step-flow-pick-handler>
+                  `
+                : this._step.type === "form"
+                ? html`
+                    <step-flow-form
+                      .flowConfig=${this._params.flowConfig}
+                      .step=${this._step}
+                      .hass=${this.hass}
+                    ></step-flow-form>
+                  `
+                : this._step.type === "external"
+                ? html`
+                    <step-flow-external
+                      .flowConfig=${this._params.flowConfig}
+                      .step=${this._step}
+                      .hass=${this.hass}
+                    ></step-flow-external>
+                  `
+                : this._step.type === "abort"
+                ? html`
+                    <step-flow-abort
+                      .flowConfig=${this._params.flowConfig}
+                      .step=${this._step}
+                      .hass=${this.hass}
+                    ></step-flow-abort>
+                  `
+                : this._devices === undefined || this._areas === undefined
+                ? // When it's a create entry result, we will fetch device & area registry
+                  html` <step-flow-loading></step-flow-loading> `
+                : html`
+                    <step-flow-create-entry
+                      .flowConfig=${this._params.flowConfig}
+                      .step=${this._step}
+                      .hass=${this.hass}
+                      .devices=${this._devices}
+                      .areas=${this._areas}
+                    ></step-flow-create-entry>
+                  `}
+            `}
+      </ha-paper-dialog>
     `;
   }
 
@@ -236,6 +226,18 @@ class DataEntryFlowDialog extends LitElement {
         this._areas = [];
       }
     }
+
+    if (changedProps.has("_devices") && this._dialog) {
+      this._scheduleCenterDialog();
+    }
+  }
+
+  private _scheduleCenterDialog() {
+    setTimeout(() => this._dialog.center(), 0);
+  }
+
+  private get _dialog(): HaPaperDialog {
+    return this.shadowRoot!.querySelector("ha-paper-dialog")!;
   }
 
   private async _fetchDevices(configEntryId) {
@@ -309,22 +311,36 @@ class DataEntryFlowDialog extends LitElement {
     }
   }
 
+  private _openedChanged(ev: PolymerChangedEvent<boolean>): void {
+    // Closed dialog by clicking on the overlay
+    if (!ev.detail.value) {
+      if (this._step) {
+        this._flowDone();
+      } else if (this._step === null) {
+        // Flow aborted during picking flow
+        this._step = undefined;
+        this._params = undefined;
+      }
+    }
+  }
+
   static get styles(): CSSResultArray {
     return [
       haStyleDialog,
       css`
-        ha-dialog {
-          --dialog-content-padding: 0;
+        ha-paper-dialog {
+          max-width: 600px;
         }
-        ha-icon-button {
-          padding: 16px;
-          position: absolute;
-          top: 0;
-          right: 0;
+        ha-paper-dialog > * {
+          margin: 0;
+          display: block;
+          padding: 0;
         }
-        ha-icon-button[rtl] {
-          right: auto;
-          left: 0;
+        paper-icon-button {
+          display: inline-block;
+          padding: 8px;
+          margin: 16px 16px 0 0;
+          float: right;
         }
       `,
     ];

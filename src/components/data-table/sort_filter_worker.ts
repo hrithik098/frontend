@@ -1,20 +1,60 @@
-// To use comlink under ES5
-import "proxy-polyfill";
-import { expose } from "comlink";
-import type {
-  DataTableSortColumnData,
+import memoizeOne from "memoize-one";
+// eslint-disable-next-line import/no-cycle
+import {
+  DataTableColumnContainer,
+  DataTableColumnData,
   DataTableRowData,
   SortingDirection,
-  SortableColumnContainer,
 } from "./ha-data-table";
 
-const filterData = (
+export const filterSortData = memoizeOne(
+  async (
+    data: DataTableRowData[],
+    columns: DataTableColumnContainer,
+    filter: string,
+    direction: SortingDirection,
+    sortColumn?: string
+  ) =>
+    sortColumn
+      ? _memSortData(
+          await _memFilterData(data, columns, filter),
+          columns,
+          direction,
+          sortColumn
+        )
+      : _memFilterData(data, columns, filter)
+);
+
+const _memFilterData = memoizeOne(
+  async (
+    data: DataTableRowData[],
+    columns: DataTableColumnContainer,
+    filter: string
+  ) => {
+    if (!filter) {
+      return data;
+    }
+    return filterData(data, columns, filter.toUpperCase());
+  }
+);
+
+const _memSortData = memoizeOne(
+  (
+    data: DataTableRowData[],
+    columns: DataTableColumnContainer,
+    direction: SortingDirection,
+    sortColumn: string
+  ) => {
+    return sortData(data, columns[sortColumn], direction, sortColumn);
+  }
+);
+
+export const filterData = (
   data: DataTableRowData[],
-  columns: SortableColumnContainer,
+  columns: DataTableColumnContainer,
   filter: string
-) => {
-  filter = filter.toUpperCase();
-  return data.filter((row) => {
+) =>
+  data.filter((row) => {
     return Object.entries(columns).some((columnEntry) => {
       const [key, column] = columnEntry;
       if (column.filterable) {
@@ -29,11 +69,10 @@ const filterData = (
       return false;
     });
   });
-};
 
-const sortData = (
+export const sortData = (
   data: DataTableRowData[],
-  column: DataTableSortColumnData,
+  column: DataTableColumnData,
   direction: SortingDirection,
   sortColumn: string
 ) =>
@@ -66,12 +105,3 @@ const sortData = (
     }
     return 0;
   });
-
-const api = {
-  filterData,
-  sortData,
-};
-
-export type api = typeof api;
-
-expose(api);

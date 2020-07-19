@@ -5,7 +5,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -22,7 +21,7 @@ class HuiEntitiesToggle extends LitElement {
 
   @property() protected hass?: HomeAssistant;
 
-  @internalProperty() private _toggleEntities?: string[];
+  @property() private _toggleEntities?: string[];
 
   public updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);

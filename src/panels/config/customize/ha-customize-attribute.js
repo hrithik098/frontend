@@ -1,4 +1,4 @@
-import "../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
@@ -28,11 +28,11 @@ class HaCustomizeAttribute extends PolymerElement {
         }
       </style>
       <div id="wrapper" class="form-group"></div>
-      <ha-icon-button
+      <paper-icon-button
         class="button"
         icon="[[getIcon(item.secondary)]]"
         on-click="tapButton"
-      ></ha-icon-button>
+      ></paper-icon-button>
     `;
   }
 

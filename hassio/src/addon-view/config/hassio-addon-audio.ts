@@ -1,4 +1,5 @@
 import "@material/mwc-button";
+import "@polymer/paper-card/paper-card";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
@@ -9,12 +10,10 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
 import "web-animations-js/web-animations-next-lite.min";
-import "../../../../src/components/ha-card";
 import {
   HassioAddonDetails,
   HassioAddonSetOptionParams,
@@ -24,9 +23,9 @@ import {
   fetchHassioHardwareAudio,
   HassioHardwareAudioDevice,
 } from "../../../../src/data/hassio/hardware";
+import { suggestAddonRestart } from "../../dialogs/suggestAddonRestart";
 import { haStyle } from "../../../../src/resources/styles";
 import { HomeAssistant } from "../../../../src/types";
-import { suggestAddonRestart } from "../../dialogs/suggestAddonRestart";
 import { hassioStyle } from "../../resources/hassio-style";
 
 @customElement("hassio-addon-audio")
@@ -35,19 +34,19 @@ class HassioAddonAudio extends LitElement {
 
   @property({ attribute: false }) public addon!: HassioAddonDetails;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _inputDevices?: HassioHardwareAudioDevice[];
+  @property() private _inputDevices?: HassioHardwareAudioDevice[];
 
-  @internalProperty() private _outputDevices?: HassioHardwareAudioDevice[];
+  @property() private _outputDevices?: HassioHardwareAudioDevice[];
 
-  @internalProperty() private _selectedInput!: null | string;
+  @property() private _selectedInput!: null | string;
 
-  @internalProperty() private _selectedOutput!: null | string;
+  @property() private _selectedOutput!: null | string;
 
   protected render(): TemplateResult {
     return html`
-      <ha-card header="Audio">
+      <paper-card heading="Audio">
         <div class="card-content">
           ${this._error ? html` <div class="errors">${this._error}</div> ` : ""}
 
@@ -93,7 +92,7 @@ class HassioAddonAudio extends LitElement {
         <div class="card-actions">
           <mwc-button @click=${this._saveSettings}>Save</mwc-button>
         </div>
-      </ha-card>
+      </paper-card>
     `;
   }
 
@@ -103,12 +102,12 @@ class HassioAddonAudio extends LitElement {
       hassioStyle,
       css`
         :host,
-        ha-card,
+        paper-card,
         paper-dropdown-menu {
           display: block;
         }
         .errors {
-          color: var(--error-color);
+          color: var(--google-red-500);
           margin-bottom: 16px;
         }
         paper-item {

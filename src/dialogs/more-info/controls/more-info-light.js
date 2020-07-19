@@ -11,7 +11,6 @@ import "../../../components/ha-labeled-slider";
 import "../../../components/ha-paper-dropdown-menu";
 import { EventsMixin } from "../../../mixins/events-mixin";
 import LocalizeMixin from "../../../mixins/localize-mixin";
-import "../../../components/ha-icon-button";
 
 const FEATURE_CLASS_NAMES = {
   1: "has-brightness",
@@ -28,12 +27,6 @@ class MoreInfoLight extends LocalizeMixin(EventsMixin(PolymerElement)) {
     return html`
       <style include="iron-flex"></style>
       <style>
-        .content {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
         .effect_list,
         .brightness,
         .color_temp,
@@ -56,6 +49,7 @@ class MoreInfoLight extends LocalizeMixin(EventsMixin(PolymerElement)) {
 
         .segmentationContainer {
           position: relative;
+          width: 100%;
         }
 
         ha-color-picker {
@@ -68,15 +62,26 @@ class MoreInfoLight extends LocalizeMixin(EventsMixin(PolymerElement)) {
         }
 
         .segmentationButton {
-          display: none;
           position: absolute;
-          top: 5%;
+          top: 11%;
           transform: translate(0%, 0%);
-          color: var(--secondary-text-color);
+          padding: 0px;
+          max-height: 0px;
+          width: 23px;
+          height: 23px;
+          opacity: var(--dark-secondary-opacity);
+          overflow: hidden;
+          transition: max-height 0.5s ease-in;
         }
 
-        .has-color.is-on .segmentationButton {
-          display: inline-block;
+        .has-color.is-on .segmentationContainer .segmentationButton {
+          position: absolute;
+          top: 11%;
+          transform: translate(0%, 0%);
+          width: 23px;
+          height: 23px;
+          padding: 0px;
+          opacity: var(--dark-secondary-opacity);
         }
 
         .has-effect_list.is-on .effect_list,
@@ -97,6 +102,11 @@ class MoreInfoLight extends LocalizeMixin(EventsMixin(PolymerElement)) {
           padding-top: 16px;
         }
 
+        .has-color.is-on .segmentationButton {
+          max-height: 100px;
+          overflow: visible;
+        }
+
         .has-color.is-on ha-color-picker {
           max-height: 500px;
           overflow: visible;
@@ -107,20 +117,8 @@ class MoreInfoLight extends LocalizeMixin(EventsMixin(PolymerElement)) {
           --ha-color-picker-marker-bordercolor: white;
         }
 
-        .control {
-          width: 100%;
-        }
-
         .is-unavailable .control {
           max-height: 0px;
-        }
-
-        ha-attributes {
-          width: 100%;
-        }
-
-        ha-paper-dropdown-menu {
-          width: 100%;
         }
 
         paper-item {
@@ -170,11 +168,11 @@ class MoreInfoLight extends LocalizeMixin(EventsMixin(PolymerElement)) {
             saturation-segments="{{saturationSegments}}"
           >
           </ha-color-picker>
-          <ha-icon-button
+          <paper-icon-button
             icon="mdi:palette"
             on-click="segmentClick"
-            class="segmentationButton"
-          ></ha-icon-button>
+            class="control segmentationButton"
+          ></paper-icon-button>
         </div>
 
         <div class="control effect_list">
@@ -201,7 +199,7 @@ class MoreInfoLight extends LocalizeMixin(EventsMixin(PolymerElement)) {
 
         <ha-attributes
           state-obj="[[stateObj]]"
-          extra-filters="brightness,color_temp,white_value,effect_list,effect,hs_color,rgb_color,xy_color,min_mireds,max_mireds,entity_id"
+          extra-filters="brightness,color_temp,white_value,effect_list,effect,hs_color,rgb_color,xy_color,min_mireds,max_mireds"
         ></ha-attributes>
       </div>
     `;
@@ -276,10 +274,7 @@ class MoreInfoLight extends LocalizeMixin(EventsMixin(PolymerElement)) {
   }
 
   computeClassNames(stateObj) {
-    const classes = [
-      "content",
-      featureClassNames(stateObj, FEATURE_CLASS_NAMES),
-    ];
+    const classes = [featureClassNames(stateObj, FEATURE_CLASS_NAMES)];
     if (stateObj && stateObj.state === "on") {
       classes.push("is-on");
     }

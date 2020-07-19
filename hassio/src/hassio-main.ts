@@ -1,10 +1,6 @@
+import "@polymer/paper-icon-button";
 import { PolymerElement } from "@polymer/polymer";
-import {
-  customElement,
-  property,
-  internalProperty,
-  PropertyValues,
-} from "lit-element";
+import { customElement, property, PropertyValues } from "lit-element";
 import { applyThemesOnElement } from "../../src/common/dom/apply_themes_on_element";
 import { fireEvent } from "../../src/common/dom/fire_event";
 import { navigate } from "../../src/common/navigate";
@@ -19,9 +15,7 @@ import {
   createHassioSession,
   fetchHassioHomeAssistantInfo,
   fetchHassioSupervisorInfo,
-  fetchHassioInfo,
   HassioHomeAssistantInfo,
-  HassioInfo,
   HassioPanelInfo,
   HassioSupervisorInfo,
 } from "../../src/data/hassio/supervisor";
@@ -40,9 +34,15 @@ import { HomeAssistant } from "../../src/types";
 // Don't codesplit it, that way the dashboard always loads fast.
 import "./hassio-panel";
 
+// The register callback of the IronA11yKeysBehavior inside paper-icon-button
+// is not called, causing _keyBindings to be uninitiliazed for paper-icon-button,
+// causing an exception when added to DOM. When transpiled to ES5, this will
+// break the build.
+customElements.get("paper-icon-button").prototype._keyBindings = {};
+
 @customElement("hassio-main")
 class HassioMain extends ProvideHassLitMixin(HassRouterPage) {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public panel!: HassioPanelInfo;
 
@@ -78,15 +78,13 @@ class HassioMain extends ProvideHassLitMixin(HassRouterPage) {
     },
   };
 
-  @internalProperty() private _supervisorInfo: HassioSupervisorInfo;
+  @property() private _supervisorInfo: HassioSupervisorInfo;
 
-  @internalProperty() private _hostInfo: HassioHostInfo;
+  @property() private _hostInfo: HassioHostInfo;
 
-  @internalProperty() private _hassioInfo?: HassioInfo;
+  @property() private _hassOsInfo?: HassioHassOSInfo;
 
-  @internalProperty() private _hassOsInfo?: HassioHassOSInfo;
-
-  @internalProperty() private _hassInfo: HassioHomeAssistantInfo;
+  @property() private _hassInfo: HassioHomeAssistantInfo;
 
   protected firstUpdated(changedProps: PropertyValues) {
     super.firstUpdated(changedProps);
@@ -96,20 +94,6 @@ class HassioMain extends ProvideHassLitMixin(HassRouterPage) {
       this.hass.themes,
       this.hass.selectedTheme || this.hass.themes.default_theme
     );
-
-    this.style.setProperty(
-      "--app-header-background-color",
-      "var(--sidebar-background-color)"
-    );
-    this.style.setProperty(
-      "--app-header-text-color",
-      "var(--sidebar-text-color)"
-    );
-    this.style.setProperty(
-      "--app-header-border-bottom",
-      "1px solid var(--divider-color)"
-    );
-
     this.addEventListener("hass-api-called", (ev) => this._apiCalled(ev));
     // Paulus - March 17, 2019
     // We went to a single hass-toggle-menu event in HA 0.90. However, the
@@ -156,7 +140,6 @@ class HassioMain extends ProvideHassLitMixin(HassRouterPage) {
         hass: this.hass,
         narrow: this.narrow,
         supervisorInfo: this._supervisorInfo,
-        hassioInfo: this._hassioInfo,
         hostInfo: this._hostInfo,
         hassInfo: this._hassInfo,
         hassOsInfo: this._hassOsInfo,
@@ -166,7 +149,6 @@ class HassioMain extends ProvideHassLitMixin(HassRouterPage) {
       el.hass = this.hass;
       el.narrow = this.narrow;
       el.supervisorInfo = this._supervisorInfo;
-      el.hassioInfo = this._hassioInfo;
       el.hostInfo = this._hostInfo;
       el.hassInfo = this._hassInfo;
       el.hassOsInfo = this._hassOsInfo;
@@ -180,14 +162,12 @@ class HassioMain extends ProvideHassLitMixin(HassRouterPage) {
       return;
     }
 
-    const [supervisorInfo, hostInfo, hassInfo, hassioInfo] = await Promise.all([
+    const [supervisorInfo, hostInfo, hassInfo] = await Promise.all([
       fetchHassioSupervisorInfo(this.hass),
       fetchHassioHostInfo(this.hass),
       fetchHassioHomeAssistantInfo(this.hass),
-      fetchHassioInfo(this.hass),
     ]);
     this._supervisorInfo = supervisorInfo;
-    this._hassioInfo = hassioInfo;
     this._hostInfo = hostInfo;
     this._hassInfo = hassInfo;
 

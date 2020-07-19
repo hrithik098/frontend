@@ -1,4 +1,4 @@
-import "../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import { HassEntity } from "home-assistant-js-websocket";
 import {
   css,
@@ -15,7 +15,7 @@ import { fireEvent } from "../../../common/dom/fire_event";
 import { computeStateName } from "../../../common/entity/compute_state_name";
 import { computeRTL } from "../../../common/util/compute_rtl";
 import { DataTableColumnContainer } from "../../../components/data-table/ha-data-table";
-import "@material/mwc-fab";
+import "../../../components/ha-fab";
 import { triggerScript } from "../../../data/script";
 import { showAlertDialog } from "../../../dialogs/generic/show-dialog-box";
 import "../../../layouts/hass-tabs-subpage-data-table";
@@ -23,13 +23,10 @@ import { haStyle } from "../../../resources/styles";
 import { HomeAssistant, Route } from "../../../types";
 import { showToast } from "../../../util/toast";
 import { configSections } from "../ha-panel-config";
-import "../../../components/ha-svg-icon";
-import { mdiPlus } from "@mdi/js";
-import { stateIcon } from "../../../common/entity/state_icon";
 
 @customElement("ha-script-picker")
 class HaScriptPicker extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public scripts!: HassEntity[];
 
@@ -44,7 +41,6 @@ class HaScriptPicker extends LitElement {
       return {
         ...script,
         name: computeStateName(script),
-        icon: stateIcon(script),
       };
     });
   });
@@ -57,20 +53,15 @@ class HaScriptPicker extends LitElement {
           type: "icon-button",
           template: (_toggle, script) =>
             html`
-              <ha-icon-button
+              <paper-icon-button
                 .script=${script}
                 icon="hass:play"
                 title="${this.hass.localize(
                   "ui.panel.config.script.picker.activate_script"
                 )}"
                 @click=${(ev: Event) => this._runScript(ev)}
-              ></ha-icon-button>
+              ></paper-icon-button>
             `,
-        },
-        icon: {
-          title: "",
-          type: "icon",
-          template: (icon) => html` <ha-icon .icon=${icon}></ha-icon> `,
         },
         name: {
           title: this.hass.localize(
@@ -97,14 +88,14 @@ class HaScriptPicker extends LitElement {
           title: "",
           type: "icon-button",
           template: (_info, script) => html`
-            <ha-icon-button
+            <paper-icon-button
               .script=${script}
               @click=${this._showInfo}
               icon="hass:information-outline"
               title="${this.hass.localize(
                 "ui.panel.config.script.picker.show_info"
               )}"
-            ></ha-icon-button>
+            ></paper-icon-button>
           `,
         },
         edit: {
@@ -112,12 +103,12 @@ class HaScriptPicker extends LitElement {
           type: "icon-button",
           template: (_info, script: any) => html`
             <a href="/config/script/edit/${script.entity_id}">
-              <ha-icon-button
+              <paper-icon-button
                 icon="hass:pencil"
                 title="${this.hass.localize(
                   "ui.panel.config.script.picker.edit_script"
                 )}"
-              ></ha-icon-button>
+              ></paper-icon-button>
             </a>
           `,
         },
@@ -141,23 +132,22 @@ class HaScriptPicker extends LitElement {
         )}
         hasFab
       >
-        <ha-icon-button
+        <paper-icon-button
           slot="toolbar-icon"
           icon="hass:help-circle"
           @click=${this._showHelp}
-        ></ha-icon-button>
+        ></paper-icon-button>
       </hass-tabs-subpage-data-table>
       <a href="/config/script/edit/new">
-        <mwc-fab
+        <ha-fab
           ?is-wide=${this.isWide}
           ?narrow=${this.narrow}
+          icon="hass:plus"
           title="${this.hass.localize(
             "ui.panel.config.script.picker.add_script"
           )}"
           ?rtl=${computeRTL(this.hass)}
-        >
-          <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-        </mwc-fab>
+        ></ha-fab>
       </a>
     `;
   }
@@ -203,26 +193,26 @@ class HaScriptPicker extends LitElement {
     return [
       haStyle,
       css`
-        mwc-fab {
+        ha-fab {
           position: fixed;
           bottom: 16px;
           right: 16px;
           z-index: 1;
         }
 
-        mwc-fab[is-wide] {
+        ha-fab[is-wide] {
           bottom: 24px;
           right: 24px;
         }
-        mwc-fab[narrow] {
+        ha-fab[narrow] {
           bottom: 84px;
         }
-        mwc-fab[rtl] {
+        ha-fab[rtl] {
           right: auto;
           left: 16px;
         }
 
-        mwc-fab[rtl][is-wide] {
+        ha-fab[rtl][is-wide] {
           bottom: 24px;
           right: auto;
           left: 24px;

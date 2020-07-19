@@ -1,15 +1,11 @@
 const gulp = require("gulp");
-const fs = require("fs");
-const path = require("path");
 
-const env = require("../env");
-const paths = require("../paths");
+const envVars = require("../env");
 
-require("./clean.js");
-require("./gen-icons-json.js");
+// require("./clean.js");
+require("./gen-icons.js");
 require("./webpack.js");
 require("./compress.js");
-require("./rollup.js");
 
 gulp.task(
   "develop-hassio",
@@ -18,9 +14,8 @@ gulp.task(
       process.env.NODE_ENV = "development";
     },
     "clean-hassio",
-    "gen-icons-json",
-    "gen-index-hassio-dev",
-    env.useRollup() ? "rollup-watch-hassio" : "webpack-watch-hassio"
+    gulp.parallel("gen-icons-hassio", "gen-icons-mdi"),
+    "webpack-watch-hassio"
   )
 );
 
@@ -31,10 +26,9 @@ gulp.task(
       process.env.NODE_ENV = "production";
     },
     "clean-hassio",
-    "gen-icons-json",
-    env.useRollup() ? "rollup-prod-hassio" : "webpack-prod-hassio",
-    "gen-index-hassio-prod",
+    gulp.parallel("gen-icons-hassio", "gen-icons-mdi"),
+    "webpack-prod-hassio",
     ...// Don't compress running tests
-    (env.isTest() ? [] : ["compress-hassio"])
+    (envVars.isTravis() ? [] : ["compress-hassio"])
   )
 );

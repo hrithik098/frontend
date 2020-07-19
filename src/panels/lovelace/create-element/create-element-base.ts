@@ -52,10 +52,9 @@ export const createErrorCardElement = (config: ErrorCardConfig) => {
     el.setConfig(config);
   } else {
     import("../cards/hui-error-card");
-    customElements.whenDefined("hui-error-card").then(() => {
-      customElements.upgrade(el);
-      el.setConfig(config);
-    });
+    customElements
+      .whenDefined("hui-error-card")
+      .then(() => el.setConfig(config));
   }
   return el;
 };
@@ -73,8 +72,15 @@ const _createElement = <T extends keyof CreateElementConfigTypes>(
   const element = document.createElement(
     tag
   ) as CreateElementConfigTypes[T]["element"];
-  // @ts-ignore
-  element.setConfig(config);
+  try {
+    // @ts-ignore
+    element.setConfig(config);
+  } catch (err) {
+    // eslint-disable-next-line
+    console.error(tag, err);
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    return _createErrorElement(err.message, config);
+  }
   return element;
 };
 
@@ -120,7 +126,6 @@ const _lazyCreate = <T extends keyof CreateElementConfigTypes>(
   ) as CreateElementConfigTypes[T]["element"];
   customElements.whenDefined(tag).then(() => {
     try {
-      customElements.upgrade(element);
       // @ts-ignore
       element.setConfig(config);
     } catch (err) {
@@ -146,36 +151,8 @@ export const createLovelaceElement = <T extends keyof CreateElementConfigTypes>(
   // Default type if no type given. If given, entity types will not work.
   defaultType?: string
 ): CreateElementConfigTypes[T]["element"] | HuiErrorCard => {
-  try {
-    return tryCreateLovelaceElement(
-      tagSuffix,
-      config,
-      alwaysLoadTypes,
-      lazyLoadTypes,
-      domainTypes,
-      defaultType
-    );
-  } catch (err) {
-    // eslint-disable-next-line
-    console.error(tagSuffix, config.type, err);
-    return _createErrorElement(err.message, config);
-  }
-};
-
-export const tryCreateLovelaceElement = <
-  T extends keyof CreateElementConfigTypes
->(
-  tagSuffix: T,
-  config: CreateElementConfigTypes[T]["config"],
-  alwaysLoadTypes?: Set<string>,
-  lazyLoadTypes?: { [domain: string]: () => Promise<unknown> },
-  // Allow looking at "entity" in config and mapping that to a type
-  domainTypes?: { _domain_not_found: string; [domain: string]: string },
-  // Default type if no type given. If given, entity types will not work.
-  defaultType?: string
-): CreateElementConfigTypes[T]["element"] | HuiErrorCard => {
   if (!config || typeof config !== "object") {
-    throw new Error("Config is not an object");
+    return _createErrorElement("Config is not an object", config);
   }
 
   if (
@@ -184,7 +161,7 @@ export const tryCreateLovelaceElement = <
     // If domain types is given, we can derive a type from "entity"
     (!domainTypes || !("entity" in config))
   ) {
-    throw new Error("No card type configured.");
+    return _createErrorElement("No card type configured.", config);
   }
 
   const customTag = config.type ? _getCustomTag(config.type) : undefined;
@@ -206,7 +183,7 @@ export const tryCreateLovelaceElement = <
   }
 
   if (type === undefined) {
-    throw new Error("No type specified.");
+    return _createErrorElement(`No type specified`, config);
   }
 
   const tag = `hui-${type}-${tagSuffix}`;
@@ -220,7 +197,7 @@ export const tryCreateLovelaceElement = <
     return _createElement(tag, config);
   }
 
-  throw new Error(`Unknown type encountered: ${type}`);
+  return _createErrorElement(`Unknown type encountered: ${type}.`, config);
 };
 
 export const getLovelaceElementClass = async <

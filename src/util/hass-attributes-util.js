@@ -37,7 +37,6 @@ hassAttributeUtil.DOMAIN_DEVICE_CLASS = {
     "shutter",
     "window",
   ],
-  humidifier: ["dehumidifier", "humidifier"],
   sensor: [
     "battery",
     "humidity",
@@ -90,8 +89,9 @@ hassAttributeUtil.LOGIC_STATE_ATTRIBUTES = hassAttributeUtil.LOGIC_STATE_ATTRIBU
     type: "array",
     options: hassAttributeUtil.DOMAIN_DEVICE_CLASS,
     description: "Device class",
-    domains: ["binary_sensor", "cover", "humidifier", "sensor", "switch"],
+    domains: ["binary_sensor", "cover", "sensor", "switch"],
   },
+  hidden: { type: "boolean", description: "Hide from UI" },
   assumed_state: {
     type: "boolean",
     domains: [
@@ -100,7 +100,6 @@ hassAttributeUtil.LOGIC_STATE_ATTRIBUTES = hassAttributeUtil.LOGIC_STATE_ATTRIBU
       "cover",
       "climate",
       "fan",
-      "humidifier",
       "group",
       "water_heater",
     ],

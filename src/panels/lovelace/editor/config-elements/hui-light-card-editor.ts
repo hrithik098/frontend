@@ -4,7 +4,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
@@ -40,9 +39,9 @@ const includeDomains = ["light"];
 @customElement("hui-light-card-editor")
 export class HuiLightCardEditor extends LitElement
   implements LovelaceCardEditor {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: LightCardConfig;
+  @property() private _config?: LightCardConfig;
 
   public setConfig(config: LightCardConfig): void {
     this._config = cardConfigStruct(config);

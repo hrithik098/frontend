@@ -1,4 +1,5 @@
-import "../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
+import type { PaperIconButtonElement } from "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-progress/paper-progress";
 import type { PaperProgressElement } from "@polymer/paper-progress/paper-progress";
 import {
@@ -8,7 +9,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   query,
   TemplateResult,
@@ -45,9 +45,8 @@ import { findEntities } from "../common/find-entites";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
 import "../components/hui-marquee";
 import type { LovelaceCard, LovelaceCardEditor } from "../types";
-import { createEntityNotFoundWarning } from "../components/hui-warning";
+import "../components/hui-warning";
 import { MediaControlCardConfig } from "./types";
-import { installResizeObserver } from "../common/install-resize-observer";
 
 function getContrastRatio(
   rgb1: [number, number, number],
@@ -189,23 +188,23 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
     return { type: "media-control", entity: foundEntities[0] || "" };
   }
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: MediaControlCardConfig;
+  @property() private _config?: MediaControlCardConfig;
 
-  @internalProperty() private _foregroundColor?: string;
+  @property() private _foregroundColor?: string;
 
-  @internalProperty() private _backgroundColor?: string;
+  @property() private _backgroundColor?: string;
 
-  @internalProperty() private _narrow = false;
+  @property() private _narrow = false;
 
-  @internalProperty() private _veryNarrow = false;
+  @property() private _veryNarrow = false;
 
-  @internalProperty() private _cardHeight = 0;
+  @property() private _cardHeight = 0;
 
   @query("paper-progress") private _progressBar?: PaperProgressElement;
 
-  @internalProperty() private _marqueeActive = false;
+  @property() private _marqueeActive = false;
 
   private _progressInterval?: number;
 
@@ -225,7 +224,7 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
 
   public connectedCallback(): void {
     super.connectedCallback();
-    this.updateComplete.then(() => this._attachObserver());
+    this.updateComplete.then(() => this._measureCard());
 
     if (!this.hass || !this._config) {
       return;
@@ -254,9 +253,6 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
       clearInterval(this._progressInterval);
       this._progressInterval = undefined;
     }
-    if (this._resizeObserver) {
-      this._resizeObserver.disconnect();
-    }
   }
 
   protected render(): TemplateResult {
@@ -267,9 +263,13 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
 
     if (!stateObj) {
       return html`
-        <hui-warning>
-          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
-        </hui-warning>
+        <hui-warning
+          >${this.hass.localize(
+            "ui.panel.lovelace.warning.entity_not_found",
+            "entity",
+            this._config.entity
+          )}</hui-warning
+        >
       `;
     }
 
@@ -352,11 +352,11 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
               </div>
             </div>
             <div>
-              <ha-icon-button
+              <paper-icon-button
                 icon="hass:dots-vertical"
                 class="more-info"
                 @click=${this._handleMoreInfo}
-              ></ha-icon-button>
+              ></paper-icon-button>
             </div>
           </div>
           ${isUnavailable
@@ -392,11 +392,11 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
                         <div class="controls">
                           ${controls!.map(
                             (control) => html`
-                              <ha-icon-button
+                              <paper-icon-button
                                 .icon=${control.icon}
                                 action=${control.action}
                                 @click=${this._handleClick}
-                              ></ha-icon-button>
+                              ></paper-icon-button>
                             `
                           )}
                         </div>
@@ -428,7 +428,6 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
   }
 
   protected firstUpdated(): void {
-    this._measureCard();
     this._attachObserver();
   }
 
@@ -626,13 +625,19 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
     this._cardHeight = card.offsetHeight;
   }
 
-  private async _attachObserver(): Promise<void> {
-    if (!this._resizeObserver) {
-      await installResizeObserver();
-      this._resizeObserver = new ResizeObserver(
-        debounce(() => this._measureCard(), 250, false)
-      );
+  private _attachObserver(): void {
+    if (typeof ResizeObserver !== "function") {
+      import("resize-observer").then((modules) => {
+        modules.install();
+        this._attachObserver();
+      });
+      return;
     }
+
+    this._resizeObserver = new ResizeObserver(
+      debounce(() => this._measureCard(), 250, false)
+    );
+
     const card = this.shadowRoot!.querySelector("ha-card");
     // If we show an error or warning there is no ha-card
     if (!card) {
@@ -650,7 +655,7 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
   private _handleClick(e: MouseEvent): void {
     this.hass!.callService(
       "media_player",
-      (e.currentTarget! as HTMLElement).getAttribute("action")!,
+      (e.currentTarget! as PaperIconButtonElement).getAttribute("action")!,
       {
         entity_id: this._config!.entity,
       }
@@ -807,6 +812,10 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
         transition-duration: 0.4s;
       }
 
+      .icon {
+        width: 18px;
+      }
+
       .controls {
         padding: 8px 8px 8px 0;
         display: flex;
@@ -822,17 +831,17 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
         align-items: center;
       }
 
-      .controls ha-icon-button {
-        --mdc-icon-button-size: 44px;
-        --mdc-icon-size: 30px;
+      .controls paper-icon-button {
+        width: 44px;
+        height: 44px;
       }
 
-      ha-icon-button[action="media_play"],
-      ha-icon-button[action="media_play_pause"],
-      ha-icon-button[action="turn_on"],
-      ha-icon-button[action="turn_off"] {
-        --mdc-icon-button-size: 56px;
-        --mdc-icon-size: 40px;
+      paper-icon-button[action="media_play"],
+      paper-icon-button[action="media_play_pause"],
+      paper-icon-button[action="turn_on"],
+      paper-icon-button[action="turn_off"] {
+        width: 56px;
+        height: 56px;
       }
 
       .top-info {
@@ -892,16 +901,16 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
         padding-bottom: 0;
       }
 
-      .narrow ha-icon-button {
-        --mdc-icon-button-size: 40px;
-        --mdc-icon-size: 28px;
+      .narrow paper-icon-button {
+        width: 40px;
+        height: 40px;
       }
 
-      .narrow ha-icon-button[action="media_play"],
-      .narrow ha-icon-button[action="media_play_pause"],
-      .narrow ha-icon-button[action="turn_on"] {
-        --mdc-icon-button-size: 50px;
-        --mdc-icon-size: 36px;
+      .narrow paper-icon-button[action="media_play"],
+      .narrow paper-icon-button[action="media_play_pause"],
+      .narrow paper-icon-button[action="turn_on"] {
+        width: 50px;
+        height: 50px;
       }
 
       .no-progress.player:not(.no-controls) {

@@ -10,25 +10,20 @@ class HaLabeledSlider extends PolymerElement {
       <style>
         :host {
           display: block;
-          border-radius: 4px;
         }
 
         .title {
           margin-bottom: 16px;
-          color: var(--secondary-text-color);
-        }
-
-        .slider-container {
-          display: flex;
+          opacity: var(--dark-primary-opacity);
         }
 
         ha-icon {
+          float: left;
           margin-top: 4px;
-          color: var(--secondary-text-color);
+          opacity: var(--dark-secondary-opacity);
         }
 
         ha-paper-slider {
-          flex-grow: 1;
           background-image: var(--ha-slider-background);
         }
       </style>

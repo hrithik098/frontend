@@ -54,14 +54,6 @@ export interface EditorTarget extends EventTarget {
   config: ActionConfig;
 }
 
-export interface Card {
-  type: string;
-  name?: string;
-  description?: string;
-  showElement?: boolean;
-  isCustom?: boolean;
-}
-
 export interface CardPickTarget extends EventTarget {
   config: LovelaceCardConfig;
 }

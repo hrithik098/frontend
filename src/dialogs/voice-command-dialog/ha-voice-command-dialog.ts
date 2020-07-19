@@ -1,6 +1,7 @@
+import "@polymer/iron-icon/iron-icon";
 import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
 import type { PaperDialogScrollableElement } from "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
-import "../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-input/paper-input";
 import type { PaperInputElement } from "@polymer/paper-input/paper-input";
 import {
@@ -10,7 +11,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   query,
   TemplateResult,
@@ -42,20 +42,20 @@ interface Results {
 
 @customElement("ha-voice-command-dialog")
 export class HaVoiceCommandDialog extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public results: Results | null = null;
 
-  @internalProperty() private _conversation: Message[] = [
+  @property() private _conversation: Message[] = [
     {
       who: "hass",
       text: "",
     },
   ];
 
-  @internalProperty() private _opened = false;
+  @property() private _opened = false;
 
-  @internalProperty() private _agentInfo?: AgentInfo;
+  @property() private _agentInfo?: AgentInfo;
 
   @query("#messages") private messages!: PaperDialogScrollableElement;
 
@@ -176,11 +176,12 @@ export class HaVoiceCommandDialog extends LitElement {
                           </div>
                         `
                       : ""}
-                    <ha-icon-button
+                    <paper-icon-button
+                      .active=${Boolean(this.results)}
                       icon="hass:microphone"
                       @click=${this._toggleListening}
                     >
-                    </ha-icon-button>
+                    </paper-icon-button>
                   </span>
                 `
               : ""}
@@ -368,11 +369,11 @@ export class HaVoiceCommandDialog extends LitElement {
           z-index: 103;
         }
 
-        ha-icon-button {
+        paper-icon-button {
           color: var(--secondary-text-color);
         }
 
-        ha-icon-button[active] {
+        paper-icon-button[active] {
           color: var(--primary-color);
         }
 
@@ -447,7 +448,7 @@ export class HaVoiceCommandDialog extends LitElement {
         }
 
         .message.error {
-          background-color: var(--error-color);
+          background-color: var(--google-red-500);
           color: var(--text-primary-color);
         }
 
@@ -456,15 +457,15 @@ export class HaVoiceCommandDialog extends LitElement {
         }
 
         .bouncer {
-          width: 48px;
-          height: 48px;
+          width: 40px;
+          height: 40px;
           position: absolute;
           top: 0;
         }
         .double-bounce1,
         .double-bounce2 {
-          width: 48px;
-          height: 48px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
           background-color: var(--primary-color);
           opacity: 0.2;

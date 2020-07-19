@@ -6,19 +6,16 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
-  PropertyValues,
 } from "lit-element";
-import { HASSDomEvent, fireEvent } from "../../../../common/dom/fire_event";
-import "../../../../components/ha-dialog";
+import type { HASSDomEvent } from "../../../../common/dom/fire_event";
+import "../../../../components/dialog/ha-paper-dialog";
 import type {
   LovelaceCardConfig,
   LovelaceViewConfig,
 } from "../../../../data/lovelace";
 import { haStyleDialog } from "../../../../resources/styles";
-import "../../../../components/ha-circular-progress";
 import type { HomeAssistant } from "../../../../types";
 import { showSaveSuccessToast } from "../../../../util/toast-saved-success";
 import { addCard, replaceCard } from "../config-util";
@@ -28,10 +25,6 @@ import type { ConfigChangedEvent, HuiCardEditor } from "./hui-card-editor";
 import "./hui-card-picker";
 import "./hui-card-preview";
 import type { EditCardDialogParams } from "./show-edit-card-dialog";
-import { getCardDocumentationURL } from "../get-card-documentation-url";
-import { mdiHelpCircle } from "@mdi/js";
-import { HassDialog } from "../../../../dialogs/make-dialog-manager";
-import { showConfirmationDialog } from "../../../../dialogs/generic/show-dialog-box";
 
 declare global {
   // for fire event
@@ -45,28 +38,24 @@ declare global {
 }
 
 @customElement("hui-dialog-edit-card")
-export class HuiDialogEditCard extends LitElement implements HassDialog {
+export class HuiDialogEditCard extends LitElement {
   @property() protected hass!: HomeAssistant;
 
-  @internalProperty() private _params?: EditCardDialogParams;
+  @property() private _params?: EditCardDialogParams;
 
-  @internalProperty() private _cardConfig?: LovelaceCardConfig;
+  @property() private _cardConfig?: LovelaceCardConfig;
 
-  @internalProperty() private _viewConfig!: LovelaceViewConfig;
+  @property() private _viewConfig!: LovelaceViewConfig;
 
-  @internalProperty() private _saving = false;
+  @property() private _saving = false;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _guiModeAvailable? = true;
+  @property() private _guiModeAvailable? = true;
 
   @query("hui-card-editor") private _cardEditorEl?: HuiCardEditor;
 
-  @internalProperty() private _GUImode = true;
-
-  @internalProperty() private _documentationURL?: string;
-
-  @internalProperty() private _dirty = false;
+  @property() private _GUImode = true;
 
   public async showDialog(params: EditCardDialogParams): Promise<void> {
     this._params = params;
@@ -78,36 +67,6 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
       card !== undefined ? this._viewConfig.cards![card] : params.cardConfig;
     if (this._cardConfig && !Object.isFrozen(this._cardConfig)) {
       this._cardConfig = deepFreeze(this._cardConfig);
-    }
-  }
-
-  public closeDialog(): boolean {
-    if (this._dirty) {
-      this._confirmCancel();
-      return false;
-    }
-    this._params = undefined;
-    this._cardConfig = undefined;
-    this._error = undefined;
-    this._documentationURL = undefined;
-    this._dirty = false;
-    fireEvent(this, "dialog-closed", { dialog: this.localName });
-    return true;
-  }
-
-  protected updated(changedProps: PropertyValues): void {
-    if (
-      !this._cardConfig ||
-      this._documentationURL !== undefined ||
-      !changedProps.has("_cardConfig")
-    ) {
-      return;
-    }
-
-    const oldConfig = changedProps.get("_cardConfig") as LovelaceCardConfig;
-
-    if (oldConfig?.type !== this._cardConfig!.type) {
-      this._documentationURL = getCardDocumentationURL(this._cardConfig!.type);
     }
   }
 
@@ -136,30 +95,11 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
     }
 
     return html`
-      <ha-dialog
-        open
-        scrimClickAction
-        @keydown=${this._ignoreKeydown}
-        @closed=${this._cancel}
-        @opened=${this._opened}
-        .heading=${html`${heading}
-        ${this._documentationURL !== undefined
-          ? html`
-              <a
-                class="header_button"
-                href=${this._documentationURL}
-                title=${this.hass!.localize("ui.panel.lovelace.menu.help")}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <mwc-icon-button>
-                  <ha-svg-icon path=${mdiHelpCircle}></ha-svg-icon>
-                </mwc-icon-button>
-              </a>
-            `
-          : ""}`}
-      >
-        <div>
+      <ha-paper-dialog with-backdrop opened modal @keyup=${this._handleKeyUp}>
+        <h2>
+          ${heading}
+        </h2>
+        <paper-dialog-scrollable>
           ${this._cardConfig === undefined
             ? html`
                 <hui-card-picker
@@ -177,7 +117,6 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
                       .value=${this._cardConfig}
                       @config-changed=${this._handleConfigChanged}
                       @GUImode-changed=${this._handleGUIModeChanged}
-                      @editor-save=${this._save}
                     ></hui-card-editor>
                   </div>
                   <div class="element-preview">
@@ -188,34 +127,33 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
                     ></hui-card-preview>
                     ${this._error
                       ? html`
-                          <ha-circular-progress
+                          <paper-spinner
                             active
                             alt="Can't update card"
-                          ></ha-circular-progress>
+                          ></paper-spinner>
                         `
                       : ``}
                   </div>
                 </div>
               `}
-        </div>
-        ${this._cardConfig !== undefined
-          ? html`
-              <mwc-button
-                slot="secondaryAction"
-                @click=${this._toggleMode}
-                .disabled=${!this._guiModeAvailable}
-                class="gui-mode-button"
-              >
-                ${this.hass!.localize(
-                  !this._cardEditorEl || this._GUImode
-                    ? "ui.panel.lovelace.editor.edit_card.show_code_editor"
-                    : "ui.panel.lovelace.editor.edit_card.show_visual_editor"
-                )}
-              </mwc-button>
-            `
-          : ""}
-        <div slot="primaryAction" @click=${this._save}>
-          <mwc-button @click=${this._cancel}>
+        </paper-dialog-scrollable>
+        <div class="paper-dialog-buttons">
+          ${this._cardConfig !== undefined
+            ? html`
+                <mwc-button
+                  @click=${this._toggleMode}
+                  .disabled=${!this._guiModeAvailable}
+                  class="gui-mode-button"
+                >
+                  ${this.hass!.localize(
+                    !this._cardEditorEl || this._GUImode
+                      ? "ui.panel.lovelace.editor.edit_card.show_code_editor"
+                      : "ui.panel.lovelace.editor.edit_card.show_visual_editor"
+                  )}
+                </mwc-button>
+              `
+            : ""}
+          <mwc-button @click=${this._close}>
             ${this.hass!.localize("ui.common.cancel")}
           </mwc-button>
           ${this._cardConfig !== undefined
@@ -226,25 +164,15 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
                 >
                   ${this._saving
                     ? html`
-                        <ha-circular-progress
-                          active
-                          alt="Saving"
-                          size="small"
-                        ></ha-circular-progress>
+                        <paper-spinner active alt="Saving"></paper-spinner>
                       `
-                    : this._dirty
-                    ? this.hass!.localize("ui.common.save")
-                    : this.hass!.localize("ui.common.close")}
+                    : this.hass!.localize("ui.common.save")}
                 </mwc-button>
               `
             : ``}
         </div>
-      </ha-dialog>
+      </ha-paper-dialog>
     `;
-  }
-
-  private _ignoreKeydown(ev: KeyboardEvent) {
-    ev.stopPropagation();
   }
 
   static get styles(): CSSResultArray {
@@ -257,20 +185,20 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
 
         @media all and (max-width: 450px), all and (max-height: 500px) {
           /* overrule the ha-style-dialog max-height on small screens */
-          ha-dialog {
-            --mdc-dialog-max-height: 100%;
+          ha-paper-dialog {
+            max-height: 100%;
             height: 100%;
           }
         }
 
         @media all and (min-width: 850px) {
-          ha-dialog {
-            --mdc-dialog-min-width: 845px;
+          ha-paper-dialog {
+            width: 845px;
           }
         }
 
-        ha-dialog {
-          --mdc-dialog-max-width: 845px;
+        ha-paper-dialog {
+          max-width: 845px;
         }
 
         .center {
@@ -292,9 +220,9 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
         }
 
         @media (min-width: 1200px) {
-          ha-dialog {
-            --mdc-dialog-max-width: calc(100% - 32px);
-            --mdc-dialog-min-width: 1000px;
+          ha-paper-dialog {
+            max-width: none;
+            width: 1000px;
           }
 
           .content {
@@ -307,13 +235,15 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
             min-width: 0;
           }
           .content hui-card-preview {
-            padding: 8px 10px;
-            margin: auto 0px;
+            padding: 8px 0;
+            margin: auto 10px;
             max-width: 500px;
           }
         }
 
-        mwc-button ha-circular-progress {
+        mwc-button paper-spinner {
+          width: 14px;
+          height: 14px;
           margin-right: 20px;
         }
         .hidden {
@@ -328,7 +258,7 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
         .element-preview {
           position: relative;
         }
-        .element-preview ha-circular-progress {
+        .element-preview paper-spinner {
           top: 50%;
           left: 50%;
           position: absolute;
@@ -339,15 +269,9 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
           margin-bottom: 4px;
           display: block;
           width: 100%;
-          box-sizing: border-box;
         }
         .gui-mode-button {
           margin-right: auto;
-        }
-        .header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
         }
       `,
     ];
@@ -364,14 +288,18 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
     }
     this._cardConfig = deepFreeze(config);
     this._error = ev.detail.error;
-    this._dirty = true;
   }
 
   private _handleConfigChanged(ev: HASSDomEvent<ConfigChangedEvent>) {
     this._cardConfig = deepFreeze(ev.detail.config);
     this._error = ev.detail.error;
     this._guiModeAvailable = ev.detail.guiModeAvailable;
-    this._dirty = true;
+  }
+
+  private _handleKeyUp(ev: KeyboardEvent) {
+    if (ev.keyCode === 27) {
+      this._close();
+    }
   }
 
   private _handleGUIModeChanged(ev: HASSDomEvent<GUIModeChangedEvent>): void {
@@ -384,8 +312,10 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
     this._cardEditorEl?.toggleMode();
   }
 
-  private _opened() {
-    this._cardEditorEl?.refreshYamlEditor();
+  private _close(): void {
+    this._params = undefined;
+    this._cardConfig = undefined;
+    this._error = undefined;
   }
 
   private get _canSave(): boolean {
@@ -401,40 +331,7 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
     return true;
   }
 
-  private async _confirmCancel() {
-    // Make sure the open state of this dialog is handled before the open state of confirm dialog
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    const confirm = await showConfirmationDialog(this, {
-      title: this.hass!.localize(
-        "ui.panel.lovelace.editor.edit_card.unsaved_changes"
-      ),
-      text: this.hass!.localize(
-        "ui.panel.lovelace.editor.edit_card.confirm_cancel"
-      ),
-      dismissText: this.hass!.localize("ui.common.no"),
-      confirmText: this.hass!.localize("ui.common.yes"),
-    });
-    if (confirm) {
-      this._cancel();
-    }
-  }
-
-  private _cancel(ev?: Event) {
-    if (ev) {
-      ev.stopPropagation();
-    }
-    this._dirty = false;
-    this.closeDialog();
-  }
-
   private async _save(): Promise<void> {
-    if (!this._canSave) {
-      return;
-    }
-    if (!this._dirty) {
-      this.closeDialog();
-      return;
-    }
     this._saving = true;
     await this._params!.saveConfig(
       this._params!.path.length === 1
@@ -450,9 +347,8 @@ export class HuiDialogEditCard extends LitElement implements HassDialog {
           )
     );
     this._saving = false;
-    this._dirty = false;
     showSaveSuccessToast(this, this.hass);
-    this.closeDialog();
+    this._close();
   }
 }
 

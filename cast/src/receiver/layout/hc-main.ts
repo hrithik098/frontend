@@ -3,12 +3,7 @@ import {
   getAuth,
   UnsubscribeFunc,
 } from "home-assistant-js-websocket";
-import {
-  customElement,
-  html,
-  internalProperty,
-  TemplateResult,
-} from "lit-element";
+import { customElement, html, property, TemplateResult } from "lit-element";
 import { CAST_NS } from "../../../../src/cast/const";
 import {
   ConnectMessage,
@@ -36,13 +31,13 @@ let resourcesLoaded = false;
 
 @customElement("hc-main")
 export class HcMain extends HassElement {
-  @internalProperty() private _showDemo = false;
+  @property() private _showDemo = false;
 
-  @internalProperty() private _lovelaceConfig?: LovelaceConfig;
+  @property() private _lovelaceConfig?: LovelaceConfig;
 
-  @internalProperty() private _lovelacePath: string | number | null = null;
+  @property() private _lovelacePath: string | number | null = null;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
   private _unsubLovelace?: UnsubscribeFunc;
 
@@ -87,7 +82,6 @@ export class HcMain extends HassElement {
         .hass=${this.hass}
         .lovelaceConfig=${this._lovelaceConfig}
         .viewPath=${this._lovelacePath}
-        @config-refresh=${this._generateLovelaceConfig}
       ></hc-lovelace>
     `;
   }
@@ -96,17 +90,15 @@ export class HcMain extends HassElement {
     super.firstUpdated(changedProps);
     import("../second-load");
     window.addEventListener("location-changed", () => {
-      const panelPath = `/${this._urlPath || "lovelace"}/`;
-      if (location.pathname.startsWith(panelPath)) {
-        this._lovelacePath = location.pathname.substr(panelPath.length);
+      if (location.pathname.startsWith("/lovelace/")) {
+        this._lovelacePath = location.pathname.substr(10);
         this._sendStatus();
       }
     });
     document.body.addEventListener("click", (ev) => {
-      const panelPath = `/${this._urlPath || "lovelace"}/`;
       const href = isNavigationClick(ev);
-      if (href && href.startsWith(panelPath)) {
-        this._lovelacePath = href.substr(panelPath.length);
+      if (href && href.startsWith("/lovelace/")) {
+        this._lovelacePath = href.substr(10);
         this._sendStatus();
       }
     });
@@ -178,10 +170,10 @@ export class HcMain extends HassElement {
       this._error = "Cannot show Lovelace because we're not connected.";
       return;
     }
-    if (msg.urlPath === "lovelace") {
-      msg.urlPath = null;
-    }
     if (!this._unsubLovelace || this._urlPath !== msg.urlPath) {
+      if (msg.urlPath === "lovelace") {
+        msg.urlPath = null;
+      }
       this._urlPath = msg.urlPath;
       if (this._unsubLovelace) {
         this._unsubLovelace();
@@ -197,11 +189,14 @@ export class HcMain extends HassElement {
           this._handleNewLovelaceConfig(lovelaceConfig)
         );
       } catch (err) {
-        // eslint-disable-next-line
-        console.log("Error fetching Lovelace configuration", err, msg);
         // Generate a Lovelace config.
         this._unsubLovelace = () => undefined;
-        await this._generateLovelaceConfig();
+        const { generateLovelaceConfigFromHass } = await import(
+          "../../../../src/panels/lovelace/common/generate-lovelace-config"
+        );
+        this._handleNewLovelaceConfig(
+          await generateLovelaceConfigFromHass(this.hass!)
+        );
       }
     }
     if (!resourcesLoaded) {
@@ -219,15 +214,6 @@ export class HcMain extends HassElement {
       this._breakFree();
     }
     this._sendStatus();
-  }
-
-  private async _generateLovelaceConfig() {
-    const { generateLovelaceConfigFromHass } = await import(
-      "../../../../src/panels/lovelace/common/generate-lovelace-config"
-    );
-    this._handleNewLovelaceConfig(
-      await generateLovelaceConfigFromHass(this.hass!)
-    );
   }
 
   private _handleNewLovelaceConfig(lovelaceConfig: LovelaceConfig) {

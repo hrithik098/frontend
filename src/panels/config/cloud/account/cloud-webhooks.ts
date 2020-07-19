@@ -1,13 +1,7 @@
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
-import "../../../../components/ha-circular-progress";
-import {
-  html,
-  LitElement,
-  property,
-  internalProperty,
-  PropertyValues,
-} from "lit-element";
+import "@polymer/paper-spinner/paper-spinner";
+import { html, LitElement, property, PropertyValues } from "lit-element";
 import "../../../../components/ha-card";
 import "../../../../components/ha-switch";
 import {
@@ -21,17 +15,15 @@ import { HomeAssistant, WebhookError } from "../../../../types";
 import { showManageCloudhookDialog } from "../dialog-manage-cloudhook/show-dialog-manage-cloudhook";
 
 export class CloudWebhooks extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public cloudStatus?: CloudStatusLoggedIn;
 
-  @internalProperty() private _cloudHooks?: {
-    [webhookId: string]: CloudWebhook;
-  };
+  @property() private _cloudHooks?: { [webhookId: string]: CloudWebhook };
 
-  @internalProperty() private _localHooks?: Webhook[];
+  @property() private _localHooks?: Webhook[];
 
-  @internalProperty() private _progress: string[];
+  @property() private _progress: string[];
 
   constructor() {
     super();
@@ -127,7 +119,7 @@ export class CloudWebhooks extends LitElement {
           ${this._progress.includes(entry.webhook_id)
             ? html`
                 <div class="progress">
-                  <ha-circular-progress active></ha-circular-progress>
+                  <paper-spinner active></paper-spinner>
                 </div>
               `
             : this._cloudHooks![entry.webhook_id]

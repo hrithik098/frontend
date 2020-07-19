@@ -22,7 +22,7 @@ declare global {
 
 @customElement("hui-lovelace-editor")
 export class HuiLovelaceEditor extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public config?: LovelaceConfig;
 
@@ -38,9 +38,7 @@ export class HuiLovelaceEditor extends LitElement {
       ${configElementStyle}
       <div class="card-config">
         <paper-input
-          .label=${this.hass.localize(
-            "ui.panel.lovelace.editor.edit_lovelace.title"
-          )}
+          label="Title"
           .value="${this._title}"
           .configValue="${"title"}"
           @value-changed="${this._valueChanged}"

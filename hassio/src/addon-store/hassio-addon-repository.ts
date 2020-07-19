@@ -1,4 +1,4 @@
-import { mdiArrowUpBoldCircle, mdiPuzzle } from "@mdi/js";
+import "@polymer/paper-card/paper-card";
 import {
   css,
   CSSResultArray,
@@ -10,7 +10,6 @@ import {
 import memoizeOne from "memoize-one";
 import { atLeastVersion } from "../../../src/common/config/version";
 import { navigate } from "../../../src/common/navigate";
-import "../../../src/components/ha-card";
 import {
   HassioAddonInfo,
   HassioAddonRepository,
@@ -21,7 +20,7 @@ import { filterAndSort } from "../components/hassio-filter-addons";
 import { hassioStyle } from "../resources/hassio-style";
 
 class HassioAddonRepositoryEl extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public repo!: HassioAddonRepository;
 
@@ -42,19 +41,13 @@ class HassioAddonRepositoryEl extends LitElement {
 
   protected render(): TemplateResult {
     const repo = this.repo;
-    let _addons = this.addons;
-    if (!this.hass.userData?.showAdvanced) {
-      _addons = _addons.filter((addon) => {
-        return !addon.advanced;
-      });
-    }
-    const addons = this._getAddons(_addons, this.filter);
+    const addons = this._getAddons(this.addons, this.filter);
 
     if (this.filter && addons.length < 1) {
       return html`
         <div class="content">
           <p class="description">
-            No results found in "${repo.name}."
+            No results found in "${repo.name}"
           </p>
         </div>
       `;
@@ -64,55 +57,66 @@ class HassioAddonRepositoryEl extends LitElement {
         <h1>
           ${repo.name}
         </h1>
+        <p class="description">
+          Maintained by ${repo.maintainer}<br />
+          <a class="repo" href=${repo.url} target="_blank" rel="noreferrer">
+            ${repo.url}
+          </a>
+        </p>
         <div class="card-group">
           ${addons.map(
             (addon) => html`
-              <ha-card
-                .addon=${addon}
-                class=${addon.available ? "" : "not_available"}
-                @click=${this._addonTapped}
-              >
-                <div class="card-content">
-                  <hassio-card-content
-                    .hass=${this.hass}
-                    .title=${addon.name}
-                    .description=${addon.description}
-                    .available=${addon.available}
-                    .icon=${addon.installed && addon.installed !== addon.version
-                      ? mdiArrowUpBoldCircle
-                      : mdiPuzzle}
-                    .iconTitle=${addon.installed
-                      ? addon.installed !== addon.version
-                        ? "New version available"
-                        : "Add-on is installed"
-                      : addon.available
-                      ? "Add-on is not installed"
-                      : "Add-on is not available on your system"}
-                    .iconClass=${addon.installed
-                      ? addon.installed !== addon.version
-                        ? "update"
-                        : "installed"
-                      : !addon.available
-                      ? "not_available"
-                      : ""}
-                    .iconImage=${atLeastVersion(
-                      this.hass.config.version,
-                      0,
-                      105
-                    ) && addon.icon
-                      ? `/api/hassio/addons/${addon.slug}/icon`
-                      : undefined}
-                    .showTopbar=${addon.installed || !addon.available}
-                    .topbarClass=${addon.installed
-                      ? addon.installed !== addon.version
-                        ? "update"
-                        : "installed"
-                      : !addon.available
-                      ? "unavailable"
-                      : ""}
-                  ></hassio-card-content>
-                </div>
-              </ha-card>
+              ${addon.advanced && !this.hass.userData?.showAdvanced
+                ? ""
+                : html`
+                    <paper-card
+                      .addon=${addon}
+                      class=${addon.available ? "" : "not_available"}
+                      @click=${this._addonTapped}
+                    >
+                      <div class="card-content">
+                        <hassio-card-content
+                          .hass=${this.hass}
+                          .title=${addon.name}
+                          .description=${addon.description}
+                          .available=${addon.available}
+                          .icon=${addon.installed &&
+                          addon.installed !== addon.version
+                            ? "hassio:arrow-up-bold-circle"
+                            : "hassio:puzzle"}
+                          .iconTitle=${addon.installed
+                            ? addon.installed !== addon.version
+                              ? "New version available"
+                              : "Add-on is installed"
+                            : addon.available
+                            ? "Add-on is not installed"
+                            : "Add-on is not available on your system"}
+                          .iconClass=${addon.installed
+                            ? addon.installed !== addon.version
+                              ? "update"
+                              : "installed"
+                            : !addon.available
+                            ? "not_available"
+                            : ""}
+                          .iconImage=${atLeastVersion(
+                            this.hass.config.version,
+                            0,
+                            105
+                          ) && addon.icon
+                            ? `/api/hassio/addons/${addon.slug}/icon`
+                            : undefined}
+                          .showTopbar=${addon.installed || !addon.available}
+                          .topbarClass=${addon.installed
+                            ? addon.installed !== addon.version
+                              ? "update"
+                              : "installed"
+                            : !addon.available
+                            ? "unavailable"
+                            : ""}
+                        ></hassio-card-content>
+                      </div>
+                    </paper-card>
+                  `}
             `
           )}
         </div>
@@ -128,7 +132,7 @@ class HassioAddonRepositoryEl extends LitElement {
     return [
       hassioStyle,
       css`
-        ha-card {
+        paper-card {
           cursor: pointer;
         }
         .not_available {

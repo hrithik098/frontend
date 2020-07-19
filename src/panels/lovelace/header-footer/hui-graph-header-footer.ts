@@ -1,4 +1,4 @@
-import "../../../components/ha-circular-progress";
+import "@polymer/paper-spinner/paper-spinner";
 import { HassEntity } from "home-assistant-js-websocket";
 import {
   css,
@@ -7,7 +7,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -29,21 +28,17 @@ export class HuiGraphHeaderFooter extends LitElement
     return {};
   }
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() protected _config?: GraphHeaderFooterConfig;
 
-  @internalProperty() private _coordinates?: number[][];
+  @property() private _coordinates?: number[][];
 
   private _date?: Date;
 
   private _stateHistory?: HassEntity[];
 
   private _fetching = false;
-
-  public getCardSize(): number {
-    return 2;
-  }
 
   public setConfig(config: GraphHeaderFooterConfig): void {
     if (!config?.entity || config.entity.split(".")[0] !== "sensor") {
@@ -75,12 +70,12 @@ export class HuiGraphHeaderFooter extends LitElement
     if (!this._coordinates) {
       return html`
         <div class="container">
-          <ha-circular-progress active></ha-circular-progress>
+          <paper-spinner active></paper-spinner>
         </div>
       `;
     }
 
-    if (!this._coordinates.length) {
+    if (this._coordinates.length < 1) {
       return html`
         <div class="container">
           <div class="info">
@@ -151,13 +146,12 @@ export class HuiGraphHeaderFooter extends LitElement
       this._stateHistory!.push(...stateHistory[0]);
     }
 
-    this._coordinates =
-      coordinates(
-        this._stateHistory,
-        this._config!.hours_to_show!,
-        500,
-        this._config!.detail!
-      ) || [];
+    this._coordinates = coordinates(
+      this._stateHistory,
+      this._config!.hours_to_show!,
+      500,
+      this._config!.detail!
+    );
 
     this._date = endTime;
     this._fetching = false;
@@ -165,7 +159,7 @@ export class HuiGraphHeaderFooter extends LitElement
 
   static get styles(): CSSResult {
     return css`
-      ha-circular-progress {
+      paper-spinner {
         position: absolute;
         top: calc(50% - 28px);
       }

@@ -7,8 +7,7 @@ import { PolymerElement } from "@polymer/polymer/polymer-element";
 import "../../components/ha-card";
 import { EventsMixin } from "../../mixins/events-mixin";
 import LocalizeMixin from "../../mixins/localize-mixin";
-import { showConfirmationDialog } from "../../dialogs/generic/show-dialog-box";
-import "../../styles/polymer-ha-style";
+import "../../resources/ha-style";
 
 let registeredDialog = false;
 
@@ -99,21 +98,20 @@ class HaMfaModulesCard extends EventsMixin(LocalizeMixin(PolymerElement)) {
     });
   }
 
-  async _disable(ev) {
-    const mfamodule = ev.model.module;
+  _disable(ev) {
     if (
-      !(await showConfirmationDialog(this, {
-        text: this.localize(
+      !confirm(
+        this.localize(
           "ui.panel.profile.mfa.confirm_disable",
           "name",
-          mfamodule.name
-        ),
-      }))
+          ev.model.module.name
+        )
+      )
     ) {
       return;
     }
 
-    const mfaModuleId = mfamodule.id;
+    const mfaModuleId = ev.model.module.id;
 
     this.hass
       .callWS({

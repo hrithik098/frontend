@@ -6,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
@@ -14,7 +13,6 @@ import "../../../../components/entity/state-badge";
 import "../../../../components/ha-card";
 import "../../../../components/ha-icon";
 import "../../../../components/ha-switch";
-import "../../../../components/ha-formfield";
 import { HomeAssistant } from "../../../../types";
 import {
   EntitiesCardConfig,
@@ -32,7 +30,6 @@ import {
   EntitiesEditorEvent,
 } from "../types";
 import { configElementStyle } from "./config-elements-style";
-import { computeRTLDirection } from "../../../../common/util/compute_rtl";
 
 const cardConfigStruct = struct({
   type: "string",
@@ -47,11 +44,11 @@ const cardConfigStruct = struct({
 @customElement("hui-entities-card-editor")
 export class HuiEntitiesCardEditor extends LitElement
   implements LovelaceCardEditor {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: EntitiesCardConfig;
+  @property() private _config?: EntitiesCardConfig;
 
-  @internalProperty() private _configEntities?: EntitiesCardEntityConfig[];
+  @property() private _configEntities?: EntitiesCardEntityConfig[];
 
   public setConfig(config: EntitiesCardConfig): void {
     config = cardConfigStruct(config);
@@ -91,18 +88,14 @@ export class HuiEntitiesCardEditor extends LitElement
           .configValue="${"theme"}"
           @value-changed="${this._valueChanged}"
         ></hui-theme-select-editor>
-        <ha-formfield
-          .label=${this.hass.localize(
+        <ha-switch
+          .checked="${this._config!.show_header_toggle !== false}"
+          .configValue="${"show_header_toggle"}"
+          @change="${this._valueChanged}"
+          >${this.hass.localize(
             "ui.panel.lovelace.editor.card.entities.show_header_toggle"
-          )}
-          .dir=${computeRTLDirection(this.hass)}
+          )}</ha-switch
         >
-          <ha-switch
-            .checked="${this._config!.show_header_toggle !== false}"
-            .configValue="${"show_header_toggle"}"
-            @change="${this._valueChanged}"
-          ></ha-switch>
-        </ha-formfield>
       </div>
       <hui-entity-editor
         .hass=${this.hass}

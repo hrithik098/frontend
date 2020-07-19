@@ -7,7 +7,6 @@
         );
         script.defer = true;
         script.src = src;
-        return script;
       }
       window.Polymer = {
         lazyRegister: true,

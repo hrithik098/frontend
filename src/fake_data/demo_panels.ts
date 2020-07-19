@@ -74,7 +74,7 @@ export const demoPanels: Panels = {
   },
   // config: {
   //   component_name: "config",
-  //   icon: "hass:cog",
+  //   icon: "hass:settings",
   //   title: "config",
   //   config: null,
   //   url_path: "config",

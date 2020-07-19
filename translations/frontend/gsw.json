@@ -147,8 +147,6 @@
             "stopped": "Gstoppt"
         },
         "default": {
-            "off": "Aus",
-            "on": "An",
             "unavailable": "Nid verfüägbar",
             "unknown": "Unbekannt"
         },
@@ -347,10 +345,7 @@
             }
         },
         "common": {
-            "loading": "Lade",
-            "next": "Weiter",
-            "previous": "Zurück",
-            "refresh": "Neu laden"
+            "loading": "Lade"
         },
         "components": {
             "device-picker": {
@@ -375,10 +370,6 @@
             "connection_lost": "Vrbindig vrlore. Neu verbinde..."
         },
         "panel": {
-            "calendar": {
-                "my_calendars": "Meine Kalender",
-                "today": "Heute"
-            },
             "config": {
                 "automation": {
                     "caption": "Automation",
@@ -405,9 +396,6 @@
                         "conditions": {
                             "header": "Bedingig",
                             "type": {
-                                "not": {
-                                    "label": "Nicht"
-                                },
                                 "sun": {
                                     "after": "Nachhär:",
                                     "before": "Vorhär:",
@@ -474,7 +462,6 @@
                     "caption": "Home Assistant Cloud"
                 },
                 "devices": {
-                    "device_info": "Geräteinformationen",
                     "scripts": "Scripts"
                 },
                 "integrations": {
@@ -487,12 +474,7 @@
                     },
                     "configure": "Konfiguriärä",
                     "configured": "Konfiguriärt",
-                    "discovered": "Erkennt",
-                    "none_found": "Keine Integrationen gefunden",
-                    "none_found_detail": "Passen Sie Ihre Suchkriterien an."
-                },
-                "mqtt": {
-                    "title": "MQTT"
+                    "discovered": "Erkennt"
                 },
                 "users": {
                     "caption": "Benutzer",
@@ -502,6 +484,13 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave"
+                }
+            },
+            "developer-tools": {
+                "tabs": {
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
                 }
             },
             "history": {

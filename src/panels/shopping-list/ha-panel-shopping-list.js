@@ -2,14 +2,13 @@ import "@polymer/app-layout/app-header-layout/app-header-layout";
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
 import "@polymer/paper-checkbox/paper-checkbox";
-import "../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-input/paper-input";
 import "@polymer/paper-item/paper-icon-item";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
 import "@polymer/paper-listbox/paper-listbox";
-import "@material/mwc-list/mwc-list-item";
-import "../../components/ha-button-menu";
+import "@polymer/paper-menu-button/paper-menu-button";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
@@ -18,8 +17,6 @@ import "../../components/ha-card";
 import "../../components/ha-menu-button";
 import { showVoiceCommandDialog } from "../../dialogs/voice-command-dialog/show-ha-voice-command-dialog";
 import LocalizeMixin from "../../mixins/localize-mixin";
-import "../../styles/polymer-ha-style";
-import { mdiDotsVertical } from "@mdi/js";
 
 /*
  * @appliesMixin LocalizeMixin
@@ -68,7 +65,7 @@ class HaPanelShoppingList extends LocalizeMixin(PolymerElement) {
         }
       </style>
 
-      <app-header-layout>
+      <app-header-layout has-scrolling-region>
         <app-header slot="header" fixed>
           <app-toolbar>
             <ha-menu-button
@@ -77,34 +74,39 @@ class HaPanelShoppingList extends LocalizeMixin(PolymerElement) {
             ></ha-menu-button>
             <div main-title>[[localize('panel.shopping_list')]]</div>
 
-            <ha-icon-button
+            <paper-icon-button
               hidden$="[[!conversation]]"
               aria-label="Start conversation"
               icon="hass:microphone"
               on-click="_showVoiceCommandDialog"
-            ></ha-icon-button>
-            <ha-button-menu corner="BOTTOM_START">
-              <ha-icon-button
+            ></paper-icon-button>
+
+            <paper-menu-button
+              horizontal-align="right"
+              horizontal-offset="-5"
+              vertical-offset="-5"
+            >
+              <paper-icon-button
                 icon="hass:dots-vertical"
-                label="Menu"
-                slot="trigger"
-              >
-              </ha-icon-button>
-              <mwc-list-item on-request-selected="_clearCompleted">
-                [[localize('ui.panel.shopping-list.clear_completed')]]
-              </mwc-list-item>
-            </ha-button-menu>
+                slot="dropdown-trigger"
+              ></paper-icon-button>
+              <paper-listbox slot="dropdown-content">
+                <paper-item on-click="_clearCompleted"
+                  >[[localize('ui.panel.shopping-list.clear_completed')]]</paper-item
+                >
+              </paper-listbox>
+            </paper-menu-button>
           </app-toolbar>
         </app-header>
 
         <div class="content">
           <ha-card>
             <paper-icon-item on-focus="_focusRowInput">
-              <ha-icon-button
+              <paper-icon-button
                 slot="item-icon"
                 icon="hass:plus"
                 on-click="_addItem"
-              ></ha-icon-button>
+              ></paper-icon-button>
               <paper-item-body>
                 <paper-input
                   id="addBox"

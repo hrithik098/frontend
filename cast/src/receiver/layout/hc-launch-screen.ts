@@ -11,7 +11,7 @@ import { HomeAssistant } from "../../../../src/types";
 
 @customElement("hc-launch-screen")
 class HcLaunchScreen extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public error?: string;
 

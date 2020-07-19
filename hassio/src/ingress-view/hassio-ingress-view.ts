@@ -5,7 +5,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -20,11 +19,11 @@ import { HomeAssistant, Route } from "../../../src/types";
 
 @customElement("hassio-ingress-view")
 class HassioIngressView extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public route!: Route;
 
-  @internalProperty() private _addon?: HassioAddonDetails;
+  @property() private _addon?: HassioAddonDetails;
 
   protected render(): TemplateResult {
     if (!this._addon) {
@@ -86,6 +85,9 @@ class HassioIngressView extends LitElement {
         width: 100%;
         height: 100%;
         border: 0;
+      }
+      paper-icon-button {
+        color: var(--text-primary-color);
       }
     `;
   }

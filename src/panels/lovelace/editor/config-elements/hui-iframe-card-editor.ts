@@ -4,7 +4,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
@@ -25,9 +24,9 @@ const cardConfigStruct = struct({
 @customElement("hui-iframe-card-editor")
 export class HuiIframeCardEditor extends LitElement
   implements LovelaceCardEditor {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: IframeCardConfig;
+  @property() private _config?: IframeCardConfig;
 
   public setConfig(config: IframeCardConfig): void {
     config = cardConfigStruct(config);

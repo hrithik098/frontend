@@ -3,7 +3,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -18,14 +17,13 @@ import { hasAction } from "../common/has-action";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
 import "../components/hui-warning-element";
 import { LovelaceElement, StateBadgeElementConfig } from "./types";
-import { createEntityNotFoundWarning } from "../components/hui-warning";
 
 @customElement("hui-state-badge-element")
 export class HuiStateBadgeElement extends LitElement
   implements LovelaceElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: StateBadgeElementConfig;
+  @property() private _config?: StateBadgeElementConfig;
 
   public setConfig(config: StateBadgeElementConfig): void {
     if (!config.entity) {
@@ -49,7 +47,11 @@ export class HuiStateBadgeElement extends LitElement
     if (!stateObj) {
       return html`
         <hui-warning-element
-          .label=${createEntityNotFoundWarning(this.hass, this._config.entity)}
+          label="${this.hass.localize(
+            "ui.panel.lovelace.warning.entity_not_found",
+            "entity",
+            this._config.entity
+          )}"
         ></hui-warning-element>
       `;
     }

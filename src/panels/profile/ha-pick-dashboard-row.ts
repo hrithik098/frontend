@@ -5,7 +5,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -17,11 +16,11 @@ import "./ha-settings-row";
 
 @customElement("ha-pick-dashboard-row")
 class HaPickDashboardRow extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public narrow!: boolean;
 
-  @internalProperty() private _dashboards: LovelaceDashboard[] = [];
+  @property() private _dashboards: LovelaceDashboard[] = [];
 
   protected firstUpdated(changedProps: PropertyValues) {
     super.firstUpdated(changedProps);

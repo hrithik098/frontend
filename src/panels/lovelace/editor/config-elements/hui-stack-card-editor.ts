@@ -1,4 +1,4 @@
-import "../../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-tabs";
 import "@polymer/paper-tabs/paper-tab";
 import {
@@ -8,7 +8,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
@@ -34,26 +33,22 @@ const cardConfigStruct = struct({
 @customElement("hui-stack-card-editor")
 export class HuiStackCardEditor extends LitElement
   implements LovelaceCardEditor {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @property({ attribute: false }) public lovelace?: LovelaceConfig;
+  @property() public lovelace?: LovelaceConfig;
 
-  @internalProperty() private _config?: StackCardConfig;
+  @property() private _config?: StackCardConfig;
 
-  @internalProperty() private _selectedCard = 0;
+  @property() private _selectedCard = 0;
 
-  @internalProperty() private _GUImode = true;
+  @property() private _GUImode = true;
 
-  @internalProperty() private _guiModeAvailable? = true;
+  @property() private _guiModeAvailable? = true;
 
   @query("hui-card-editor") private _cardEditorEl?: HuiCardEditor;
 
   public setConfig(config: StackCardConfig): void {
     this._config = cardConfigStruct(config);
-  }
-
-  public refreshYamlEditor(focus) {
-    this._cardEditorEl?.refreshYamlEditor(focus);
   }
 
   protected render(): TemplateResult {
@@ -105,26 +100,26 @@ export class HuiStackCardEditor extends LitElement
                         : "ui.panel.lovelace.editor.edit_card.show_visual_editor"
                     )}
                   </mwc-button>
-                  <ha-icon-button
+                  <paper-icon-button
                     id="move-before"
                     title="Move card before"
                     icon="hass:arrow-left"
                     .disabled=${selected === 0}
                     @click=${this._handleMove}
-                  ></ha-icon-button>
+                  ></paper-icon-button>
 
-                  <ha-icon-button
+                  <paper-icon-button
                     id="move-after"
                     title="Move card after"
                     icon="hass:arrow-right"
                     .disabled=${selected === numcards - 1}
                     @click=${this._handleMove}
-                  ></ha-icon-button>
+                  ></paper-icon-button>
 
-                  <ha-icon-button
+                  <paper-icon-button
                     icon="hass:delete"
                     @click=${this._handleDeleteCard}
-                  ></ha-icon-button>
+                  ></paper-icon-button>
                 </div>
 
                 <hui-card-editor

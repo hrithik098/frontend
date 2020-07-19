@@ -16,7 +16,7 @@ import { HaDeviceTrigger } from "./types/ha-automation-trigger-device";
 
 @customElement("ha-automation-trigger")
 export default class HaAutomationTrigger extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public triggers!: Trigger[];
 

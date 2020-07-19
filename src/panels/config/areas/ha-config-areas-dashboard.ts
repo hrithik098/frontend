@@ -16,7 +16,7 @@ import {
   DataTableColumnContainer,
   RowClickedEvent,
 } from "../../../components/data-table/ha-data-table";
-import "@material/mwc-fab";
+import "../../../components/ha-fab";
 import {
   AreaRegistryEntry,
   createAreaRegistryEntry,
@@ -26,8 +26,6 @@ import {
   devicesInArea,
 } from "../../../data/device_registry";
 import { showAlertDialog } from "../../../dialogs/generic/show-dialog-box";
-import "../../../components/ha-icon-button";
-import "../../../components/ha-svg-icon";
 import "../../../layouts/hass-loading-screen";
 import "../../../layouts/hass-tabs-subpage-data-table";
 import { HomeAssistant, Route } from "../../../types";
@@ -37,12 +35,10 @@ import {
   loadAreaRegistryDetailDialog,
   showAreaRegistryDetailDialog,
 } from "./show-dialog-area-registry-detail";
-import { mdiPlus } from "@mdi/js";
-import { computeRTL } from "../../../common/util/compute_rtl";
 
 @customElement("ha-config-areas-dashboard")
 export class HaConfigAreasDashboard extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public isWide?: boolean;
 
@@ -118,23 +114,21 @@ export class HaConfigAreasDashboard extends LitElement {
         id="area_id"
         hasFab
       >
-        <ha-icon-button
+        <paper-icon-button
           slot="toolbar-icon"
           icon="hass:help-circle"
           @click=${this._showHelp}
-        ></ha-icon-button>
+        ></paper-icon-button>
       </hass-tabs-subpage-data-table>
-      <mwc-fab
+      <ha-fab
         ?is-wide=${this.isWide}
         ?narrow=${this.narrow}
-        ?rtl=${computeRTL(this.hass!)}
+        icon="hass:plus"
         title="${this.hass.localize(
           "ui.panel.config.areas.picker.create_area"
         )}"
         @click=${this._createArea}
-      >
-        <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-      </mwc-fab>
+      ></ha-fab>
     `;
   }
 
@@ -183,27 +177,28 @@ export class HaConfigAreasDashboard extends LitElement {
         --app-header-background-color: var(--sidebar-background-color);
         --app-header-text-color: var(--sidebar-text-color);
       }
-      mwc-fab {
+      ha-fab {
         position: fixed;
         bottom: 16px;
         right: 16px;
         z-index: 1;
       }
-      mwc-fab[is-wide] {
+      ha-fab[is-wide] {
         bottom: 24px;
         right: 24px;
       }
-      mwc-fab[narrow] {
+      ha-fab[narrow] {
         bottom: 84px;
       }
-      mwc-fab[rtl] {
+      ha-fab.rtl {
         right: auto;
         left: 16px;
       }
-      mwc-fab[is-wide][rtl] {
+
+      ha-fab[is-wide].rtl {
         bottom: 24px;
-        left: 24px;
         right: auto;
+        left: 24px;
       }
     `;
   }

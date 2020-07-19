@@ -9,7 +9,7 @@ import {
 
 @customElement("ha-automation-trigger-time_pattern")
 export class HaTimePatternTrigger extends LitElement implements TriggerElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public trigger!: TimePatternTrigger;
 

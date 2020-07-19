@@ -16,7 +16,7 @@ import { HaDeviceCondition } from "./types/ha-automation-condition-device";
 
 @customElement("ha-automation-condition")
 export default class HaAutomationCondition extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public conditions!: Condition[];
 

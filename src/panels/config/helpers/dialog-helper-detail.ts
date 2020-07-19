@@ -8,7 +8,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
@@ -41,17 +40,17 @@ const HELPERS = {
 
 @customElement("dialog-helper-detail")
 export class DialogHelperDetail extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _item?: Helper;
+  @property() private _item?: Helper;
 
-  @internalProperty() private _opened = false;
+  @property() private _opened = false;
 
-  @internalProperty() private _platform?: string;
+  @property() private _platform?: string;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _submitting = false;
+  @property() private _submitting = false;
 
   @query(".form") private _form?: HTMLDivElement;
 
@@ -109,7 +108,7 @@ export class DialogHelperDetail extends LitElement {
                 @click="${this._goBack}"
                 .disabled=${this._submitting}
               >
-                ${this.hass!.localize("ui.common.back")}
+                Back
               </mwc-button>
             `
           : html`

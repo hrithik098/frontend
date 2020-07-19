@@ -3,7 +3,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -17,13 +16,12 @@ import type { HomeAssistant } from "../../../types";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
 import "../components/hui-generic-entity-row";
 import type { EntityConfig, LovelaceRow } from "./types";
-import { createEntityNotFoundWarning } from "../components/hui-warning";
 
 @customElement("hui-input-datetime-entity-row")
 class HuiInputDatetimeEntityRow extends LitElement implements LovelaceRow {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: EntityConfig;
+  @property() private _config?: EntityConfig;
 
   public setConfig(config: EntityConfig): void {
     if (!config) {
@@ -45,9 +43,13 @@ class HuiInputDatetimeEntityRow extends LitElement implements LovelaceRow {
 
     if (!stateObj) {
       return html`
-        <hui-warning>
-          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
-        </hui-warning>
+        <hui-warning
+          >${this.hass.localize(
+            "ui.panel.lovelace.warning.entity_not_found",
+            "entity",
+            this._config.entity
+          )}</hui-warning
+        >
       `;
     }
 

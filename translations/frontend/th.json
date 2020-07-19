@@ -448,7 +448,7 @@
         "components": {
             "entity": {
                 "entity-picker": {
-                    "entity": "เอนทิตี"
+                    "entity": "เลือกเอนทิตี"
                 }
             },
             "history_charts": {
@@ -743,7 +743,7 @@
                 },
                 "cloud": {
                     "caption": "Home Assistant Cloud",
-                    "description_features": "ควบคุมการทำงานจากนอกบ้าน ร่วมกับ Alexa และ Google Assistant",
+                    "description_features": "ควบคุมการทำงานเมื่อออกจากบ้านร่วมกับ Alexa และ Google Assistant",
                     "description_login": "ลงชื่อเข้าใช้เป็น {email}",
                     "description_not_login": "ยังไม่ได้เข้าสู่ระบบ",
                     "forgot_password": {
@@ -793,13 +793,7 @@
                     }
                 },
                 "devices": {
-                    "caption": "อุปกรณ์",
-                    "scene": {
-                        "create": "สร้างฉากด้วยอุปกรณ์",
-                        "no_scenes": "ไม่มีฉาก",
-                        "scenes": "ฉาก"
-                    },
-                    "scenes": "ฉาก"
+                    "caption": "อุปกรณ์"
                 },
                 "entities": {
                     "caption": "เอนทิตีรีจิสทรี",
@@ -811,9 +805,6 @@
                     }
                 },
                 "header": "การตั้งค่า Home Assistant",
-                "info": {
-                    "title": "ข้อมูล"
-                },
                 "integrations": {
                     "caption": "การทำงานร่วมกัน",
                     "config_entry": {
@@ -841,10 +832,7 @@
                     "new": "สร้างการทำงานร่วมกันอันใหม่",
                     "none": "ยังไม่มีการกำหนดค่าใดๆ เลย"
                 },
-                "introduction": "ที่นี่คือที่สำหรับกำหนดค่าองค์ประกอบต่างๆ รวมถึงระบบของ Home Assistant ไม่ใช่ทุกอย่างที่จะสามารถตั้งค่าได้ผ่าน UI ในขณะนี้ แต่เรากำลังพัฒนาเพิ่มเติมอยู่นะ",
-                "mqtt": {
-                    "title": "MQTT"
-                },
+                "introduction": "ดูสิ! สามารถกำหนดค่าส่วนประกอบต่างๆ ของคุณได้ด้วย รวมถึงส่วนของระบบของ Home Assistant เลยเชียวนะ! ถึงแม้ตอนนี้ส่วนการแสดงผลยังทำไม่ได้ก็ตาม แต่เรากำลังพัฒนามันอยู่ คงจะใช้ได้เร็วๆ นี้ละ",
                 "person": {
                     "caption": "บุคคล",
                     "description": "จัดการบุคคลที่ระบบจะทำการติดตาม",
@@ -853,14 +841,6 @@
                         "device_tracker_pick": "เลือกอุปกรณ์ที่จะติดตาม",
                         "device_tracker_picked": "ติดตามอุปกรณ์",
                         "name": "ชื่อ"
-                    }
-                },
-                "scene": {
-                    "editor": {
-                        "entities": {
-                            "add": "เพิ่มเอนทิตี",
-                            "delete": "ลบเอนทิตี"
-                        }
                     }
                 },
                 "script": {
@@ -950,6 +930,12 @@
                     "events": {
                         "title": "เหตุการณ์"
                     },
+                    "info": {
+                        "title": "ข้อมูล"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    },
                     "services": {
                         "title": "บริการ"
                     },
@@ -1037,7 +1023,7 @@
                     },
                     "header": "แก้ไข UI",
                     "menu": {
-                        "raw_editor": "ตัวแก้ไขไฟล์ตั้งค่าแบบหยาบ"
+                        "raw_editor": "ตัวแก้ไข config แบบดิบๆ"
                     },
                     "migrate": {
                         "header": "การกำหนดค่าไม่ถูกต้อง",

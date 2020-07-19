@@ -12,56 +12,29 @@ import "./hass-subpage";
 
 @customElement("hass-error-screen")
 class HassErrorScreen extends LitElement {
-  @property({ type: Boolean }) public toolbar = true;
-
-  @property() public error?: string;
+  @property()
+  public error?: string;
 
   protected render(): TemplateResult {
     return html`
-      ${this.toolbar
-        ? html`<div class="toolbar">
-            <ha-icon-button-arrow-prev
-              @click=${this._handleBack}
-            ></ha-icon-button-arrow-prev>
-          </div>`
-        : ""}
-      <div class="content">
-        <h3>${this.error}</h3>
-        <slot>
-          <mwc-button @click=${this._handleBack}>go back</mwc-button>
-        </slot>
-      </div>
+      <hass-subpage>
+        <div class="content">
+          <h3>${this.error}</h3>
+          <slot>
+            <mwc-button @click=${this._backTapped}>go back</mwc-button>
+          </slot>
+        </div>
+      </hass-subpage>
     `;
   }
 
-  private _handleBack(): void {
+  private _backTapped(): void {
     history.back();
   }
 
   static get styles(): CSSResultArray {
     return [
       css`
-        :host {
-          display: block;
-          height: 100%;
-          background-color: var(--primary-background-color);
-        }
-        .toolbar {
-          display: flex;
-          align-items: center;
-          font-size: 20px;
-          height: 65px;
-          padding: 0 16px;
-          pointer-events: none;
-          background-color: var(--app-header-background-color);
-          font-weight: 400;
-          color: var(--app-header-text-color, white);
-          border-bottom: var(--app-header-border-bottom, none);
-          box-sizing: border-box;
-        }
-        ha-icon-button-arrow-prev {
-          pointer-events: auto;
-        }
         .content {
           height: calc(100% - 64px);
           display: flex;

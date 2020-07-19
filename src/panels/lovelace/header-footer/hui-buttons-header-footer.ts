@@ -19,13 +19,9 @@ export class HuiButtonsHeaderFooter extends LitElement
     return { entities: [] };
   }
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   private _configEntities?: EntityConfig[];
-
-  public getCardSize(): number {
-    return 1;
-  }
 
   public setConfig(config: ButtonsHeaderFooterConfig): void {
     this._configEntities = processConfigEntities(config.entities);

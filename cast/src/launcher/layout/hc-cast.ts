@@ -1,3 +1,4 @@
+import "@polymer/iron-icon";
 import "@polymer/paper-item/paper-icon-item";
 import "@polymer/paper-listbox/paper-listbox";
 import { Auth, Connection } from "home-assistant-js-websocket";
@@ -8,7 +9,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { CastManager } from "../../../../src/cast/cast_manager";
@@ -29,7 +29,7 @@ import {
   getLovelaceCollection,
   LovelaceConfig,
 } from "../../../../src/data/lovelace";
-import "../../../../src/layouts/hass-loading-screen";
+import "../../../../src/layouts/loading-screen";
 import { generateDefaultViewConfig } from "../../../../src/panels/lovelace/common/generate-lovelace-config";
 import "./hc-layout";
 import "@material/mwc-button/mwc-button";
@@ -42,13 +42,13 @@ class HcCast extends LitElement {
 
   @property() public castManager!: CastManager;
 
-  @internalProperty() private askWrite = false;
+  @property() private askWrite = false;
 
-  @internalProperty() private lovelaceConfig?: LovelaceConfig | null;
+  @property() private lovelaceConfig?: LovelaceConfig | null;
 
   protected render(): TemplateResult {
     if (this.lovelaceConfig === undefined) {
-      return html` <hass-loading-screen no-toolbar></hass-loading-screen>> `;
+      return html` <loading-screen></loading-screen>> `;
     }
 
     const error =
@@ -83,7 +83,7 @@ class HcCast extends LitElement {
           ? html`
               <p class="center-item">
                 <mwc-button raised @click=${this._handleLaunch}>
-                  <ha-icon icon="hass:cast"></ha-icon>
+                  <iron-icon icon="hass:cast"></iron-icon>
                   Start Casting
                 </mwc-button>
               </p>
@@ -121,7 +121,7 @@ class HcCast extends LitElement {
           ${this.castManager.status
             ? html`
                 <mwc-button @click=${this._handleLaunch}>
-                  <ha-icon icon="hass:cast-connected"></ha-icon>
+                  <iron-icon icon="hass:cast-connected"></iron-icon>
                   Manage
                 </mwc-button>
               `
@@ -243,7 +243,7 @@ class HcCast extends LitElement {
         color: var(--secondary-text-color);
       }
 
-      mwc-button ha-icon {
+      mwc-button iron-icon {
         margin-right: 8px;
         height: 18px;
       }

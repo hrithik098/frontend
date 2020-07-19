@@ -1,4 +1,3 @@
-import "@material/mwc-fab";
 import {
   css,
   CSSResult,
@@ -6,7 +5,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -15,16 +13,14 @@ import memoizeOne from "memoize-one";
 import { fireEvent, HASSDomEvent } from "../../../../common/dom/fire_event";
 import { computeDomain } from "../../../../common/entity/compute_domain";
 import { computeStateName } from "../../../../common/entity/compute_state_name";
-import {
-  computeRTL,
-  computeRTLDirection,
-} from "../../../../common/util/compute_rtl";
+import { computeRTL } from "../../../../common/util/compute_rtl";
 import "../../../../components/data-table/ha-data-table";
 import type {
   DataTableColumnContainer,
   SelectionChangedEvent,
 } from "../../../../components/data-table/ha-data-table";
 import "../../../../components/entity/state-badge";
+import "../../../../components/ha-fab";
 import "../../../../components/ha-icon";
 import "../../../../components/ha-relative-time";
 import type { LovelaceConfig } from "../../../../data/lovelace";
@@ -32,20 +28,18 @@ import type { HomeAssistant } from "../../../../types";
 import { computeUnusedEntities } from "../../common/compute-unused-entities";
 import type { Lovelace } from "../../types";
 import { addEntitiesToLovelaceView } from "../add-entities-to-view";
-import "../../../../components/ha-svg-icon";
-import { mdiPlus } from "@mdi/js";
 
 @customElement("hui-unused-entities")
 export class HuiUnusedEntities extends LitElement {
-  @property({ attribute: false }) public lovelace?: Lovelace;
+  @property() public lovelace?: Lovelace;
 
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public narrow?: boolean;
 
-  @internalProperty() private _unusedEntities: string[] = [];
+  @property() private _unusedEntities: string[] = [];
 
-  @internalProperty() private _selectedEntities: string[] = [];
+  @property() private _selectedEntities: string[] = [];
 
   private get _config(): LovelaceConfig {
     return this.lovelace!.config;
@@ -175,22 +169,20 @@ export class HuiUnusedEntities extends LitElement {
         .id=${"entity_id"}
         selectable
         @selection-changed=${this._handleSelectionChanged}
-        .dir=${computeRTLDirection(this.hass)}
       ></ha-data-table>
 
       ${this._selectedEntities.length
         ? html`
-            <mwc-fab
+            <ha-fab
               class="${classMap({
                 rtl: computeRTL(this.hass),
               })}"
+              icon="hass:plus"
               .label=${this.hass.localize(
                 "ui.panel.lovelace.editor.edit_card.add"
               )}
               @click=${this._addToLovelaceView}
-            >
-              <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-            </mwc-fab>
+            ></ha-fab>
           `
         : ""}
     `;
@@ -246,13 +238,13 @@ export class HuiUnusedEntities extends LitElement {
         flex-grow: 1;
         margin-top: -20px;
       }
-      mwc-fab {
+      ha-fab {
         position: absolute;
         right: 16px;
         bottom: 16px;
         z-index: 1;
       }
-      mwc-fab.rtl {
+      ha-fab.rtl {
         left: 16px;
         right: auto;
       }

@@ -21,7 +21,7 @@ const equal = (a: ScriptEntity[], b: ScriptEntity[]): boolean => {
 
 @customElement("ha-config-script")
 class HaConfigScript extends HassRouterPage {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public narrow!: boolean;
 
@@ -53,7 +53,8 @@ class HaConfigScript extends HassRouterPage {
 
   private _getScripts = memoizeOne((states: HassEntities): ScriptEntity[] => {
     return Object.values(states).filter(
-      (entity) => computeStateDomain(entity) === "script"
+      (entity) =>
+        computeStateDomain(entity) === "script" && !entity.attributes.hidden
     ) as ScriptEntity[];
   });
 
@@ -72,7 +73,7 @@ class HaConfigScript extends HassRouterPage {
     if (this.hass) {
       if (!pageEl.scripts || !changedProps) {
         pageEl.scripts = this._getScripts(this.hass.states);
-      } else if (changedProps.has("hass")) {
+      } else if (changedProps && changedProps.has("hass")) {
         this._debouncedUpdateScripts(pageEl);
       }
     }

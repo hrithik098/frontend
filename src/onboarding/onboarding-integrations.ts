@@ -1,4 +1,5 @@
 import "@material/mwc-button/mwc-button";
+import { genClientId } from "home-assistant-js-websocket";
 import {
   css,
   CSSResult,
@@ -6,7 +7,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -21,6 +21,7 @@ import {
 } from "../data/config_flow";
 import { DataEntryFlowProgress } from "../data/data_entry_flow";
 import { domainToName } from "../data/integration";
+import { onboardIntegrationStep } from "../data/onboarding";
 import {
   loadConfigFlowDialog,
   showConfigFlowDialog,
@@ -31,13 +32,13 @@ import "./integration-badge";
 
 @customElement("onboarding-integrations")
 class OnboardingIntegrations extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public onboardingLocalize!: LocalizeFunc;
 
-  @internalProperty() private _entries?: ConfigEntry[];
+  @property() private _entries?: ConfigEntry[];
 
-  @internalProperty() private _discovered?: DataEntryFlowProgress[];
+  @property() private _discovered?: DataEntryFlowProgress[];
 
   private _unsubEvents?: () => void;
 
@@ -168,8 +169,12 @@ class OnboardingIntegrations extends LitElement {
   }
 
   private async _finish() {
+    const result = await onboardIntegrationStep(this.hass, {
+      client_id: genClientId(),
+    });
     fireEvent(this, "onboarding-step", {
       type: "integration",
+      result,
     });
   }
 

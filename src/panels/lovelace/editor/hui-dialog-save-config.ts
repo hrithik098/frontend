@@ -1,6 +1,6 @@
 import "@material/mwc-button";
 import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
-import "../../../components/ha-circular-progress";
+import "@polymer/paper-spinner/paper-spinner";
 import {
   css,
   CSSResult,
@@ -8,7 +8,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
@@ -16,25 +15,23 @@ import { fireEvent } from "../../../common/dom/fire_event";
 import "../../../components/dialog/ha-paper-dialog";
 import type { HaPaperDialog } from "../../../components/dialog/ha-paper-dialog";
 import "../../../components/ha-switch";
-import "../../../components/ha-formfield";
 import "../../../components/ha-yaml-editor";
 import type { PolymerChangedEvent } from "../../../polymer-types";
 import { haStyleDialog } from "../../../resources/styles";
 import type { HomeAssistant } from "../../../types";
 import type { SaveDialogParams } from "./show-save-config-dialog";
-import { computeRTLDirection } from "../../../common/util/compute_rtl";
 
 const EMPTY_CONFIG = { views: [] };
 
 @customElement("hui-dialog-save-config")
 export class HuiSaveConfig extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _params?: SaveDialogParams;
+  @property() private _params?: SaveDialogParams;
 
-  @internalProperty() private _emptyConfig = false;
+  @property() private _emptyConfig = false;
 
-  @internalProperty() private _saving: boolean;
+  @property() private _saving: boolean;
 
   @query("ha-paper-dialog") private _dialog?: HaPaperDialog;
 
@@ -75,17 +72,13 @@ export class HuiSaveConfig extends LitElement {
                     "ui.panel.lovelace.editor.save_config.para_sure"
                   )}
                 </p>
-                <ha-formfield
-                  .label=${this.hass!.localize(
+                <ha-switch
+                  .checked=${this._emptyConfig}
+                  @change=${this._emptyConfigChanged}
+                  >${this.hass!.localize(
                     "ui.panel.lovelace.editor.save_config.empty_config"
-                  )}
-                  .dir=${computeRTLDirection(this.hass!)}
+                  )}</ha-switch
                 >
-                  <ha-switch
-                    .checked=${this._emptyConfig}
-                    @change=${this._emptyConfigChanged}
-                  ></ha-switch
-                ></ha-formfield>
               `
             : html`
                 <p>
@@ -121,10 +114,10 @@ export class HuiSaveConfig extends LitElement {
                   ?disabled="${this._saving}"
                   @click="${this._saveConfig}"
                 >
-                  <ha-circular-progress
+                  <paper-spinner
                     ?active="${this._saving}"
                     alt="Saving"
-                  ></ha-circular-progress>
+                  ></paper-spinner>
                   ${this.hass!.localize(
                     "ui.panel.lovelace.editor.save_config.save"
                   )}
@@ -198,13 +191,13 @@ export class HuiSaveConfig extends LitElement {
         ha-paper-dialog {
           max-width: 650px;
         }
-        ha-circular-progress {
+        paper-spinner {
           display: none;
         }
-        ha-circular-progress[active] {
+        paper-spinner[active] {
           display: block;
         }
-        mwc-button ha-circular-progress {
+        mwc-button paper-spinner {
           width: 14px;
           height: 14px;
           margin-right: 20px;

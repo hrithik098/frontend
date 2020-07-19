@@ -6,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -17,14 +16,14 @@ import { setValue } from "../../../data/input_text";
 import { HomeAssistant } from "../../../types";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
 import "../components/hui-generic-entity-row";
+import "../components/hui-warning";
 import { EntityConfig, LovelaceRow } from "./types";
-import { createEntityNotFoundWarning } from "../components/hui-warning";
 
 @customElement("hui-input-number-entity-row")
 class HuiInputNumberEntityRow extends LitElement implements LovelaceRow {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: EntityConfig;
+  @property() private _config?: EntityConfig;
 
   private _loaded?: boolean;
 
@@ -64,9 +63,13 @@ class HuiInputNumberEntityRow extends LitElement implements LovelaceRow {
 
     if (!stateObj) {
       return html`
-        <hui-warning>
-          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
-        </hui-warning>
+        <hui-warning
+          >${this.hass.localize(
+            "ui.panel.lovelace.warning.entity_not_found",
+            "entity",
+            this._config.entity
+          )}</hui-warning
+        >
       `;
     }
 
@@ -77,7 +80,7 @@ class HuiInputNumberEntityRow extends LitElement implements LovelaceRow {
               <div class="flex">
                 <ha-slider
                   .disabled=${UNAVAILABLE_STATES.includes(stateObj.state)}
-                  .dir=${computeRTLDirection(this.hass)}
+                  .dir="${computeRTLDirection(this.hass!)}"
                   .step="${Number(stateObj.attributes.step)}"
                   .min="${Number(stateObj.attributes.min)}"
                   .max="${Number(stateObj.attributes.max)}"
@@ -98,7 +101,7 @@ class HuiInputNumberEntityRow extends LitElement implements LovelaceRow {
                 no-label-float
                 auto-validate
                 .disabled=${UNAVAILABLE_STATES.includes(stateObj.state)}
-                pattern="[0-9]+([\\.][0-9]+)?"
+                .pattern="[0-9]+([\\.][0-9]+)?"
                 .step="${Number(stateObj.attributes.step)}"
                 .min="${Number(stateObj.attributes.min)}"
                 .max="${Number(stateObj.attributes.max)}"

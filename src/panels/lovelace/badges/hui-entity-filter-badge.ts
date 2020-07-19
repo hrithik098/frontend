@@ -5,21 +5,15 @@ import { createBadgeElement } from "../create-element/create-badge-element";
 import { EntityFilterEntityConfig } from "../entity-rows/types";
 import { LovelaceBadge } from "../types";
 import { EntityFilterBadgeConfig } from "./types";
-import {
-  UpdatingElement,
-  property,
-  internalProperty,
-  PropertyValues,
-} from "lit-element";
 
-class EntityFilterBadge extends UpdatingElement implements LovelaceBadge {
-  @property({ attribute: false }) public hass!: HomeAssistant;
-
-  @internalProperty() private _config?: EntityFilterBadgeConfig;
-
+class EntityFilterBadge extends HTMLElement implements LovelaceBadge {
   private _elements?: LovelaceBadge[];
 
+  private _config?: EntityFilterBadgeConfig;
+
   private _configEntities?: EntityFilterEntityConfig[];
+
+  private _hass?: HomeAssistant;
 
   private _oldEntities?: EntityFilterEntityConfig[];
 
@@ -40,43 +34,39 @@ class EntityFilterBadge extends UpdatingElement implements LovelaceBadge {
       throw new Error("Incorrect filter config.");
     }
 
-    while (this.lastChild) {
-      this.removeChild(this.lastChild);
-    }
-    this._elements = undefined;
-
-    this._configEntities = processConfigEntities(config.entities);
-    this._oldEntities = undefined;
     this._config = config;
-  }
+    this._configEntities = undefined;
 
-  protected shouldUpdate(changedProperties: PropertyValues): boolean {
-    if (
-      changedProperties.has("_config") ||
-      (changedProperties.has("hass") &&
-        this.haveEntitiesChanged(
-          changedProperties.get("hass") as HomeAssistant | undefined
-        ))
-    ) {
-      return true;
+    if (this.lastChild) {
+      this.removeChild(this.lastChild);
+      this._elements = undefined;
     }
-    return false;
   }
 
-  protected update(changedProperties: PropertyValues) {
-    super.update(changedProperties);
-    if (!this.hass || !this._configEntities) {
+  set hass(hass: HomeAssistant) {
+    if (!hass || !this._config) {
       return;
     }
 
     if (this._elements) {
       for (const element of this._elements) {
-        element.hass = this.hass;
+        element.hass = hass;
       }
     }
 
+    if (!this.haveEntitiesChanged(hass)) {
+      this._hass = hass;
+      return;
+    }
+
+    this._hass = hass;
+
+    if (!this._configEntities) {
+      this._configEntities = processConfigEntities(this._config.entities);
+    }
+
     const entitiesList = this._configEntities.filter((entityConf) => {
-      const stateObj = this.hass.states[entityConf.entity];
+      const stateObj = hass.states[entityConf.entity];
 
       if (!stateObj) {
         return false;
@@ -101,7 +91,6 @@ class EntityFilterBadge extends UpdatingElement implements LovelaceBadge {
 
     if (entitiesList.length === 0) {
       this.style.display = "none";
-      this._oldEntities = entitiesList;
       return;
     }
 
@@ -114,7 +103,7 @@ class EntityFilterBadge extends UpdatingElement implements LovelaceBadge {
       this._elements = [];
       for (const badgeConfig of entitiesList) {
         const element = createBadgeElement(badgeConfig);
-        element.hass = this.hass;
+        element.hass = hass;
         this._elements.push(element);
       }
       this._oldEntities = entitiesList;
@@ -135,17 +124,17 @@ class EntityFilterBadge extends UpdatingElement implements LovelaceBadge {
     this.style.display = "inline";
   }
 
-  private haveEntitiesChanged(oldHass?: HomeAssistant): boolean {
-    if (!oldHass) {
+  private haveEntitiesChanged(hass: HomeAssistant): boolean {
+    if (!this._hass) {
       return true;
     }
 
-    if (!this._oldEntities || this.hass.localize !== oldHass.localize) {
+    if (!this._configEntities || this._hass.localize !== hass.localize) {
       return true;
     }
 
-    for (const config of this._configEntities!) {
-      if (this.hass.states[config.entity] !== oldHass.states[config.entity]) {
+    for (const config of this._configEntities) {
+      if (this._hass.states[config.entity] !== hass.states[config.entity]) {
         return true;
       }
     }

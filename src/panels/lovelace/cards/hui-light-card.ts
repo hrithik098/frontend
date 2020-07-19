@@ -1,4 +1,4 @@
-import "../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@thomasloven/round-slider";
 import {
   css,
@@ -7,7 +7,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -29,7 +28,7 @@ import { findEntities } from "../common/find-entites";
 import { handleAction } from "../common/handle-action";
 import { hasAction } from "../common/has-action";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
-import { createEntityNotFoundWarning } from "../components/hui-warning";
+import "../components/hui-warning";
 import { LovelaceCard, LovelaceCardEditor } from "../types";
 import { LightCardConfig } from "./types";
 
@@ -60,14 +59,14 @@ export class HuiLightCard extends LitElement implements LovelaceCard {
     return { type: "light", entity: foundEntities[0] || "" };
   }
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: LightCardConfig;
+  @property() private _config?: LightCardConfig;
 
   private _brightnessTimout?: number;
 
   public getCardSize(): number {
-    return 4;
+    return 2;
   }
 
   public setConfig(config: LightCardConfig): void {
@@ -90,9 +89,13 @@ export class HuiLightCard extends LitElement implements LovelaceCard {
 
     if (!stateObj) {
       return html`
-        <hui-warning>
-          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
-        </hui-warning>
+        <hui-warning
+          >${this.hass.localize(
+            "ui.panel.lovelace.warning.entity_not_found",
+            "entity",
+            this._config.entity
+          )}</hui-warning
+        >
       `;
     }
 
@@ -101,12 +104,12 @@ export class HuiLightCard extends LitElement implements LovelaceCard {
 
     return html`
       <ha-card>
-        <ha-icon-button
+        <paper-icon-button
           icon="hass:dots-vertical"
           class="more-info"
           @click=${this._handleMoreInfo}
           tabindex="0"
-        ></ha-icon-button>
+        ></paper-icon-button>
 
         <div class="content">
           <div id="controls">
@@ -123,7 +126,7 @@ export class HuiLightCard extends LitElement implements LovelaceCard {
                     : "hidden",
                 })}
               ></round-slider>
-              <ha-icon-button
+              <paper-icon-button
                 class="light-button ${classMap({
                   "slider-center": supportsFeature(
                     stateObj,
@@ -132,8 +135,8 @@ export class HuiLightCard extends LitElement implements LovelaceCard {
                   "state-on": stateObj.state === "on",
                   "state-unavailable": stateObj.state === "unavailable",
                 })}"
-                .icon=${this._config.icon || stateIcon(stateObj)}
                 .disabled=${UNAVAILABLE_STATES.includes(stateObj.state)}
+                .icon=${this._config.icon || stateIcon(stateObj)}
                 style=${styleMap({
                   filter: this._computeBrightness(stateObj),
                   color: this._computeColor(stateObj),
@@ -144,7 +147,7 @@ export class HuiLightCard extends LitElement implements LovelaceCard {
                   hasDoubleClick: hasAction(this._config!.double_tap_action),
                 })}
                 tabindex="0"
-              ></ha-icon-button>
+              ></paper-icon-button>
             </div>
           </div>
 
@@ -326,8 +329,6 @@ export class HuiLightCard extends LitElement implements LovelaceCard {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        --mdc-icon-button-size: 100%;
-        --mdc-icon-size: 100%;
       }
 
       .light-button.state-on {

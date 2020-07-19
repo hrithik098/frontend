@@ -4,7 +4,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -13,16 +12,16 @@ import { timerTimeRemaining } from "../../../common/entity/timer_time_remaining"
 import { HomeAssistant } from "../../../types";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
 import "../components/hui-generic-entity-row";
-import { createEntityNotFoundWarning } from "../components/hui-warning";
+import "../components/hui-warning";
 import { EntityConfig } from "./types";
 
 @customElement("hui-timer-entity-row")
 class HuiTimerEntityRow extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: EntityConfig;
+  @property() private _config?: EntityConfig;
 
-  @internalProperty() private _timeRemaining?: number;
+  @property() private _timeRemaining?: number;
 
   private _interval?: number;
 
@@ -57,9 +56,13 @@ class HuiTimerEntityRow extends LitElement {
 
     if (!stateObj) {
       return html`
-        <hui-warning>
-          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
-        </hui-warning>
+        <hui-warning
+          >${this.hass.localize(
+            "ui.panel.lovelace.warning.entity_not_found",
+            "entity",
+            this._config.entity
+          )}</hui-warning
+        >
       `;
     }
 

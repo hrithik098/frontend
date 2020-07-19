@@ -1,6 +1,5 @@
 import "@material/mwc-button";
-import "@material/mwc-icon-button";
-import { mdiPackageVariant, mdiPackageVariantClosed, mdiReload } from "@mdi/js";
+import "@polymer/paper-card/paper-card";
 import "@polymer/paper-checkbox/paper-checkbox";
 import type { PaperCheckboxElement } from "@polymer/paper-checkbox/paper-checkbox";
 import "@polymer/paper-input/paper-input";
@@ -15,13 +14,10 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../src/common/dom/fire_event";
-import "../../../src/components/ha-card";
-import "../../../src/components/ha-svg-icon";
 import {
   createHassioFullSnapshot,
   createHassioPartialSnapshot,
@@ -32,14 +28,15 @@ import {
   reloadHassioSnapshots,
 } from "../../../src/data/hassio/snapshot";
 import { HassioSupervisorInfo } from "../../../src/data/hassio/supervisor";
-import "../../../src/layouts/hass-tabs-subpage";
 import { PolymerChangedEvent } from "../../../src/polymer-types";
 import { haStyle } from "../../../src/resources/styles";
 import { HomeAssistant, Route } from "../../../src/types";
+import "../../../src/layouts/hass-tabs-subpage";
 import "../components/hassio-card-content";
 import { showHassioSnapshotDialog } from "../dialogs/snapshot/show-dialog-hassio-snapshot";
-import { supervisorTabs } from "../hassio-tabs";
 import { hassioStyle } from "../resources/hassio-style";
+
+import { supervisorTabs } from "../hassio-panel";
 
 interface CheckboxItem {
   slug: string;
@@ -57,19 +54,19 @@ class HassioSnapshots extends LitElement {
 
   @property({ attribute: false }) public supervisorInfo!: HassioSupervisorInfo;
 
-  @internalProperty() private _snapshotName = "";
+  @property() private _snapshotName = "";
 
-  @internalProperty() private _snapshotPassword = "";
+  @property() private _snapshotPassword = "";
 
-  @internalProperty() private _snapshotHasPassword = false;
+  @property() private _snapshotHasPassword = false;
 
-  @internalProperty() private _snapshotType: HassioSnapshot["type"] = "full";
+  @property() private _snapshotType: HassioSnapshot["type"] = "full";
 
-  @internalProperty() private _snapshots?: HassioSnapshot[] = [];
+  @property() private _snapshots?: HassioSnapshot[] = [];
 
-  @internalProperty() private _addonList: CheckboxItem[] = [];
+  @property() private _addonList: CheckboxItem[] = [];
 
-  @internalProperty() private _folderList: CheckboxItem[] = [
+  @property() private _folderList: CheckboxItem[] = [
     {
       slug: "homeassistant",
       name: "Home Assistant configuration",
@@ -80,9 +77,9 @@ class HassioSnapshots extends LitElement {
     { slug: "addons/local", name: "Local add-ons", checked: true },
   ];
 
-  @internalProperty() private _creatingSnapshot = false;
+  @property() private _creatingSnapshot = false;
 
-  @internalProperty() private _error = "";
+  @property() private _error = "";
 
   public async refreshData() {
     await reloadHassioSnapshots(this.hass);
@@ -101,13 +98,12 @@ class HassioSnapshots extends LitElement {
       >
         <span slot="header">Snapshots</span>
 
-        <mwc-icon-button
+        <paper-icon-button
+          icon="hassio:reload"
           slot="toolbar-icon"
           aria-label="Reload snapshots"
           @click=${this.refreshData}
-        >
-          <ha-svg-icon path=${mdiReload}></ha-svg-icon>
-        </mwc-icon-button>
+        ></paper-icon-button>
 
         <div class="content">
           <h1>
@@ -118,7 +114,7 @@ class HassioSnapshots extends LitElement {
             Home Assistant instance.
           </p>
           <div class="card-group">
-            <ha-card>
+            <paper-card>
               <div class="card-content">
                 <paper-input
                   autofocus
@@ -199,7 +195,7 @@ class HassioSnapshots extends LitElement {
                   Create
                 </mwc-button>
               </div>
-            </ha-card>
+            </paper-card>
           </div>
 
           <h1>Available snapshots</h1>
@@ -208,15 +204,15 @@ class HassioSnapshots extends LitElement {
               ? undefined
               : this._snapshots.length === 0
               ? html`
-                  <ha-card>
+                  <paper-card>
                     <div class="card-content">
                       You don't have any snapshots yet.
                     </div>
-                  </ha-card>
+                  </paper-card>
                 `
               : this._snapshots.map(
                   (snapshot) => html`
-                    <ha-card
+                    <paper-card
                       class="pointer"
                       .snapshot=${snapshot}
                       @click=${this._snapshotClicked}
@@ -228,12 +224,12 @@ class HassioSnapshots extends LitElement {
                           .description=${this._computeDetails(snapshot)}
                           .datetime=${snapshot.date}
                           .icon=${snapshot.type === "full"
-                            ? mdiPackageVariantClosed
-                            : mdiPackageVariant}
+                            ? "hassio:package-variant-closed"
+                            : "hassio:package-variant"}
                           .icon-class="snapshot"
                         ></hassio-card-content>
                       </div>
-                    </ha-card>
+                    </paper-card>
                   `
                 )}
           </div>

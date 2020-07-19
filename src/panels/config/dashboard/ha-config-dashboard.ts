@@ -20,14 +20,12 @@ import { HomeAssistant } from "../../../types";
 import "../ha-config-section";
 import { configSections } from "../ha-panel-config";
 import "./ha-config-navigation";
-import { mdiCloudLock } from "@mdi/js";
 
 @customElement("ha-config-dashboard")
 class HaConfigDashboard extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @property({ type: Boolean, reflect: true })
-  public narrow!: boolean;
+  @property() public narrow!: boolean;
 
   @property() public isWide!: boolean;
 
@@ -36,98 +34,8 @@ class HaConfigDashboard extends LitElement {
   @property() public showAdvanced!: boolean;
 
   protected render(): TemplateResult {
-    const content = html` <ha-config-section
-      .narrow=${this.narrow}
-      .isWide=${this.isWide}
-    >
-      <div slot="header">
-        ${this.hass.localize("ui.panel.config.header")}
-      </div>
-
-      <div slot="introduction">
-        ${this.hass.localize("ui.panel.config.introduction")}
-      </div>
-
-      ${this.cloudStatus && isComponentLoaded(this.hass, "cloud")
-        ? html`
-            <ha-card>
-              <ha-config-navigation
-                .hass=${this.hass}
-                .showAdvanced=${this.showAdvanced}
-                .pages=${[
-                  {
-                    component: "cloud",
-                    path: "/config/cloud",
-                    translationKey: "ui.panel.config.cloud.caption",
-                    info: this.cloudStatus,
-                    iconPath: mdiCloudLock,
-                  },
-                ]}
-              ></ha-config-navigation>
-            </ha-card>
-          `
-        : ""}
-      ${Object.values(configSections).map(
-        (section) => html`
-          <ha-card>
-            <ha-config-navigation
-              .hass=${this.hass}
-              .showAdvanced=${this.showAdvanced}
-              .pages=${section}
-            ></ha-config-navigation>
-          </ha-card>
-        `
-      )}
-      ${isComponentLoaded(this.hass, "zha")
-        ? html`
-            <div class="promo-advanced">
-              ${this.hass.localize(
-                "ui.panel.config.integration_panel_move.missing_zha",
-                "integrations_page",
-                html`<a href="/config/integrations">
-                  ${this.hass.localize(
-                    "ui.panel.config.integration_panel_move.link_integration_page"
-                  )}
-                </a>`
-              )}
-            </div>
-          `
-        : ""}
-      ${isComponentLoaded(this.hass, "zwave")
-        ? html`
-            <div class="promo-advanced">
-              ${this.hass.localize(
-                "ui.panel.config.integration_panel_move.missing_zwave",
-                "integrations_page",
-                html`<a href="/config/integrations">
-                  ${this.hass.localize(
-                    "ui.panel.config.integration_panel_move.link_integration_page"
-                  )}
-                </a>`
-              )}
-            </div>
-          `
-        : ""}
-      ${!this.showAdvanced
-        ? html`
-            <div class="promo-advanced">
-              ${this.hass.localize("ui.panel.config.advanced_mode.hint_enable")}
-              <a href="/profile"
-                >${this.hass.localize(
-                  "ui.panel.config.advanced_mode.link_profile_page"
-                )}</a
-              >.
-            </div>
-          `
-        : ""}
-    </ha-config-section>`;
-
-    if (!this.narrow && this.hass.dockedSidebar !== "always_hidden") {
-      return content;
-    }
-
     return html`
-      <app-header-layout>
+      <app-header-layout has-scrolling-region>
         <app-header fixed slot="header">
           <app-toolbar>
             <ha-menu-button
@@ -137,7 +45,60 @@ class HaConfigDashboard extends LitElement {
           </app-toolbar>
         </app-header>
 
-        ${content}
+        <ha-config-section .narrow=${this.narrow} .isWide=${this.isWide}>
+          <div slot="header">
+            ${this.hass.localize("ui.panel.config.header")}
+          </div>
+
+          <div slot="introduction">
+            ${this.hass.localize("ui.panel.config.introduction")}
+          </div>
+
+          ${this.cloudStatus && isComponentLoaded(this.hass, "cloud")
+            ? html`
+                <ha-card>
+                  <ha-config-navigation
+                    .hass=${this.hass}
+                    .showAdvanced=${this.showAdvanced}
+                    .pages=${[
+                      {
+                        component: "cloud",
+                        path: "/config/cloud",
+                        translationKey: "ui.panel.config.cloud.caption",
+                        info: this.cloudStatus,
+                        icon: "hass:cloud-lock",
+                      },
+                    ]}
+                  ></ha-config-navigation>
+                </ha-card>
+              `
+            : ""}
+          ${Object.values(configSections).map(
+            (section) => html`
+              <ha-card>
+                <ha-config-navigation
+                  .hass=${this.hass}
+                  .showAdvanced=${this.showAdvanced}
+                  .pages=${section}
+                ></ha-config-navigation>
+              </ha-card>
+            `
+          )}
+          ${!this.showAdvanced
+            ? html`
+                <div class="promo-advanced">
+                  ${this.hass.localize(
+                    "ui.panel.config.advanced_mode.hint_enable"
+                  )}
+                  <a href="/profile"
+                    >${this.hass.localize(
+                      "ui.panel.config.advanced_mode.link_profile_page"
+                    )}</a
+                  >.
+                </div>
+              `
+            : ""}
+        </ha-config-section>
       </app-header-layout>
     `;
   }
@@ -153,9 +114,6 @@ class HaConfigDashboard extends LitElement {
           margin-bottom: 24px;
         }
         ha-config-section {
-          margin-top: -12px;
-        }
-        :host([narrow]) ha-config-section {
           margin-top: -20px;
         }
         ha-card {

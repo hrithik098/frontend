@@ -1,6 +1,7 @@
 import "@polymer/paper-item/paper-icon-item";
 import "@polymer/paper-item/paper-item-body";
-import Fuse from "fuse.js";
+import "@polymer/paper-spinner/paper-spinner-lite";
+import * as Fuse from "fuse.js";
 import {
   css,
   CSSResult,
@@ -8,7 +9,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
@@ -32,17 +32,15 @@ interface HandlerObj {
 class StepFlowPickHandler extends LitElement {
   public flowConfig!: FlowConfig;
 
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public handlers!: string[];
 
   @property() public showAdvanced?: boolean;
 
-  @internalProperty() private filter?: string;
+  @property() private filter?: string;
 
   private _width?: number;
-
-  private _height?: number;
 
   private _getHandlers = memoizeOne(
     (h: string[], filter?: string, _localize?: LocalizeFunc) => {
@@ -54,14 +52,14 @@ class StepFlowPickHandler extends LitElement {
       });
 
       if (filter) {
-        const options: Fuse.IFuseOptions<HandlerObj> = {
+        const options: Fuse.FuseOptions<HandlerObj> = {
           keys: ["name", "slug"],
-          isCaseSensitive: false,
+          caseSensitive: false,
           minMatchCharLength: 2,
           threshold: 0.2,
         };
         const fuse = new Fuse(handlers, options);
-        return fuse.search(filter).map((result) => result.item);
+        return fuse.search(filter);
       }
       return handlers.sort((a, b) =>
         a.name.toUpperCase() < b.name.toUpperCase() ? -1 : 1
@@ -82,13 +80,9 @@ class StepFlowPickHandler extends LitElement {
         autofocus
         .filter=${this.filter}
         @value-changed=${this._filterChanged}
-        .label=${this.hass.localize("ui.panel.config.integrations.search")}
       ></search-input>
       <div
-        style=${styleMap({
-          width: `${this._width}px`,
-          height: `${this._height}px`,
-        })}
+        style=${styleMap({ width: `${this._width}px` })}
         class=${classMap({ advanced: Boolean(this.showAdvanced) })}
       >
         ${handlers.map(
@@ -145,18 +139,11 @@ class StepFlowPickHandler extends LitElement {
 
   protected updated(changedProps) {
     super.updated(changedProps);
-    // Store the width and height so that when we search, box doesn't jump
-    const div = this.shadowRoot!.querySelector("div")!;
+    // Store the width so that when we search, box doesn't jump
     if (!this._width) {
-      const width = div.clientWidth;
+      const width = this.shadowRoot!.querySelector("div")!.clientWidth;
       if (width) {
         this._width = width;
-      }
-    }
-    if (!this._height) {
-      const height = div.clientHeight;
-      if (height) {
-        this._height = height;
       }
     }
   }
@@ -179,8 +166,8 @@ class StepFlowPickHandler extends LitElement {
       configFlowContentStyles,
       css`
         img {
-          width: 40px;
-          height: 40px;
+          max-width: 40px;
+          max-height: 40px;
         }
         search-input {
           display: block;
@@ -193,12 +180,12 @@ class StepFlowPickHandler extends LitElement {
           overflow: auto;
           max-height: 600px;
         }
-        @media all and (max-height: 900px) {
+        @media all and (max-height: 1px) {
           div {
-            max-height: calc(100vh - 134px);
+            max-height: calc(100vh - 205px);
           }
           div.advanced {
-            max-height: calc(100vh - 250px);
+            max-height: calc(100vh - 300px);
           }
         }
         paper-icon-item {

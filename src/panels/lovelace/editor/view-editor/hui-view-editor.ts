@@ -6,20 +6,16 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import { slugify } from "../../../../common/string/slugify";
 import "../../../../components/ha-switch";
-import "../../../../components/ha-formfield";
-import "../../../../components/ha-icon-input";
 import { LovelaceViewConfig } from "../../../../data/lovelace";
 import { HomeAssistant } from "../../../../types";
 import "../../components/hui-theme-select-editor";
 import { configElementStyle } from "../config-elements/config-elements-style";
 import { EditorTarget } from "../types";
-import { computeRTLDirection } from "../../../../common/util/compute_rtl";
 
 declare global {
   interface HASSDomEvents {
@@ -31,11 +27,11 @@ declare global {
 
 @customElement("hui-view-editor")
 export class HuiViewEditor extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public isNew!: boolean;
 
-  @internalProperty() private _config!: LovelaceViewConfig;
+  @property() private _config!: LovelaceViewConfig;
 
   private _suggestedPath = false;
 
@@ -97,17 +93,16 @@ export class HuiViewEditor extends LitElement {
           @value-changed=${this._valueChanged}
           @blur=${this._handleTitleBlur}
         ></paper-input>
-        <ha-icon-input
+        <paper-input
           .label="${this.hass.localize(
             "ui.panel.lovelace.editor.card.generic.icon"
-          )} (${this.hass.localize(
+          )}  (${this.hass.localize(
             "ui.panel.lovelace.editor.card.config.optional"
           )})"
           .value=${this._icon}
-          .placeholder=${this._icon}
           .configValue=${"icon"}
           @value-changed=${this._valueChanged}
-        ></ha-icon-input>
+        ></paper-input>
         <paper-input
           .label="${this.hass.localize(
             "ui.panel.lovelace.editor.card.generic.url"
@@ -124,23 +119,19 @@ export class HuiViewEditor extends LitElement {
           .configValue=${"theme"}
           @value-changed=${this._valueChanged}
         ></hui-theme-select-editor>
-        <ha-formfield
-          .label=${this.hass.localize(
+        <ha-switch
+          .checked=${this._panel !== false}
+          .configValue=${"panel"}
+          @change=${this._valueChanged}
+          >${this.hass.localize(
             "ui.panel.lovelace.editor.view.panel_mode.title"
-          )}
-          .dir=${computeRTLDirection(this.hass)}
+          )}</ha-switch
         >
-          <ha-switch
-            .checked=${this._panel !== false}
-            .configValue=${"panel"}
-            @change=${this._valueChanged}
-          ></ha-switch
-        ></ha-formfield>
-        <span class="panel">
-          ${this.hass.localize(
+        <span class="panel"
+          >${this.hass.localize(
             "ui.panel.lovelace.editor.view.panel_mode.description"
-          )}
-        </span>
+          )}</span
+        >
       </div>
     `;
   }
@@ -183,7 +174,6 @@ export class HuiViewEditor extends LitElement {
     return css`
       .panel {
         color: var(--secondary-text-color);
-        display: block;
       }
     `;
   }

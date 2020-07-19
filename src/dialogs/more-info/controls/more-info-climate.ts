@@ -32,7 +32,7 @@ import {
 import { HomeAssistant } from "../../../types";
 
 class MoreInfoClimate extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public stateObj?: ClimateEntity;
 
@@ -441,6 +441,12 @@ class MoreInfoClimate extends LitElement {
     return css`
       :host {
         color: var(--primary-text-color);
+      }
+
+      .container-hvac_modes iron-icon,
+      .container-fan_list iron-icon,
+      .container-swing_list iron-icon {
+        margin: 22px 16px 0 0;
       }
 
       ha-paper-dropdown-menu {

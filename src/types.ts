@@ -47,16 +47,6 @@ declare global {
 
 export type Constructor<T = {}> = new (...args: any[]) => T;
 
-export interface ClassElement {
-  kind: "field" | "method";
-  key: PropertyKey;
-  placement: "static" | "prototype" | "own";
-  initializer?: Function;
-  extras?: ClassElement[];
-  finisher?: <T>(cls: Constructor<T>) => undefined | Constructor<T>;
-  descriptor?: PropertyDescriptor;
-}
-
 export interface WebhookError {
   code: number;
   message: string;
@@ -106,40 +96,6 @@ export interface Panels {
   [name: string]: PanelInfo;
 }
 
-export interface Calendar {
-  entity_id: string;
-  name: string;
-  backgroundColor: string;
-}
-
-export interface SelectedCalendar {
-  selected: boolean;
-  calendar: Calendar;
-}
-
-export interface CalendarEvent {
-  summary: string;
-  title: string;
-  start: string;
-  end?: string;
-  backgroundColor?: string;
-  borderColor?: string;
-  calendar: string;
-  [key: string]: any;
-}
-
-export interface CalendarViewChanged {
-  end: Date;
-  start: Date;
-  view: string;
-}
-
-export interface ToggleButton {
-  label?: string;
-  icon: string;
-  value: string;
-}
-
 export interface Translation {
   nativeName: string;
   isRTL: boolean;
@@ -151,16 +107,6 @@ export interface TranslationMetadata {
   translations: {
     [lang: string]: Translation;
   };
-}
-
-export interface IconMetaFile {
-  version: string;
-  parts: IconMeta[];
-}
-
-export interface IconMeta {
-  start: string;
-  file: string;
 }
 
 export interface Notification {
@@ -209,7 +155,7 @@ export interface HomeAssistant {
   resources: Resources;
   localize: LocalizeFunc;
   translationMetadata: TranslationMetadata;
-  suspendWhenHidden: boolean;
+
   vibrate: boolean;
   dockedSidebar: "docked" | "always_hidden" | "auto";
   defaultPanel: string;
@@ -234,7 +180,7 @@ export interface HomeAssistant {
     category: Parameters<typeof getHassTranslations>[2],
     integration?: Parameters<typeof getHassTranslations>[3],
     configFlow?: Parameters<typeof getHassTranslations>[4]
-  ): Promise<LocalizeFunc>;
+  ): Promise<void>;
 }
 
 export type LightEntity = HassEntityBase & {
@@ -312,7 +258,6 @@ interface ForecastAttribute {
   datetime: string;
   templow?: number;
   precipitation?: number;
-  precipitation_probability?: number;
   humidity?: number;
   condition?: string;
 }

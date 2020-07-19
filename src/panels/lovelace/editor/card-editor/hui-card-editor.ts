@@ -7,9 +7,7 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
-  query,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import { computeRTL } from "../../../../common/util/compute_rtl";
@@ -24,8 +22,6 @@ import { getCardElementClass } from "../../create-element/create-card-element";
 import type { EntityConfig } from "../../entity-rows/types";
 import type { LovelaceCardEditor } from "../../types";
 import type { GUIModeChangedEvent } from "../types";
-import "../../../../components/ha-circular-progress";
-import { deepEqual } from "../../../../common/util/deep-equal";
 
 export interface ConfigChangedEvent {
   config: LovelaceCardConfig;
@@ -51,29 +47,27 @@ export interface UIConfigChangedEvent extends Event {
 
 @customElement("hui-card-editor")
 export class HuiCardEditor extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @property({ attribute: false }) public lovelace?: LovelaceConfig;
+  @property() public lovelace?: LovelaceConfig;
 
-  @internalProperty() private _yaml?: string;
+  @property() private _yaml?: string;
 
-  @internalProperty() private _config?: LovelaceCardConfig;
+  @property() private _config?: LovelaceCardConfig;
 
-  @internalProperty() private _configElement?: LovelaceCardEditor;
+  @property() private _configElement?: LovelaceCardEditor;
 
-  @internalProperty() private _configElType?: string;
+  @property() private _configElType?: string;
 
-  @internalProperty() private _GUImode = true;
+  @property() private _GUImode = true;
 
   // Error: Configuration broken - do not save
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
   // Warning: GUI editor can't handle configuration - ok to save
-  @internalProperty() private _warning?: string;
+  @property() private _warning?: string;
 
-  @internalProperty() private _loading = false;
-
-  @query("ha-code-editor") _yamlEditor?: HaCodeEditor;
+  @property() private _loading = false;
 
   public get yaml(): string {
     return this._yaml || "";
@@ -83,11 +77,16 @@ export class HuiCardEditor extends LitElement {
     this._yaml = _yaml;
     try {
       this._config = safeLoad(this.yaml);
+      this._updateConfigElement();
       this._error = undefined;
     } catch (err) {
       this._error = err.message;
     }
-    this._setConfig();
+    fireEvent(this, "config-changed", {
+      config: this.value!,
+      error: this._error,
+      guiModeAvailable: !(this.hasWarning || this.hasError),
+    });
   }
 
   public get value(): LovelaceCardConfig | undefined {
@@ -95,29 +94,9 @@ export class HuiCardEditor extends LitElement {
   }
 
   public set value(config: LovelaceCardConfig | undefined) {
-    if (this._config && deepEqual(config, this._config)) {
-      return;
+    if (JSON.stringify(config) !== JSON.stringify(this._config || {})) {
+      this.yaml = safeDump(config);
     }
-    this._config = config;
-    this._yaml = safeDump(config);
-    this._error = undefined;
-    this._setConfig();
-  }
-
-  private _setConfig() {
-    if (!this._error) {
-      try {
-        this._updateConfigElement();
-        this._error = undefined;
-      } catch (err) {
-        this._error = err.message;
-      }
-    }
-    fireEvent(this, "config-changed", {
-      config: this.value!,
-      error: this._error,
-      guiModeAvailable: !(this.hasWarning || this.hasError),
-    });
   }
 
   public get hasWarning(): boolean {
@@ -140,21 +119,17 @@ export class HuiCardEditor extends LitElement {
     });
   }
 
+  private get _yamlEditor(): HaCodeEditor {
+    return this.shadowRoot!.querySelector("ha-code-editor")! as HaCodeEditor;
+  }
+
   public toggleMode() {
     this.GUImode = !this.GUImode;
   }
 
-  public refreshYamlEditor(focus = false) {
-    if (this._configElement?.refreshYamlEditor) {
-      this._configElement.refreshYamlEditor(focus);
-    }
-    if (!this._yamlEditor?.codemirror) {
-      return;
-    }
-    this._yamlEditor.codemirror.refresh();
-    if (focus) {
-      this._yamlEditor.codemirror.focus();
-    }
+  public connectedCallback() {
+    super.connectedCallback();
+    this._refreshYamlEditor();
   }
 
   protected render(): TemplateResult {
@@ -165,11 +140,11 @@ export class HuiCardEditor extends LitElement {
               <div class="gui-editor">
                 ${this._loading
                   ? html`
-                      <ha-circular-progress
+                      <paper-spinner
                         active
                         alt="Loading"
                         class="center margin-bot"
-                      ></ha-circular-progress>
+                      ></paper-spinner>
                     `
                   : this._configElement}
               </div>
@@ -180,10 +155,9 @@ export class HuiCardEditor extends LitElement {
                   mode="yaml"
                   autofocus
                   .value=${this.yaml}
-                  .error=${Boolean(this._error)}
+                  .error=${this._error}
                   .rtl=${computeRTL(this.hass)}
                   @value-changed=${this._handleYAMLChanged}
-                  @keydown=${this._ignoreKeydown}
                 ></ha-code-editor>
               </div>
             `}
@@ -207,12 +181,34 @@ export class HuiCardEditor extends LitElement {
 
   protected updated(changedProperties) {
     super.updated(changedProperties);
+
+    if (changedProperties.has("_GUImode")) {
+      if (this.GUImode === false) {
+        // Refresh code editor when switching to yaml mode
+        this._refreshYamlEditor(true);
+      }
+      fireEvent(this as HTMLElement, "iron-resize");
+    }
+
     if (this._configElement && changedProperties.has("hass")) {
       this._configElement.hass = this.hass;
     }
     if (this._configElement && changedProperties.has("lovelace")) {
       this._configElement.lovelace = this.lovelace;
     }
+  }
+
+  private _refreshYamlEditor(focus = false) {
+    // wait on render
+    setTimeout(() => {
+      if (this._yamlEditor && this._yamlEditor.codemirror) {
+        this._yamlEditor.codemirror.refresh();
+        if (focus) {
+          this._yamlEditor.codemirror.focus();
+        }
+      }
+      fireEvent(this as HTMLElement, "iron-resize");
+    }, 1);
   }
 
   private _handleUIConfigChanged(ev: UIConfigChangedEvent) {
@@ -283,11 +279,8 @@ export class HuiCardEditor extends LitElement {
       this.GUImode = false;
     } finally {
       this._loading = false;
+      fireEvent(this, "iron-resize");
     }
-  }
-
-  private _ignoreKeydown(ev: KeyboardEvent) {
-    ev.stopPropagation();
   }
 
   static get styles(): CSSResult {
@@ -302,17 +295,13 @@ export class HuiCardEditor extends LitElement {
       .yaml-editor {
         padding: 8px 0px;
       }
-      .error,
-      .warning {
-        word-break: break-word;
-      }
       .error {
-        color: var(--error-color);
+        color: #ef5350;
       }
       .warning {
-        color: var(--warning-color);
+        color: #ffa726;
       }
-      ha-circular-progress {
+      paper-spinner {
         display: block;
         margin: auto;
       }

@@ -14,12 +14,13 @@ import { HomeAssistant } from "../../../types";
 import { actionHandler } from "../common/directives/action-handler-directive";
 import { handleAction } from "../common/handle-action";
 import { hasAction } from "../common/has-action";
+import "../components/hui-warning-element";
 import { LovelaceBadge } from "../types";
 import { StateLabelBadgeConfig } from "./types";
 
 @customElement("hui-state-label-badge")
 export class HuiStateLabelBadge extends LitElement implements LovelaceBadge {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() protected _config?: StateLabelBadgeConfig;
 

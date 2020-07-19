@@ -1,5 +1,6 @@
 import "@material/mwc-button";
 import "@polymer/iron-autogrow-textarea/iron-autogrow-textarea";
+import "@polymer/paper-card/paper-card";
 import {
   css,
   CSSResult,
@@ -7,13 +8,11 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   query,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../src/common/dom/fire_event";
-import "../../../../src/components/ha-card";
 import "../../../../src/components/ha-yaml-editor";
 import type { HaYamlEditor } from "../../../../src/components/ha-yaml-editor";
 import {
@@ -24,8 +23,9 @@ import {
 import { showConfirmationDialog } from "../../../../src/dialogs/generic/show-dialog-box";
 import { haStyle } from "../../../../src/resources/styles";
 import type { HomeAssistant } from "../../../../src/types";
-import { suggestAddonRestart } from "../../dialogs/suggestAddonRestart";
 import { hassioStyle } from "../../resources/hassio-style";
+
+import { suggestAddonRestart } from "../../dialogs/suggestAddonRestart";
 
 @customElement("hassio-addon-config")
 class HassioAddonConfig extends LitElement {
@@ -33,7 +33,7 @@ class HassioAddonConfig extends LitElement {
 
   @property({ attribute: false }) public addon!: HassioAddonDetails;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
   @property({ type: Boolean }) private _configHasChanged = false;
 
@@ -46,7 +46,7 @@ class HassioAddonConfig extends LitElement {
 
     return html`
       <h1>${this.addon.name}</h1>
-      <ha-card header="Configuration">
+      <paper-card heading="Configuration">
         <div class="card-content">
           <ha-yaml-editor
             @value-changed=${this._configChanged}
@@ -65,7 +65,7 @@ class HassioAddonConfig extends LitElement {
             Save
           </mwc-button>
         </div>
-      </ha-card>
+      </paper-card>
     `;
   }
 
@@ -77,7 +77,7 @@ class HassioAddonConfig extends LitElement {
         :host {
           display: block;
         }
-        ha-card {
+        paper-card {
           display: block;
         }
         .card-actions {
@@ -85,7 +85,7 @@ class HassioAddonConfig extends LitElement {
           justify-content: space-between;
         }
         .errors {
-          color: var(--error-color);
+          color: var(--google-red-500);
           margin-top: 16px;
         }
         iron-autogrow-textarea {
@@ -93,7 +93,7 @@ class HassioAddonConfig extends LitElement {
           font-family: monospace;
         }
         .syntaxerror {
-          color: var(--error-color);
+          color: var(--google-red-500);
         }
       `,
     ];

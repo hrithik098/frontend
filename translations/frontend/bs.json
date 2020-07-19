@@ -240,22 +240,8 @@
         },
         "panel": {
             "config": {
-                "automation": {
-                    "editor": {
-                        "triggers": {
-                            "type": {
-                                "mqtt": {
-                                    "label": "MQTT"
-                                }
-                            }
-                        }
-                    }
-                },
                 "cloud": {
                     "caption": "Home Assistant Cloud"
-                },
-                "mqtt": {
-                    "title": "MQTT"
                 },
                 "zwave": {
                     "caption": "Z-Wave",
@@ -268,6 +254,9 @@
                 "tabs": {
                     "events": {
                         "title": "Događanja"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
                     },
                     "services": {
                         "title": "Usluge"

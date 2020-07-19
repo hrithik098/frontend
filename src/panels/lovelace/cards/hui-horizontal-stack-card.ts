@@ -3,20 +3,17 @@ import { computeCardSize } from "../common/compute-card-size";
 import { HuiStackCard } from "./hui-stack-card";
 
 class HuiHorizontalStackCard extends HuiStackCard {
-  public async getCardSize(): Promise<number> {
-    if (!this._cards) {
-      return 0;
+  public getCardSize(): number {
+    let totalSize = 0;
+
+    if (this._cards) {
+      for (const element of this._cards) {
+        const elementSize = computeCardSize(element);
+        totalSize = elementSize > totalSize ? elementSize : totalSize;
+      }
     }
 
-    const promises: Array<Promise<number> | number> = [];
-
-    for (const element of this._cards) {
-      promises.push(computeCardSize(element));
-    }
-
-    const results = await Promise.all(promises);
-
-    return Math.max(...results);
+    return totalSize;
   }
 
   static get styles(): CSSResult[] {

@@ -1,3 +1,4 @@
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-input/paper-input";
 import {
   css,
@@ -8,10 +9,8 @@ import {
 } from "lit-element";
 import { html, TemplateResult } from "lit-html";
 import { classMap } from "lit-html/directives/class-map";
-import "../../components/ha-svg-icon";
+import "../../components/ha-icon";
 import { fireEvent } from "../dom/fire_event";
-import { mdiMagnify, mdiClose } from "@mdi/js";
-import "@material/mwc-icon-button/mwc-icon-button";
 
 @customElement("search-input")
 class SearchInput extends LitElement {
@@ -25,9 +24,6 @@ class SearchInput extends LitElement {
 
   @property({ type: Boolean })
   public autofocus = false;
-
-  @property({ type: String })
-  public label?: string;
 
   public focus() {
     this.shadowRoot!.querySelector("paper-input")!.focus();
@@ -46,27 +42,22 @@ class SearchInput extends LitElement {
       <paper-input
         class=${classMap({ "no-underline": this.noUnderline })}
         .autofocus=${this.autofocus}
-        .label=${this.label || "Search"}
+        label="Search"
         .value=${this.filter}
         @value-changed=${this._filterInputChanged}
         .noLabelFloat=${this.noLabelFloat}
       >
-        <ha-svg-icon
-          path=${mdiMagnify}
-          slot="prefix"
-          class="prefix"
-        ></ha-svg-icon>
+        <ha-icon icon="hass:magnify" slot="prefix" class="prefix"></ha-icon>
         ${this.filter &&
         html`
-          <mwc-icon-button
+          <paper-icon-button
             slot="suffix"
             class="suffix"
             @click=${this._clearSearch}
+            icon="hass:close"
             alt="Clear"
             title="Clear"
-          >
-            <ha-svg-icon path=${mdiClose}></ha-svg-icon>
-          </mwc-icon-button>
+          ></paper-icon-button>
         `}
       </paper-input>
     `;
@@ -86,14 +77,7 @@ class SearchInput extends LitElement {
 
   static get styles(): CSSResult {
     return css`
-      ha-svg-icon,
-      mwc-icon-button {
-        color: var(--primary-text-color);
-      }
-      mwc-icon-button {
-        --mdc-icon-button-size: 24px;
-      }
-      ha-svg-icon.prefix {
+      ha-icon {
         margin: 8px;
       }
     `;

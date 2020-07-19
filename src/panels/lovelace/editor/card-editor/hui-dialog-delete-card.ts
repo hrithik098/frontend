@@ -1,4 +1,3 @@
-import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
 import deepFreeze from "deep-freeze";
 import {
   css,
@@ -7,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
@@ -24,9 +22,9 @@ import type { DeleteCardDialogParams } from "./show-delete-card-dialog";
 export class HuiDialogDeleteCard extends LitElement {
   @property() protected hass!: HomeAssistant;
 
-  @internalProperty() private _params?: DeleteCardDialogParams;
+  @property() private _params?: DeleteCardDialogParams;
 
-  @internalProperty() private _cardConfig?: LovelaceCardConfig;
+  @property() private _cardConfig?: LovelaceCardConfig;
 
   @query("ha-paper-dialog") private _dialog!: HaPaperDialog;
 

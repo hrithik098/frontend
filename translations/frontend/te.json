@@ -476,9 +476,6 @@
                     "caption": "మార్పులు చేర్పులు"
                 },
                 "header": "కాన్ఫిగర్ Home Assistant",
-                "mqtt": {
-                    "title": "MQTT"
-                },
                 "script": {
                     "caption": "స్క్రిప్ట్",
                     "description": "స్క్రిప్ట్లను సృష్టించండి మరియు సవరించండి"
@@ -501,6 +498,9 @@
                 "tabs": {
                     "events": {
                         "title": "సంఘటనలు"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
                     },
                     "services": {
                         "title": "సేవలు"

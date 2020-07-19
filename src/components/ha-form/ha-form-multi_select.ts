@@ -1,3 +1,4 @@
+import "@polymer/iron-icon/iron-icon";
 import "@polymer/paper-checkbox/paper-checkbox";
 import "@polymer/paper-input/paper-input";
 import "@polymer/paper-item/paper-icon-item";
@@ -11,7 +12,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
@@ -21,7 +21,6 @@ import {
   HaFormMultiSelectData,
   HaFormMultiSelectSchema,
 } from "./ha-form";
-import "../ha-icon";
 
 @customElement("ha-form-multi_select")
 export class HaFormMultiSelect extends LitElement implements HaFormElement {
@@ -33,7 +32,7 @@ export class HaFormMultiSelect extends LitElement implements HaFormElement {
 
   @property() public suffix!: string;
 
-  @internalProperty() private _init = false;
+  @property() private _init = false;
 
   @query("paper-menu-button") private _input?: HTMLElement;
 
@@ -65,11 +64,11 @@ export class HaFormMultiSelect extends LitElement implements HaFormElement {
             input-aria-haspopup="listbox"
             autocomplete="off"
           >
-            <ha-icon
+            <iron-icon
               icon="paper-dropdown-menu:arrow-drop-down"
               suffix
               slot="suffix"
-            ></ha-icon>
+            ></iron-icon>
           </paper-input>
         </div>
         <paper-listbox

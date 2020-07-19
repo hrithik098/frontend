@@ -1,4 +1,4 @@
-import "../../../../components/ha-icon-button";
+import "@polymer/paper-icon-button";
 import {
   css,
   CSSResult,
@@ -6,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import memoizeOne from "memoize-one";
@@ -39,8 +38,6 @@ import "../../../../layouts/hass-loading-screen";
 import "../../../../layouts/hass-subpage";
 import type { HomeAssistant } from "../../../../types";
 import { showToast } from "../../../../util/toast";
-import "../../../../components/ha-formfield";
-import { computeRTLDirection } from "../../../../common/util/compute_rtl";
 
 const DEFAULT_CONFIG_EXPOSE = true;
 
@@ -51,13 +48,13 @@ const configIsExposed = (config: GoogleEntityConfig) =>
 
 @customElement("cloud-google-assistant")
 class CloudGoogleAssistant extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public cloudStatus!: CloudStatusLoggedIn;
 
   @property() public narrow!: boolean;
 
-  @internalProperty() private _entities?: GoogleEntity[];
+  @property() private _entities?: GoogleEntity[];
 
   @property()
   private _entityConfigs: CloudPreferences["google_entity_configs"] = {};
@@ -85,7 +82,6 @@ class CloudGoogleAssistant extends LitElement {
     const filterFunc = this._getEntityFilterFunc(
       this.cloudStatus.google_entities
     );
-    const dir = computeRTLDirection(this.hass!);
 
     // We will only generate `isInitialExposed` during first render.
     // On each subsequent render we will use the same set so that cards
@@ -131,38 +127,25 @@ class CloudGoogleAssistant extends LitElement {
                 .map((trait) => trait.substr(trait.lastIndexOf(".") + 1))
                 .join(", ")}
             </state-info>
-            <div>
-              <ha-formfield
-                .label=${this.hass!.localize(
-                  "ui.panel.config.cloud.google.expose"
-                )}
-                .dir=${dir}
-              >
-                <ha-switch
-                  .entityId=${entity.entity_id}
-                  .disabled=${!emptyFilter}
-                  .checked=${isExposed}
-                  @change=${this._exposeChanged}
-                >
-                </ha-switch>
-              </ha-formfield>
-            </div>
+            <ha-switch
+              .entityId=${entity.entity_id}
+              .disabled=${!emptyFilter}
+              .checked=${isExposed}
+              @change=${this._exposeChanged}
+            >
+              ${this.hass!.localize("ui.panel.config.cloud.google.expose")}
+            </ha-switch>
             ${entity.might_2fa
               ? html`
-                  <div>
-                    <ha-formfield
-                      .label=${this.hass!.localize(
-                        "ui.panel.config.cloud.google.disable_2FA"
-                      )}
-                      .dir=${dir}
-                    >
-                      <ha-switch
-                        .entityId=${entity.entity_id}
-                        .checked=${Boolean(config.disable_2fa)}
-                        @change=${this._disable2FAChanged}
-                      ></ha-switch>
-                    </ha-formfield>
-                  </div>
+                  <ha-switch
+                    .entityId=${entity.entity_id}
+                    .checked=${Boolean(config.disable_2fa)}
+                    @change=${this._disable2FAChanged}
+                  >
+                    ${this.hass!.localize(
+                      "ui.panel.config.cloud.google.disable_2FA"
+                    )}
+                  </ha-switch>
                 `
               : ""}
           </div>
@@ -184,11 +167,11 @@ class CloudGoogleAssistant extends LitElement {
         ${
           emptyFilter
             ? html`
-                <ha-icon-button
+                <paper-icon-button
                   slot="toolbar-icon"
                   icon="hass:tune"
                   @click=${this._openDomainToggler}
-                ></ha-icon-button>
+                ></paper-icon-button>
               `
             : ""
         }
@@ -362,7 +345,7 @@ class CloudGoogleAssistant extends LitElement {
         color: var(--primary-text-color);
         background-color: var(
           --ha-card-background,
-          var(--card-background-color, white)
+          var(--paper-card-background-color, white)
         );
         padding: 16px 8px;
         text-align: center;

@@ -7,7 +7,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
@@ -39,9 +38,9 @@ const includeDomains = ["sensor"];
 @customElement("hui-sensor-card-editor")
 export class HuiSensorCardEditor extends LitElement
   implements LovelaceCardEditor {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: SensorCardConfig;
+  @property() private _config?: SensorCardConfig;
 
   public setConfig(config: SensorCardConfig): void {
     config = cardConfigStruct(config);

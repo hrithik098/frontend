@@ -1,14 +1,9 @@
 const del = require("del");
 const gulp = require("gulp");
-const fs = require("fs");
 const mapStream = require("map-stream");
 
-const inDirFrontend = "translations/frontend";
-const inDirBackend = "translations/backend";
-const downloadDir = "translations/downloads";
-const srcMeta = "src/translations/translationMetadata.json";
-
-const encoding = "utf8";
+const inDir = "translations/frontend";
+const downloadDir = inDir + "/downloads";
 
 const tasks = [];
 
@@ -58,25 +53,9 @@ gulp.task(taskName, function () {
 });
 tasks.push(taskName);
 
-taskName = "check-all-files-exist";
-gulp.task(taskName, function () {
-  const file = fs.readFileSync(srcMeta, { encoding });
-  const meta = JSON.parse(file);
-  Object.keys(meta).forEach((lang) => {
-    if (!fs.existsSync(`${inDirFrontend}/${lang}.json`)) {
-      fs.writeFileSync(`${inDirFrontend}/${lang}.json`, JSON.stringify({}));
-    }
-    if (!fs.existsSync(`${inDirBackend}/${lang}.json`)) {
-      fs.writeFileSync(`${inDirBackend}/${lang}.json`, JSON.stringify({}));
-    }
-  });
-  return Promise.resolve();
-});
-tasks.push(taskName);
-
 taskName = "move-downloaded-translations";
 gulp.task(taskName, function () {
-  return gulp.src(`${downloadDir}/*.json`).pipe(gulp.dest(inDirFrontend));
+  return gulp.src(`${downloadDir}/*.json`).pipe(gulp.dest(inDir));
 });
 tasks.push(taskName);
 
@@ -86,7 +65,6 @@ gulp.task(
   gulp.series(
     "check-translations-html",
     "move-downloaded-translations",
-    "check-all-files-exist",
     "clean-downloaded-translations"
   )
 );

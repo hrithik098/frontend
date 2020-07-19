@@ -7,7 +7,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -26,12 +25,9 @@ import {
 import { HomeAssistant } from "../../../types";
 import { LovelaceCard, LovelaceCardEditor } from "../types";
 import { SensorCardConfig, ShoppingListCardConfig } from "./types";
-import { SubscribeMixin } from "../../../mixins/subscribe-mixin";
-import { UnsubscribeFunc } from "home-assistant-js-websocket";
 
 @customElement("hui-shopping-list-card")
-class HuiShoppingListCard extends SubscribeMixin(LitElement)
-  implements LovelaceCard {
+class HuiShoppingListCard extends LitElement implements LovelaceCard {
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     await import(
       /* webpackChunkName: "hui-shopping-list-editor" */ "../editor/config-elements/hui-shopping-list-editor"
@@ -43,13 +39,15 @@ class HuiShoppingListCard extends SubscribeMixin(LitElement)
     return { type: "shopping-list" };
   }
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: ShoppingListCardConfig;
+  @property() private _config?: ShoppingListCardConfig;
 
-  @internalProperty() private _uncheckedItems?: ShoppingListItem[];
+  @property() private _uncheckedItems?: ShoppingListItem[];
 
-  @internalProperty() private _checkedItems?: ShoppingListItem[];
+  @property() private _checkedItems?: ShoppingListItem[];
+
+  private _unsubEvents?: Promise<() => Promise<void>>;
 
   public getCardSize(): number {
     return (this._config ? (this._config.title ? 1 : 0) : 0) + 3;
@@ -59,16 +57,27 @@ class HuiShoppingListCard extends SubscribeMixin(LitElement)
     this._config = config;
     this._uncheckedItems = [];
     this._checkedItems = [];
+    this._fetchData();
   }
 
-  public hassSubscribe(): Promise<UnsubscribeFunc>[] {
-    this._fetchData();
-    return [
-      this.hass!.connection.subscribeEvents(
+  public connectedCallback(): void {
+    super.connectedCallback();
+
+    if (this.hass) {
+      this._unsubEvents = this.hass.connection.subscribeEvents(
         () => this._fetchData(),
         "shopping_list_updated"
-      ),
-    ];
+      );
+      this._fetchData();
+    }
+  }
+
+  public disconnectedCallback(): void {
+    super.disconnectedCallback();
+
+    if (this._unsubEvents) {
+      this._unsubEvents.then((unsub) => unsub());
+    }
   }
 
   protected updated(changedProps: PropertyValues): void {
@@ -76,15 +85,16 @@ class HuiShoppingListCard extends SubscribeMixin(LitElement)
     if (!this._config || !this.hass) {
       return;
     }
-
     const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
     const oldConfig = changedProps.get("_config") as
       | SensorCardConfig
       | undefined;
 
     if (
-      (changedProps.has("hass") && oldHass?.themes !== this.hass.themes) ||
-      (changedProps.has("_config") && oldConfig?.theme !== this._config.theme)
+      !oldHass ||
+      !oldConfig ||
+      oldHass.themes !== this.hass.themes ||
+      oldConfig.theme !== this._config.theme
     ) {
       applyThemesOnElement(this, this.hass.themes, this._config.theme);
     }
@@ -189,22 +199,81 @@ class HuiShoppingListCard extends SubscribeMixin(LitElement)
     `;
   }
 
-  private async _fetchData(): Promise<void> {
-    if (!this.hass) {
-      return;
-    }
-    const checkedItems: ShoppingListItem[] = [];
-    const uncheckedItems: ShoppingListItem[] = [];
-    const items = await fetchItems(this.hass);
-    for (const key in items) {
-      if (items[key].complete) {
-        checkedItems.push(items[key]);
-      } else {
-        uncheckedItems.push(items[key]);
+  static get styles(): CSSResult {
+    return css`
+      ha-card {
+        padding: 16px;
       }
+
+      .has-header {
+        padding-top: 0;
+      }
+
+      .editRow,
+      .addRow,
+      .checked {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .addRow ha-icon {
+        color: var(--secondary-text-color);
+        --iron-icon-width: 26px;
+        --iron-icon-height: 26px;
+      }
+
+      .addButton {
+        padding-right: 16px;
+        cursor: pointer;
+      }
+
+      paper-checkbox {
+        padding-left: 4px;
+        padding-right: 20px;
+        --paper-checkbox-label-spacing: 0px;
+      }
+
+      paper-input {
+        flex-grow: 1;
+      }
+
+      .checked {
+        margin: 12px 0;
+        justify-content: space-between;
+      }
+
+      .checked span {
+        color: var(--primary-color);
+      }
+
+      .divider {
+        height: 1px;
+        background-color: var(--divider-color);
+        margin: 10px 0;
+      }
+
+      .clearall {
+        cursor: pointer;
+      }
+    `;
+  }
+
+  private async _fetchData(): Promise<void> {
+    if (this.hass) {
+      const checkedItems: ShoppingListItem[] = [];
+      const uncheckedItems: ShoppingListItem[] = [];
+      const items = await fetchItems(this.hass);
+      for (const key in items) {
+        if (items[key].complete) {
+          checkedItems.push(items[key]);
+        } else {
+          uncheckedItems.push(items[key]);
+        }
+      }
+      this._checkedItems = checkedItems;
+      this._uncheckedItems = uncheckedItems;
     }
-    this._checkedItems = checkedItems;
-    this._uncheckedItems = uncheckedItems;
   }
 
   private _completeItem(ev): void {
@@ -248,65 +317,6 @@ class HuiShoppingListCard extends SubscribeMixin(LitElement)
     if (ev.keyCode === 13) {
       this._addItem(null);
     }
-  }
-
-  static get styles(): CSSResult {
-    return css`
-      ha-card {
-        padding: 16px;
-      }
-
-      .has-header {
-        padding-top: 0;
-      }
-
-      .editRow,
-      .addRow,
-      .checked {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      }
-
-      .addRow ha-icon {
-        color: var(--secondary-text-color);
-        --mdc-icon-size: 26px;
-      }
-
-      .addButton {
-        padding-right: 16px;
-        cursor: pointer;
-      }
-
-      paper-checkbox {
-        padding-left: 4px;
-        padding-right: 20px;
-        --paper-checkbox-label-spacing: 0px;
-      }
-
-      paper-input {
-        flex-grow: 1;
-      }
-
-      .checked {
-        margin: 12px 0;
-        justify-content: space-between;
-      }
-
-      .checked span {
-        color: var(--primary-color);
-      }
-
-      .divider {
-        height: 1px;
-        background-color: var(--divider-color);
-        margin: 10px 0;
-      }
-
-      .clearall {
-        cursor: pointer;
-      }
-    `;
   }
 }
 

@@ -21,7 +21,7 @@ const equal = (a: AutomationEntity[], b: AutomationEntity[]): boolean => {
 
 @customElement("ha-config-automation")
 class HaConfigAutomation extends HassRouterPage {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public narrow!: boolean;
 
@@ -54,7 +54,9 @@ class HaConfigAutomation extends HassRouterPage {
   private _getAutomations = memoizeOne(
     (states: HassEntities): AutomationEntity[] => {
       return Object.values(states).filter(
-        (entity) => computeStateDomain(entity) === "automation"
+        (entity) =>
+          computeStateDomain(entity) === "automation" &&
+          !entity.attributes.hidden
       ) as AutomationEntity[];
     }
   );
@@ -74,7 +76,7 @@ class HaConfigAutomation extends HassRouterPage {
     if (this.hass) {
       if (!pageEl.automations || !changedProps) {
         pageEl.automations = this._getAutomations(this.hass.states);
-      } else if (changedProps.has("hass")) {
+      } else if (changedProps && changedProps.has("hass")) {
         this._debouncedUpdateAutomations(pageEl);
       }
     }

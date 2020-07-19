@@ -6,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -64,7 +63,7 @@ interface DeviceEntitiesLookup {
 
 @customElement("ha-thingtalk-placeholders")
 export class ThingTalkPlaceholders extends SubscribeMixin(LitElement) {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public opened!: boolean;
 
@@ -72,13 +71,13 @@ export class ThingTalkPlaceholders extends SubscribeMixin(LitElement) {
 
   @property() public placeholders!: PlaceholderContainer;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
   private _deviceEntityLookup: DeviceEntitiesLookup = {};
 
-  @internalProperty() private _extraInfo: ExtraInfo = {};
+  @property() private _extraInfo: ExtraInfo = {};
 
-  @internalProperty() private _placeholderValues: PlaceholderValues = {};
+  @property() private _placeholderValues: PlaceholderValues = {};
 
   private _devices?: DeviceRegistryEntry[];
 
@@ -481,7 +480,7 @@ export class ThingTalkPlaceholders extends SubscribeMixin(LitElement) {
           font-weight: 500;
         }
         .error {
-          color: var(--error-color);
+          color: var(--google-red-500);
         }
       `,
     ];

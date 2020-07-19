@@ -170,12 +170,12 @@ class ActionHandler extends HTMLElement implements ActionHandler {
       display: null,
     });
     this.ripple.disabled = false;
-    this.ripple.startPress();
+    this.ripple.active = true;
     this.ripple.unbounded = true;
   }
 
   private stopAnimation() {
-    this.ripple.endPress();
+    this.ripple.active = false;
     this.ripple.disabled = true;
     this.style.display = "none";
   }

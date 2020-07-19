@@ -4,7 +4,7 @@ import {
   customElement,
   html,
   LitElement,
-  internalProperty,
+  property,
   TemplateResult,
 } from "lit-element";
 import "../../../components/ha-icon";
@@ -12,7 +12,7 @@ import { LovelaceRow, TextConfig } from "../entity-rows/types";
 
 @customElement("hui-text-row")
 class HuiTextRow extends LitElement implements LovelaceRow {
-  @internalProperty() private _config?: TextConfig;
+  @property() private _config?: TextConfig;
 
   public setConfig(config: TextConfig): void {
     if (!config || !config.name || !config.text) {

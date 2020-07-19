@@ -1,4 +1,4 @@
-import "../../../../components/ha-icon-button";
+import "@polymer/paper-icon-button";
 import {
   css,
   CSSResult,
@@ -6,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import memoizeOne from "memoize-one";
@@ -34,8 +33,6 @@ import { showDomainTogglerDialog } from "../../../../dialogs/domain-toggler/show
 import "../../../../layouts/hass-loading-screen";
 import "../../../../layouts/hass-subpage";
 import type { HomeAssistant } from "../../../../types";
-import "../../../../components/ha-formfield";
-import { computeRTLDirection } from "../../../../common/util/compute_rtl";
 
 const DEFAULT_CONFIG_EXPOSE = true;
 const IGNORE_INTERFACES = ["Alexa.EndpointHealth"];
@@ -47,14 +44,14 @@ const configIsExposed = (config: AlexaEntityConfig) =>
 
 @customElement("cloud-alexa")
 class CloudAlexa extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property()
   public cloudStatus!: CloudStatusLoggedIn;
 
   @property({ type: Boolean }) public narrow!: boolean;
 
-  @internalProperty() private _entities?: AlexaEntity[];
+  @property() private _entities?: AlexaEntity[];
 
   @property()
   private _entityConfigs: CloudPreferences["alexa_entity_configs"] = {};
@@ -130,20 +127,14 @@ class CloudAlexa extends LitElement {
                 )
                 .join(", ")}
             </state-info>
-            <ha-formfield
-              .label=${this.hass!.localize(
-                "ui.panel.config.cloud.alexa.expose"
-              )}
-              .dir=${computeRTLDirection(this.hass!)}
+            <ha-switch
+              .entityId=${entity.entity_id}
+              .disabled=${!emptyFilter}
+              .checked=${isExposed}
+              @change=${this._exposeChanged}
             >
-              <ha-switch
-                .entityId=${entity.entity_id}
-                .disabled=${!emptyFilter}
-                .checked=${isExposed}
-                @change=${this._exposeChanged}
-              >
-              </ha-switch>
-            </ha-formfield>
+              ${this.hass!.localize("ui.panel.config.cloud.alexa.expose")}
+            </ha-switch>
           </div>
         </ha-card>
       `);
@@ -163,11 +154,11 @@ class CloudAlexa extends LitElement {
         ${
           emptyFilter
             ? html`
-                <ha-icon-button
+                <paper-icon-button
                   slot="toolbar-icon"
                   icon="hass:tune"
                   @click=${this._openDomainToggler}
-                ></ha-icon-button>
+                ></paper-icon-button>
               `
             : ""
         }
@@ -324,7 +315,7 @@ class CloudAlexa extends LitElement {
         color: var(--primary-text-color);
         background-color: var(
           --ha-card-background,
-          var(--card-background-color, white)
+          var(--paper-card-background-color, white)
         );
         padding: 16px 8px;
         text-align: center;

@@ -1,27 +1,30 @@
 const gulp = require("gulp");
 
-const env = require("../env");
-
 require("./clean.js");
 require("./translations.js");
+require("./gen-icons.js");
 require("./gather-static.js");
 require("./webpack.js");
 require("./service-worker.js");
 require("./entry-html.js");
-require("./rollup.js");
 
 gulp.task(
   "develop-cast",
   gulp.series(
     async function setEnv() {
       process.env.NODE_ENV = "development";
+      process.env.IS_CAST = "true";
     },
     "clean-cast",
     "translations-enable-merge-backend",
-    gulp.parallel("gen-icons-json", "build-translations"),
+    gulp.parallel(
+      "gen-icons-app",
+      "gen-icons-mdi",
+      "gen-index-cast-dev",
+      "build-translations"
+    ),
     "copy-static-cast",
-    "gen-index-cast-dev",
-    env.useRollup() ? "rollup-dev-server-cast" : "webpack-dev-server-cast"
+    "webpack-dev-server-cast"
   )
 );
 
@@ -33,9 +36,9 @@ gulp.task(
     },
     "clean-cast",
     "translations-enable-merge-backend",
-    gulp.parallel("gen-icons-json", "build-translations"),
+    gulp.parallel("gen-icons-app", "gen-icons-mdi", "build-translations"),
     "copy-static-cast",
-    env.useRollup() ? "rollup-prod-cast" : "webpack-prod-cast",
+    "webpack-prod-cast",
     "gen-index-cast-prod"
   )
 );

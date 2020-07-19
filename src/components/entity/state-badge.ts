@@ -1,13 +1,12 @@
 import type { HassEntity } from "home-assistant-js-websocket";
-import { styleMap } from "lit-html/directives/style-map";
 import {
   css,
   CSSResult,
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
+  query,
   TemplateResult,
 } from "lit-element";
 import { ifDefined } from "lit-html/directives/if-defined";
@@ -17,6 +16,7 @@ import { stateIcon } from "../../common/entity/state_icon";
 import { iconColorCSS } from "../../common/style/icon_color_css";
 import type { HomeAssistant } from "../../types";
 import "../ha-icon";
+import type { HaIcon } from "../ha-icon";
 
 export class StateBadge extends LitElement {
   public hass?: HomeAssistant;
@@ -29,15 +29,12 @@ export class StateBadge extends LitElement {
 
   @property({ type: Boolean }) public stateColor?: boolean;
 
-  @property({ type: Boolean, reflect: true, attribute: "icon" })
-  private _showIcon = true;
-
-  @internalProperty() private _iconStyle: { [name: string]: string } = {};
+  @query("ha-icon") private _icon!: HaIcon;
 
   protected render(): TemplateResult {
     const stateObj = this.stateObj;
 
-    if (!stateObj || !this._showIcon) {
+    if (!stateObj) {
       return html``;
     }
 
@@ -45,7 +42,7 @@ export class StateBadge extends LitElement {
 
     return html`
       <ha-icon
-        style=${styleMap(this._iconStyle)}
+        id="icon"
         data-domain=${ifDefined(
           this.stateColor || (domain === "light" && this.stateColor !== false)
             ? domain
@@ -63,13 +60,14 @@ export class StateBadge extends LitElement {
     }
     const stateObj = this.stateObj;
 
-    const iconStyle: { [name: string]: string } = {};
+    const iconStyle: Partial<CSSStyleDeclaration> = {
+      color: "",
+      filter: "",
+      display: "",
+    };
     const hostStyle: Partial<CSSStyleDeclaration> = {
       backgroundImage: "",
     };
-
-    this._showIcon = true;
-
     if (stateObj) {
       // hide icon if we have entity picture
       if (
@@ -81,7 +79,7 @@ export class StateBadge extends LitElement {
           imageUrl = this.hass.hassUrl(imageUrl);
         }
         hostStyle.backgroundImage = `url(${imageUrl})`;
-        this._showIcon = false;
+        iconStyle.display = "none";
       } else if (stateObj.state === "on") {
         if (stateObj.attributes.hs_color && this.stateColor !== false) {
           const hue = stateObj.attributes.hs_color[0];
@@ -104,7 +102,7 @@ export class StateBadge extends LitElement {
         }
       }
     }
-    this._iconStyle = iconStyle;
+    Object.assign(this._icon.style, iconStyle);
     Object.assign(this.style, hostStyle);
   }
 
@@ -121,17 +119,8 @@ export class StateBadge extends LitElement {
         background-size: cover;
         line-height: 40px;
         vertical-align: middle;
-        box-sizing: border-box;
       }
-      :host(:focus) {
-        outline: none;
-      }
-      :host(:not([icon]):focus) {
-        border: 2px solid var(--divider-color);
-      }
-      :host([icon]:focus) {
-        background: var(--divider-color);
-      }
+
       ha-icon {
         transition: color 0.3s ease-in-out, filter 0.3s ease-in-out;
       }

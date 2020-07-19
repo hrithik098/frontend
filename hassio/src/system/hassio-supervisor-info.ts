@@ -1,4 +1,5 @@
 import "@material/mwc-button";
+import "@polymer/paper-card/paper-card";
 import {
   css,
   CSSResult,
@@ -6,33 +7,31 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../src/common/dom/fire_event";
 import "../../../src/components/buttons/ha-call-api-button";
-import "../../../src/components/ha-card";
 import {
   HassioSupervisorInfo as HassioSupervisorInfoType,
   setSupervisorOption,
   SupervisorOptions,
 } from "../../../src/data/hassio/supervisor";
-import { showConfirmationDialog } from "../../../src/dialogs/generic/show-dialog-box";
 import { haStyle } from "../../../src/resources/styles";
 import { HomeAssistant } from "../../../src/types";
 import { hassioStyle } from "../resources/hassio-style";
+import { showConfirmationDialog } from "../../../src/dialogs/generic/show-dialog-box";
 
 @customElement("hassio-supervisor-info")
 class HassioSupervisorInfo extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public supervisorInfo!: HassioSupervisorInfoType;
 
-  @internalProperty() private _errors?: string;
+  @property() private _errors?: string;
 
   public render(): TemplateResult | void {
     return html`
-      <ha-card>
+      <paper-card>
         <div class="card-content">
           <h2>Supervisor</h2>
           <table class="info">
@@ -93,7 +92,7 @@ class HassioSupervisorInfo extends LitElement {
               `
             : ""}
         </div>
-      </ha-card>
+      </paper-card>
     `;
   }
 
@@ -102,7 +101,7 @@ class HassioSupervisorInfo extends LitElement {
       haStyle,
       hassioStyle,
       css`
-        ha-card {
+        paper-card {
           height: 100%;
           width: 100%;
         }
@@ -118,7 +117,7 @@ class HassioSupervisorInfo extends LitElement {
           text-align: right;
         }
         .errors {
-          color: var(--error-color);
+          color: var(--google-red-500);
           margin-top: 16px;
         }
       `,

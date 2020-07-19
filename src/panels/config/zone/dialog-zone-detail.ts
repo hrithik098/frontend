@@ -6,14 +6,11 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
-import { fireEvent } from "../../../common/dom/fire_event";
 import { addDistanceToCoord } from "../../../common/location/add_distance_to_coord";
 import { createCloseHeading } from "../../../components/ha-dialog";
 import "../../../components/ha-switch";
-import "../../../components/ha-formfield";
 import "../../../components/map/ha-location-editor";
 import {
   defaultRadiusColor,
@@ -24,30 +21,29 @@ import {
 import { haStyleDialog } from "../../../resources/styles";
 import { HomeAssistant } from "../../../types";
 import { ZoneDetailDialogParams } from "./show-dialog-zone-detail";
-import { computeRTLDirection } from "../../../common/util/compute_rtl";
 
 class DialogZoneDetail extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _name!: string;
+  @property() private _name!: string;
 
-  @internalProperty() private _icon!: string;
+  @property() private _icon!: string;
 
-  @internalProperty() private _latitude!: number;
+  @property() private _latitude!: number;
 
-  @internalProperty() private _longitude!: number;
+  @property() private _longitude!: number;
 
-  @internalProperty() private _passive!: boolean;
+  @property() private _passive!: boolean;
 
-  @internalProperty() private _radius!: number;
+  @property() private _radius!: number;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _params?: ZoneDetailDialogParams;
+  @property() private _params?: ZoneDetailDialogParams;
 
-  @internalProperty() private _submitting = false;
+  @property() private _submitting = false;
 
-  public showDialog(params: ZoneDetailDialogParams): void {
+  public async showDialog(params: ZoneDetailDialogParams): Promise<void> {
     this._params = params;
     this._error = undefined;
     if (this._params.entry) {
@@ -76,11 +72,7 @@ class DialogZoneDetail extends LitElement {
       this._passive = false;
       this._radius = 100;
     }
-  }
-
-  public closeDialog(): void {
-    this._params = undefined;
-    fireEvent(this, "dialog-closed", { dialog: this.localName });
+    await this.updateComplete;
   }
 
   protected render(): TemplateResult {
@@ -99,7 +91,7 @@ class DialogZoneDetail extends LitElement {
     return html`
       <ha-dialog
         open
-        @closed="${this.closeDialog}"
+        @closing="${this._close}"
         scrimClickAction=""
         escapeKeyAction=""
         .heading=${createCloseHeading(
@@ -189,17 +181,11 @@ class DialogZoneDetail extends LitElement {
             <p>
               ${this.hass!.localize("ui.panel.config.zone.detail.passive_note")}
             </p>
-            <ha-formfield
-              .label=${this.hass!.localize(
+            <ha-switch .checked=${this._passive} @change=${this._passiveChanged}
+              >${this.hass!.localize(
                 "ui.panel.config.zone.detail.passive"
-              )}
-              .dir=${computeRTLDirection(this.hass)}
+              )}</ha-switch
             >
-              <ha-switch
-                .checked=${this._passive}
-                @change=${this._passiveChanged}
-              ></ha-switch>
-            </ha-formfield>
           </div>
         </div>
         ${this._params.entry
@@ -280,6 +266,10 @@ class DialogZoneDetail extends LitElement {
     } finally {
       this._submitting = false;
     }
+  }
+
+  private _close(): void {
+    this._params = undefined;
   }
 
   static get styles(): CSSResult[] {

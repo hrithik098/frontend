@@ -4,7 +4,7 @@ import {
   customElement,
   html,
   LitElement,
-  internalProperty,
+  property,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -19,13 +19,13 @@ import "../components/hui-entities-toggle";
 import { createHeaderFooterElement } from "../create-element/create-header-footer-element";
 import { createRowElement } from "../create-element/create-row-element";
 import { LovelaceRow } from "../entity-rows/types";
+import { LovelaceHeaderFooterConfig } from "../header-footer/types";
 import {
   LovelaceCard,
   LovelaceCardEditor,
   LovelaceHeaderFooter,
 } from "../types";
 import { EntitiesCardConfig, EntitiesCardEntityConfig } from "./types";
-import { computeCardSize } from "../common/compute-card-size";
 
 @customElement("hui-entities-card")
 class HuiEntitiesCard extends LitElement implements LovelaceCard {
@@ -53,17 +53,13 @@ class HuiEntitiesCard extends LitElement implements LovelaceCard {
     return { type: "entities", title: "My Title", entities: foundEntities };
   }
 
-  @internalProperty() private _config?: EntitiesCardConfig;
+  @property() private _config?: EntitiesCardConfig;
 
   private _hass?: HomeAssistant;
 
   private _configEntities?: EntitiesCardEntityConfig[];
 
   private _showHeaderToggle?: boolean;
-
-  private _headerElement?: LovelaceHeaderFooter;
-
-  private _footerElement?: LovelaceHeaderFooter;
 
   set hass(hass: HomeAssistant) {
     this._hass = hass;
@@ -72,12 +68,11 @@ class HuiEntitiesCard extends LitElement implements LovelaceCard {
         (element as LovelaceRow).hass = hass;
       }
     );
-    if (this._headerElement) {
-      this._headerElement.hass = hass;
-    }
-    if (this._footerElement) {
-      this._footerElement.hass = hass;
-    }
+    this.shadowRoot!.querySelectorAll(".header-footer > *").forEach(
+      (element: unknown) => {
+        (element as LovelaceHeaderFooter).hass = hass;
+      }
+    );
     const entitiesToggle = this.shadowRoot!.querySelector(
       "hui-entities-toggle"
     );
@@ -86,24 +81,12 @@ class HuiEntitiesCard extends LitElement implements LovelaceCard {
     }
   }
 
-  public async getCardSize(): Promise<number> {
+  public getCardSize(): number {
     if (!this._config) {
       return 0;
     }
     // +1 for the header
-    let size =
-      (this._config.title || this._showHeaderToggle ? 1 : 0) +
-      (this._config.entities.length || 1);
-    if (this._headerElement) {
-      const headerSize = computeCardSize(this._headerElement);
-      size += headerSize instanceof Promise ? await headerSize : headerSize;
-    }
-    if (this._footerElement) {
-      const footerSize = computeCardSize(this._footerElement);
-      size += footerSize instanceof Promise ? await footerSize : footerSize;
-    }
-
-    return size;
+    return (this._config.title ? 1 : 0) + this._config.entities.length;
   }
 
   public setConfig(config: EntitiesCardConfig): void {
@@ -126,24 +109,6 @@ class HuiEntitiesCard extends LitElement implements LovelaceCard {
       this._showHeaderToggle = toggleable === 2;
     } else {
       this._showHeaderToggle = config.show_header_toggle;
-    }
-
-    if (this._config.header) {
-      this._headerElement = createHeaderFooterElement(this._config.header);
-      if (this._hass) {
-        this._headerElement.hass = this._hass;
-      }
-    } else {
-      this._headerElement = undefined;
-    }
-
-    if (this._config.footer) {
-      this._footerElement = createHeaderFooterElement(this._config.footer);
-      if (this._hass) {
-        this._footerElement.hass = this._hass;
-      }
-    } else {
-      this._footerElement = undefined;
     }
   }
 
@@ -174,10 +139,8 @@ class HuiEntitiesCard extends LitElement implements LovelaceCard {
 
     return html`
       <ha-card>
-        ${this._headerElement
-          ? html`<div class="header-footer header">
-              ${this._headerElement}
-            </div>`
+        ${this._config.header
+          ? this.renderHeaderFooter(this._config.header, "header")
           : ""}
         ${!this._config.title && !this._showHeaderToggle && !this._config.icon
           ? ""
@@ -212,10 +175,8 @@ class HuiEntitiesCard extends LitElement implements LovelaceCard {
           )}
         </div>
 
-        ${this._footerElement
-          ? html`<div class="header-footer footer">
-              ${this._footerElement}
-            </div>`
+        ${this._config.footer
+          ? this.renderHeaderFooter(this._config.footer, "footer")
           : ""}
       </ha-card>
     `;
@@ -228,7 +189,6 @@ class HuiEntitiesCard extends LitElement implements LovelaceCard {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        overflow: hidden;
       }
       .card-header {
         display: flex;
@@ -283,6 +243,17 @@ class HuiEntitiesCard extends LitElement implements LovelaceCard {
         overflow: hidden;
       }
     `;
+  }
+
+  private renderHeaderFooter(
+    conf: LovelaceHeaderFooterConfig,
+    className: string
+  ): TemplateResult {
+    const element = createHeaderFooterElement(conf);
+    if (this._hass) {
+      element.hass = this._hass;
+    }
+    return html` <div class=${"header-footer " + className}>${element}</div> `;
   }
 
   private renderEntity(entityConf: EntitiesCardEntityConfig): TemplateResult {

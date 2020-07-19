@@ -1,5 +1,5 @@
-import "../../../components/ha-icon-button";
-import "../../../components/ha-icon";
+import "@polymer/iron-icon/iron-icon";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
 import {
@@ -90,7 +90,7 @@ const VACUUM_COMMANDS: VacuumCommand[] = [
 
 @customElement("more-info-vacuum")
 class MoreInfoVacuum extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public stateObj?: VacuumEntity;
 
@@ -122,7 +122,9 @@ class MoreInfoVacuum extends LitElement {
           ? html`
               <div>
                 <span>
-                  <ha-icon .icon=${stateObj.attributes.battery_icon}></ha-icon>
+                  <iron-icon
+                    .icon=${stateObj.attributes.battery_icon}
+                  ></iron-icon>
                   ${stateObj.attributes.battery_level}%
                 </span>
               </div>
@@ -145,14 +147,14 @@ class MoreInfoVacuum extends LitElement {
                 ).map(
                   (item) => html`
                     <div>
-                      <ha-icon-button
+                      <paper-icon-button
                         .icon=${item.icon}
                         .entry=${item}
                         @click=${this.callService}
                         .title=${this.hass!.localize(
                           `ui.dialogs.more_info_control.vacuum.${item.translationKey}`
                         )}
-                      ></ha-icon-button>
+                      ></paper-icon-button>
                     </div>
                   `
                 )}
@@ -188,7 +190,7 @@ class MoreInfoVacuum extends LitElement {
                   style="justify-content: center; align-self: center; padding-top: 1.3em"
                 >
                   <span>
-                    <ha-icon icon="hass:fan"></ha-icon>
+                    <iron-icon icon="hass:fan"></iron-icon>
                     ${stateObj.attributes.fan_speed}
                   </span>
                 </div>

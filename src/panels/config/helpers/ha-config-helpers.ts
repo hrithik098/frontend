@@ -11,7 +11,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -23,7 +22,7 @@ import {
   DataTableColumnContainer,
   RowClickedEvent,
 } from "../../../components/data-table/ha-data-table";
-import "@material/mwc-fab";
+import "../../../components/ha-fab";
 import "../../../components/ha-icon";
 import "../../../layouts/hass-loading-screen";
 import "../../../layouts/hass-tabs-subpage-data-table";
@@ -32,13 +31,10 @@ import { showEntityEditorDialog } from "../entities/show-dialog-entity-editor";
 import { configSections } from "../ha-panel-config";
 import { HELPER_DOMAINS } from "./const";
 import { showHelperDetailDialog } from "./show-dialog-helper-detail";
-import "../../../components/ha-svg-icon";
-import { mdiPlus } from "@mdi/js";
-import { computeRTL } from "../../../common/util/compute_rtl";
 
 @customElement("ha-config-helpers")
 export class HaConfigHelpers extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public isWide!: boolean;
 
@@ -46,7 +42,7 @@ export class HaConfigHelpers extends LitElement {
 
   @property() public route!: Route;
 
-  @internalProperty() private _stateItems: HassEntity[] = [];
+  @property() private _stateItems: HassEntity[] = [];
 
   private _columns = memoize(
     (narrow, _language): DataTableColumnContainer => {
@@ -156,22 +152,17 @@ export class HaConfigHelpers extends LitElement {
         .data=${this._getItems(this._stateItems)}
         @row-click=${this._openEditDialog}
         hasFab
-        .noDataText=${this.hass.localize(
-          "ui.panel.config.helpers.picker.no_helpers"
-        )}
       >
       </hass-tabs-subpage-data-table>
-      <mwc-fab
+      <ha-fab
         ?is-wide=${this.isWide}
         ?narrow=${this.narrow}
-        ?rtl=${computeRTL(this.hass!)}
+        icon="hass:plus"
         title="${this.hass.localize(
           "ui.panel.config.helpers.picker.add_helper"
         )}"
         @click=${this._createHelpler}
-      >
-        <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-      </mwc-fab>
+      ></ha-fab>
     `;
   }
 
@@ -218,27 +209,18 @@ export class HaConfigHelpers extends LitElement {
 
   static get styles(): CSSResult {
     return css`
-      mwc-fab {
+      ha-fab {
         position: fixed;
         bottom: 16px;
         right: 16px;
         z-index: 1;
       }
-      mwc-fab[is-wide] {
+      ha-fab[is-wide] {
         bottom: 24px;
         right: 24px;
       }
-      mwc-fab[narrow] {
+      ha-fab[narrow] {
         bottom: 84px;
-      }
-      mwc-fab[rtl] {
-        right: auto;
-        left: 16px;
-      }
-      mwc-fab[is-wide][rtl] {
-        bottom: 24px;
-        left: 24px;
-        right: auto;
       }
     `;
   }

@@ -6,12 +6,10 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import "../../../../components/ha-switch";
-import "../../../../components/ha-formfield";
 import { HomeAssistant } from "../../../../types";
 import { GaugeCardConfig, SeverityConfig } from "../../cards/types";
 import { struct } from "../../common/structs/struct";
@@ -20,7 +18,6 @@ import "../../components/hui-theme-select-editor";
 import { LovelaceCardEditor } from "../../types";
 import { EditorTarget, EntitiesEditorEvent } from "../types";
 import { configElementStyle } from "./config-elements-style";
-import { computeRTLDirection } from "../../../../common/util/compute_rtl";
 
 const cardConfigStruct = struct({
   type: "string",
@@ -38,9 +35,9 @@ const includeDomains = ["sensor"];
 @customElement("hui-gauge-card-editor")
 export class HuiGaugeCardEditor extends LitElement
   implements LovelaceCardEditor {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: GaugeCardConfig;
+  @property() private _config?: GaugeCardConfig;
 
   public setConfig(config: GaugeCardConfig): void {
     config = cardConfigStruct(config);
@@ -144,17 +141,13 @@ export class HuiGaugeCardEditor extends LitElement
           .configValue=${"max"}
           @value-changed="${this._valueChanged}"
         ></paper-input>
-        <ha-formfield
-          .label=${this.hass.localize(
+        <ha-switch
+          .checked="${this._config!.severity !== undefined}"
+          @change="${this._toggleSeverity}"
+          >${this.hass.localize(
             "ui.panel.lovelace.editor.card.gauge.severity.define"
-          )}
-          .dir=${computeRTLDirection(this.hass)}
+          )}</ha-switch
         >
-          <ha-switch
-            .checked="${this._config!.severity !== undefined}"
-            @change="${this._toggleSeverity}"
-          ></ha-switch
-        ></ha-formfield>
         ${this._config!.severity !== undefined
           ? html`
               <paper-input

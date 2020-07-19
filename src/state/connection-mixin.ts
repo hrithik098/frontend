@@ -6,7 +6,6 @@ import {
   subscribeConfig,
   subscribeEntities,
   subscribeServices,
-  HassConfig,
 } from "home-assistant-js-websocket";
 import { fireEvent } from "../common/dom/fire_event";
 import { broadcastConnectionStatus } from "../data/connection-status";
@@ -47,7 +46,6 @@ export const connectionMixin = <T extends Constructor<HassBaseEl>>(
         translationMetadata,
         dockedSidebar: "docked",
         vibrate: true,
-        suspendWhenHidden: true,
         moreInfoEntityId: null,
         hassUrl: (path = "") => new URL(path, auth.data.hassUrl).toString(),
         callService: async (domain, service, serviceData = {}) => {
@@ -158,15 +156,8 @@ export const connectionMixin = <T extends Constructor<HassBaseEl>>(
 
     protected hassReconnected() {
       super.hassReconnected();
-
       this._updateHass({ connected: true });
       broadcastConnectionStatus("connected");
-
-      // on reconnect always fetch config as we might miss an update while we were disconnected
-      // @ts-ignore
-      this.hass!.callWS({ type: "get_config" }).then((config: HassConfig) => {
-        this._updateHass({ config });
-      });
     }
 
     protected hassDisconnected() {

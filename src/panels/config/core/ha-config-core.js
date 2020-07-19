@@ -1,12 +1,12 @@
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 import "../../../layouts/hass-tabs-subpage";
 import LocalizeMixin from "../../../mixins/localize-mixin";
-import "../../../styles/polymer-ha-style";
+import "../../../resources/ha-style";
 import { configSections } from "../ha-panel-config";
 import "./ha-config-section-core";
 

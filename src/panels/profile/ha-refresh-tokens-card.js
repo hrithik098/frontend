@@ -1,4 +1,4 @@
-import "../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-tooltip/paper-tooltip";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
@@ -7,10 +7,6 @@ import { formatDateTime } from "../../common/datetime/format_date_time";
 import "../../components/ha-card";
 import { EventsMixin } from "../../mixins/events-mixin";
 import LocalizeMixin from "../../mixins/localize-mixin";
-import {
-  showAlertDialog,
-  showConfirmationDialog,
-} from "../../dialogs/generic/show-dialog-box";
 import "./ha-settings-row";
 
 /*
@@ -21,10 +17,10 @@ class HaRefreshTokens extends LocalizeMixin(EventsMixin(PolymerElement)) {
   static get template() {
     return html`
       <style>
-        ha-icon-button {
+        paper-icon-button {
           color: var(--primary-text-color);
         }
-        ha-icon-button[disabled] {
+        paper-icon-button[disabled] {
           color: var(--disabled-text-color);
         }
       </style>
@@ -43,11 +39,11 @@ class HaRefreshTokens extends LocalizeMixin(EventsMixin(PolymerElement)) {
                   >[[localize('ui.panel.profile.refresh_tokens.current_token_tooltip')]]</paper-tooltip
                 >
               </template>
-              <ha-icon-button
+              <paper-icon-button
                 icon="hass:delete"
                 on-click="_handleDelete"
                 disabled="[[item.is_current]]"
-              ></ha-icon-button>
+              ></paper-icon-button>
             </div>
           </ha-settings-row>
         </template>
@@ -95,30 +91,27 @@ class HaRefreshTokens extends LocalizeMixin(EventsMixin(PolymerElement)) {
   }
 
   async _handleDelete(ev) {
-    const token = ev.model.item;
     if (
-      !(await showConfirmationDialog(this, {
-        text: this.localize(
+      !confirm(
+        this.localize(
           "ui.panel.profile.refresh_tokens.confirm_delete",
           "name",
-          token.client_id
-        ),
-      }))
+          ev.model.item.client_id
+        )
+      )
     ) {
       return;
     }
     try {
       await this.hass.callWS({
         type: "auth/delete_refresh_token",
-        refresh_token_id: token.id,
+        refresh_token_id: ev.model.item.id,
       });
       this.fire("hass-refresh-tokens");
     } catch (err) {
       // eslint-disable-next-line
       console.error(err);
-      showAlertDialog(this, {
-        text: this.localize("ui.panel.profile.refresh_tokens.delete_failed"),
-      });
+      alert(this.localize("ui.panel.profile.refresh_tokens.delete_failed"));
     }
   }
 }

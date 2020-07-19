@@ -1,6 +1,6 @@
 import "@polymer/paper-styles/paper-styles";
 import "@polymer/polymer/lib/elements/custom-style";
-import { derivedStyles } from "./styles";
+import { derivedStyles, haStyle, haStyleDialog } from "./styles";
 
 const documentContainer = document.createElement("template");
 documentContainer.setAttribute("style", "display: none;");
@@ -34,9 +34,6 @@ documentContainer.innerHTML = `<custom-style>
       --scrollbar-thumb-color: rgb(194, 194, 194);
 
       --error-color: #db4437;
-      --warning-color: #f4b400;
-      --success-color: #0f9d58;
-      --info-color: #4285f4;
 
       /* states and badges */
       --state-icon-color: #44739e;
@@ -63,6 +60,12 @@ documentContainer.innerHTML = `<custom-style>
       --paper-grey-200: #eeeeee;  /* for ha-date-picker-style */
       --paper-grey-500: #9e9e9e;  /* --label-badge-grey */
 
+      /* for paper-spinner */
+      --google-red-500: #db4437;
+      --google-blue-500: #4285f4;
+      --google-green-500: #0f9d58;
+      --google-yellow-500: #f4b400;
+
       /* for paper-slider */
       --paper-green-400: #66bb6a;
       --paper-blue-400: #42a5f5;
@@ -83,36 +86,46 @@ documentContainer.innerHTML = `<custom-style>
       /* set our slider style */
       --ha-paper-slider-pin-font-size: 15px;
 
-      /* markdown styles */
-      --markdown-code-background-color: #f6f8fa;
-
       /* rgb */
       --rgb-primary-color: 3, 169, 244;
       --rgb-accent-color: 255, 152, 0;
       --rgb-primary-text-color: 33, 33, 33;
       --rgb-secondary-text-color: 114, 114, 114;
       --rgb-text-primary-color: 255, 255, 255;
-      --rgb-card-background-color: 255, 255, 255;
 
       ${Object.entries(derivedStyles)
         .map(([key, value]) => `--${key}: ${value};`)
         .join("")}
     }
+  </style>
 
+  <style shady-unscoped="">
     /*
       prevent clipping of positioned elements in a small scrollable
       force smooth scrolling if can scroll
       use non-shady selectors so this only targets iOS 9
       conditional mixin set in ha-style-dialog does not work with shadyCSS
     */
-    paper-dialog-scrollable:not(.can-scroll) > .scrollable {
+    paper-dialog-scrollable:not(.can-scroll) &gt; .scrollable {
       -webkit-overflow-scrolling: auto !important;
     }
 
-    paper-dialog-scrollable.can-scroll > .scrollable {
+    paper-dialog-scrollable.can-scroll &gt; .scrollable {
       -webkit-overflow-scrolling: touch !important;
     }
   </style>
-</custom-style>`;
+</custom-style><dom-module id="ha-style">
+  <template>
+    <style>
+    ${haStyle.cssText}
+    </style>
+  </template>
+</dom-module><dom-module id="ha-style-dialog">
+  <template>
+    <style>
+      ${haStyleDialog.cssText}
+    </style>
+  </template>
+</dom-module>`;
 
 document.head.appendChild(documentContainer.content);

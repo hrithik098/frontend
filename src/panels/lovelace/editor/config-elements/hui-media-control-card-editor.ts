@@ -3,7 +3,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
@@ -24,9 +23,9 @@ const includeDomains = ["media_player"];
 @customElement("hui-media-control-card-editor")
 export class HuiMediaControlCardEditor extends LitElement
   implements LovelaceCardEditor {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: MediaControlCardConfig;
+  @property() private _config?: MediaControlCardConfig;
 
   public setConfig(config: MediaControlCardConfig): void {
     config = cardConfigStruct(config);

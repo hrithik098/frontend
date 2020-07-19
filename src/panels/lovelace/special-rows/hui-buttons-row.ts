@@ -20,7 +20,7 @@ export class HuiButtonsRow extends LitElement implements LovelaceRow {
     return { entities: [] };
   }
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   private _configEntities?: EntityConfig[];
 

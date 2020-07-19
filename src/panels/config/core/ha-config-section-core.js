@@ -7,11 +7,10 @@ import { isComponentLoaded } from "../../../common/config/is_component_loaded";
 import "../../../components/buttons/ha-call-service-button";
 import "../../../components/ha-card";
 import LocalizeMixin from "../../../mixins/localize-mixin";
-import "../../../styles/polymer-ha-style";
+import "../../../resources/ha-style";
 import "../ha-config-section";
 import "./ha-config-core-form";
 import "./ha-config-name-form";
-import "./ha-config-url-form";
 
 /*
  * @appliesMixin LocalizeMixin
@@ -27,7 +26,7 @@ class HaConfigSectionCore extends LocalizeMixin(PolymerElement) {
         }
 
         .validate-result {
-          color: var(--success-color);
+          color: var(--google-green-500);
           font-weight: 500;
           margin-bottom: 1em;
         }
@@ -37,7 +36,7 @@ class HaConfigSectionCore extends LocalizeMixin(PolymerElement) {
         }
 
         .config-invalid .text {
-          color: var(--error-color);
+          color: var(--google-red-500);
           font-weight: 500;
         }
 
@@ -60,7 +59,6 @@ class HaConfigSectionCore extends LocalizeMixin(PolymerElement) {
 
         <ha-config-name-form hass="[[hass]]"></ha-config-name-form>
         <ha-config-core-form hass="[[hass]]"></ha-config-core-form>
-        <ha-config-url-form hass="[[hass]]"></ha-config-url-form>
       </ha-config-section>
     `;
   }

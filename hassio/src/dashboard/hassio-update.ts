@@ -1,5 +1,6 @@
 import "@material/mwc-button";
-import { mdiHomeAssistant } from "@mdi/js";
+import "@polymer/iron-icon/iron-icon";
+import "@polymer/paper-card/paper-card";
 import {
   css,
   CSSResult,
@@ -7,12 +8,9 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import "../../../src/components/buttons/ha-call-api-button";
-import "../../../src/components/ha-card";
-import "../../../src/components/ha-svg-icon";
 import { HassioHassOSInfo } from "../../../src/data/hassio/host";
 import {
   HassioHomeAssistantInfo,
@@ -20,19 +18,20 @@ import {
 } from "../../../src/data/hassio/supervisor";
 import { haStyle } from "../../../src/resources/styles";
 import { HomeAssistant } from "../../../src/types";
+import "../components/hassio-card-content";
 import { hassioStyle } from "../resources/hassio-style";
 
 @customElement("hassio-update")
 export class HassioUpdate extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @property({ attribute: false }) public hassInfo: HassioHomeAssistantInfo;
+  @property() public hassInfo: HassioHomeAssistantInfo;
 
-  @property({ attribute: false }) public hassOsInfo?: HassioHassOSInfo;
+  @property() public hassOsInfo?: HassioHassOSInfo;
 
   @property() public supervisorInfo: HassioSupervisorInfo;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
   protected render(): TemplateResult {
     const updatesAvailable: number = [
@@ -73,7 +72,7 @@ export class HassioUpdate extends LitElement {
             `https://${
               this.hassInfo.version_latest.includes("b") ? "rc" : "www"
             }.home-assistant.io/latest-release-notes/`,
-            mdiHomeAssistant
+            "hassio:home-assistant"
           )}
           ${this._renderUpdateCard(
             "Supervisor",
@@ -108,12 +107,12 @@ export class HassioUpdate extends LitElement {
       return html``;
     }
     return html`
-      <ha-card>
+      <paper-card>
         <div class="card-content">
           ${icon
             ? html`
                 <div class="icon">
-                  <ha-svg-icon .path=${icon}></ha-svg-icon>
+                  <iron-icon .icon=${icon}></iron-icon>
                 </div>
               `
             : ""}
@@ -134,7 +133,7 @@ export class HassioUpdate extends LitElement {
             Update
           </ha-call-api-button>
         </div>
-      </ha-card>
+      </paper-card>
     `;
   }
 
@@ -159,16 +158,15 @@ export class HassioUpdate extends LitElement {
       hassioStyle,
       css`
         .icon {
-          --mdc-icon-size: 48px;
+          --iron-icon-height: 48px;
+          --iron-icon-width: 48px;
           float: right;
           margin: 0 0 2px 10px;
-          color: var(--primary-text-color);
         }
         .update-heading {
           font-size: var(--paper-font-subhead_-_font-size);
           font-weight: 500;
           margin-bottom: 0.5em;
-          color: var(--primary-text-color);
         }
         .warning {
           color: var(--secondary-text-color);
@@ -181,7 +179,7 @@ export class HassioUpdate extends LitElement {
           text-align: right;
         }
         .errors {
-          color: var(--error-color);
+          color: var(--google-red-500);
           padding: 16px;
         }
         a {

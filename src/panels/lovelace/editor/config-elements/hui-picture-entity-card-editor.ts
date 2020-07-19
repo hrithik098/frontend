@@ -7,12 +7,10 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import "../../../../components/ha-switch";
-import "../../../../components/ha-formfield";
 import { ActionConfig } from "../../../../data/lovelace";
 import { HomeAssistant } from "../../../../types";
 import { PictureEntityCardConfig } from "../../cards/types";
@@ -27,7 +25,6 @@ import {
   EntitiesEditorEvent,
 } from "../types";
 import { configElementStyle } from "./config-elements-style";
-import { computeRTLDirection } from "../../../../common/util/compute_rtl";
 
 const cardConfigStruct = struct({
   type: "string",
@@ -49,9 +46,9 @@ const includeDomains = ["camera"];
 @customElement("hui-picture-entity-card-editor")
 export class HuiPictureEntityCardEditor extends LitElement
   implements LovelaceCardEditor {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: PictureEntityCardConfig;
+  @property() private _config?: PictureEntityCardConfig;
 
   public setConfig(config: PictureEntityCardConfig): void {
     config = cardConfigStruct(config);
@@ -79,7 +76,7 @@ export class HuiPictureEntityCardEditor extends LitElement
   }
 
   get _aspect_ratio(): string {
-    return this._config!.aspect_ratio || "";
+    return this._config!.aspect_ratio || "50";
   }
 
   get _tap_action(): ActionConfig {
@@ -109,7 +106,6 @@ export class HuiPictureEntityCardEditor extends LitElement
 
     const actions = ["more-info", "toggle", "navigate", "call-service", "none"];
     const views = ["auto", "live"];
-    const dir = computeRTLDirection(this.hass!);
 
     return html`
       ${configElementStyle}
@@ -191,34 +187,22 @@ export class HuiPictureEntityCardEditor extends LitElement
           ></paper-input>
         </div>
         <div class="side-by-side">
-          <div>
-            <ha-formfield
-              .label=${this.hass.localize(
-                "ui.panel.lovelace.editor.card.generic.show_name"
-              )}
-              .dir=${dir}
-            >
-              <ha-switch
-                .checked="${this._config!.show_name !== false}"
-                .configValue="${"show_name"}"
-                @change="${this._valueChanged}"
-              ></ha-switch
-            ></ha-formfield>
-          </div>
-          <div>
-            <ha-formfield
-              .label=${this.hass.localize(
-                "ui.panel.lovelace.editor.card.generic.show_state"
-              )}
-              .dir=${dir}
-            >
-              <ha-switch
-                .checked="${this._config!.show_state !== false}"
-                .configValue="${"show_state"}"
-                @change="${this._valueChanged}"
-              ></ha-switch
-            ></ha-formfield>
-          </div>
+          <ha-switch
+            .checked="${this._config!.show_name !== false}"
+            .configValue="${"show_name"}"
+            @change="${this._valueChanged}"
+            >${this.hass.localize(
+              "ui.panel.lovelace.editor.card.generic.show_name"
+            )}</ha-switch
+          >
+          <ha-switch
+            .checked="${this._config!.show_state !== false}"
+            .configValue="${"show_state"}"
+            @change="${this._valueChanged}"
+            >${this.hass.localize(
+              "ui.panel.lovelace.editor.card.generic.show_state"
+            )}</ha-switch
+          >
         </div>
         <div class="side-by-side">
           <hui-action-editor

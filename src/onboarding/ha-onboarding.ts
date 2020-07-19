@@ -1,26 +1,25 @@
 import {
   Auth,
   createConnection,
+  genClientId,
   getAuth,
   subscribeConfig,
-  genClientId,
 } from "home-assistant-js-websocket";
 import {
   customElement,
   html,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
 import { HASSDomEvent } from "../common/dom/fire_event";
 import { subscribeOne } from "../common/util/subscribe-one";
-import { hassUrl, AuthUrlSearchParams } from "../data/auth";
+import { hassUrl } from "../data/auth";
 import {
   fetchOnboardingOverview,
   OnboardingResponses,
   OnboardingStep,
-  onboardIntegrationStep,
+  ValidOnboardingStep,
 } from "../data/onboarding";
 import { subscribeUser } from "../data/ws-user";
 import { litLocalizeLiteMixin } from "../mixins/lit-localize-lite-mixin";
@@ -29,40 +28,31 @@ import { HomeAssistant } from "../types";
 import { registerServiceWorker } from "../util/register-service-worker";
 import "./onboarding-create-user";
 import "./onboarding-loading";
-import { extractSearchParamsObject } from "../common/url/search-params";
 
-type OnboardingEvent =
-  | {
-      type: "user";
-      result: OnboardingResponses["user"];
-    }
-  | {
-      type: "core_config";
-      result: OnboardingResponses["core_config"];
-    }
-  | {
-      type: "integration";
-    };
+interface OnboardingEvent<T extends ValidOnboardingStep> {
+  type: T;
+  result: OnboardingResponses[T];
+}
 
 declare global {
   interface HASSDomEvents {
-    "onboarding-step": OnboardingEvent;
+    "onboarding-step": OnboardingEvent<ValidOnboardingStep>;
   }
 
   interface GlobalEventHandlersEventMap {
-    "onboarding-step": HASSDomEvent<OnboardingEvent>;
+    "onboarding-step": HASSDomEvent<OnboardingEvent<ValidOnboardingStep>>;
   }
 }
 
 @customElement("ha-onboarding")
 class HaOnboarding extends litLocalizeLiteMixin(HassElement) {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   public translationFragment = "page-onboarding";
 
-  @internalProperty() private _loading = false;
+  @property() private _loading = false;
 
-  @internalProperty() private _steps?: OnboardingStep[];
+  @property() private _steps?: OnboardingStep[];
 
   protected render(): TemplateResult {
     const step = this._curStep()!;
@@ -106,7 +96,7 @@ class HaOnboarding extends litLocalizeLiteMixin(HassElement) {
     import(
       /* webpackChunkName: "onboarding-core-config" */ "./onboarding-core-config"
     );
-    registerServiceWorker(this, false);
+    registerServiceWorker(false);
     this.addEventListener("onboarding-step", (ev) => this._handleStepDone(ev));
   }
 
@@ -160,7 +150,9 @@ class HaOnboarding extends litLocalizeLiteMixin(HassElement) {
     }
   }
 
-  private async _handleStepDone(ev: HASSDomEvent<OnboardingEvent>) {
+  private async _handleStepDone(
+    ev: HASSDomEvent<OnboardingEvent<ValidOnboardingStep>>
+  ) {
     const stepResult = ev.detail;
     this._steps = this._steps!.map((step) =>
       step.step === stepResult.type ? { ...step, done: true } : step
@@ -184,40 +176,8 @@ class HaOnboarding extends litLocalizeLiteMixin(HassElement) {
     } else if (stepResult.type === "core_config") {
       // We do nothing
     } else if (stepResult.type === "integration") {
+      const result = stepResult.result as OnboardingResponses["integration"];
       this._loading = true;
-
-      // Determine if oauth redirect has been provided
-      const externalAuthParams = extractSearchParamsObject() as AuthUrlSearchParams;
-      const authParams =
-        externalAuthParams.client_id && externalAuthParams.redirect_uri
-          ? externalAuthParams
-          : {
-              client_id: genClientId(),
-              redirect_uri: `${location.protocol}//${location.host}/?auth_callback=1`,
-              state: btoa(
-                JSON.stringify({
-                  hassUrl: `${location.protocol}//${location.host}`,
-                  clientId: genClientId(),
-                })
-              ),
-            };
-
-      let result: OnboardingResponses["integration"];
-
-      try {
-        result = await onboardIntegrationStep(this.hass!, {
-          client_id: authParams.client_id!,
-          redirect_uri: authParams.redirect_uri!,
-        });
-      } catch (err) {
-        this.hass!.connection.close();
-        await this.hass!.auth.revoke();
-
-        alert(`Unable to finish onboarding: ${err.message}`);
-
-        document.location.assign("/?");
-        return;
-      }
 
       // If we don't close the connection manually, the connection will be
       // closed when we navigate away from the page. Firefox allows JS to
@@ -231,17 +191,17 @@ class HaOnboarding extends litLocalizeLiteMixin(HassElement) {
       // Revoke current auth token.
       await this.hass!.auth.revoke();
 
-      // Build up the url to redirect to
-      let redirectUrl = authParams.redirect_uri!;
-      redirectUrl +=
-        (redirectUrl.includes("?") ? "&" : "?") +
-        `code=${encodeURIComponent(result.auth_code)}`;
-
-      if (authParams.state) {
-        redirectUrl += `&state=${encodeURIComponent(authParams.state)}`;
-      }
-
-      document.location.assign(redirectUrl);
+      const state = btoa(
+        JSON.stringify({
+          hassUrl: `${location.protocol}//${location.host}`,
+          clientId: genClientId(),
+        })
+      );
+      document.location.assign(
+        `/?auth_callback=1&code=${encodeURIComponent(
+          result.auth_code
+        )}&state=${state}`
+      );
     }
   }
 

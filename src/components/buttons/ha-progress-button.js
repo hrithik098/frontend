@@ -1,5 +1,5 @@
 import "@material/mwc-button";
-import "../ha-circular-progress";
+import "@polymer/paper-spinner/paper-spinner";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
@@ -8,9 +8,6 @@ class HaProgressButton extends PolymerElement {
   static get template() {
     return html`
       <style>
-        :host {
-          outline: none;
-        }
         .container {
           position: relative;
           display: inline-block;
@@ -22,13 +19,13 @@ class HaProgressButton extends PolymerElement {
 
         .success mwc-button {
           --mdc-theme-primary: white;
-          background-color: var(--success-color);
+          background-color: var(--google-green-500);
           transition: none;
         }
 
         .error mwc-button {
           --mdc-theme-primary: white;
-          background-color: var(--error-color);
+          background-color: var(--google-red-500);
           transition: none;
         }
 
@@ -51,9 +48,7 @@ class HaProgressButton extends PolymerElement {
           <slot></slot>
         </mwc-button>
         <template is="dom-if" if="[[progress]]">
-          <div class="progress">
-            <ha-circular-progress active size="small"></ha-circular-progress>
-          </div>
+          <div class="progress"><paper-spinner active=""></paper-spinner></div>
         </template>
       </div>
     `;

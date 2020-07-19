@@ -1,4 +1,4 @@
-import { mdiArrowUpBoldCircle, mdiPuzzle } from "@mdi/js";
+import "@polymer/paper-card/paper-card";
 import {
   css,
   CSSResult,
@@ -10,7 +10,6 @@ import {
 } from "lit-element";
 import { atLeastVersion } from "../../../src/common/config/version";
 import { navigate } from "../../../src/common/navigate";
-import "../../../src/components/ha-card";
 import { HassioAddonInfo } from "../../../src/data/hassio/addon";
 import { haStyle } from "../../../src/resources/styles";
 import { HomeAssistant } from "../../../src/types";
@@ -19,7 +18,7 @@ import { hassioStyle } from "../resources/hassio-style";
 
 @customElement("hassio-addons")
 class HassioAddons extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public addons?: HassioAddonInfo[];
 
@@ -30,19 +29,19 @@ class HassioAddons extends LitElement {
         <div class="card-group">
           ${!this.addons
             ? html`
-                <ha-card>
+                <paper-card>
                   <div class="card-content">
                     You don't have any add-ons installed yet. Head over to
                     <a href="#" @click=${this._openStore}>the add-on store</a>
                     to get started!
                   </div>
-                </ha-card>
+                </paper-card>
               `
             : this.addons
                 .sort((a, b) => (a.name > b.name ? 1 : -1))
                 .map(
                   (addon) => html`
-                    <ha-card .addon=${addon} @click=${this._addonTapped}>
+                    <paper-card .addon=${addon} @click=${this._addonTapped}>
                       <div class="card-content">
                         <hassio-card-content
                           .hass=${this.hass}
@@ -52,8 +51,8 @@ class HassioAddons extends LitElement {
                           .showTopbar=${addon.installed !== addon.version}
                           topbarClass="update"
                           .icon=${addon.installed !== addon.version
-                            ? mdiArrowUpBoldCircle
-                            : mdiPuzzle}
+                            ? "hassio:arrow-up-bold-circle"
+                            : "hassio:puzzle"}
                           .iconTitle=${addon.state !== "started"
                             ? "Add-on is stopped"
                             : addon.installed !== addon.version
@@ -76,7 +75,7 @@ class HassioAddons extends LitElement {
                             : undefined}
                         ></hassio-card-content>
                       </div>
-                    </ha-card>
+                    </paper-card>
                   `
                 )}
         </div>
@@ -89,7 +88,7 @@ class HassioAddons extends LitElement {
       haStyle,
       hassioStyle,
       css`
-        ha-card {
+        paper-card {
           cursor: pointer;
         }
       `,

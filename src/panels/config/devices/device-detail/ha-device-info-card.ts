@@ -17,7 +17,7 @@ import { HomeAssistant } from "../../../../types";
 
 @customElement("ha-device-info-card")
 export class HaDeviceCard extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public device!: DeviceRegistryEntry;
 
@@ -29,9 +29,7 @@ export class HaDeviceCard extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <ha-card
-        .header=${this.hass.localize("ui.panel.config.devices.device_info")}
-      >
+      <ha-card header="Device info">
         <div class="card-content">
           ${this.device.model
             ? html` <div class="model">${this.device.model}</div> `
@@ -75,7 +73,6 @@ export class HaDeviceCard extends LitElement {
             : ""}
           <slot></slot>
         </div>
-        <slot name="actions"></slot>
       </ha-card>
     `;
   }
@@ -101,6 +98,7 @@ export class HaDeviceCard extends LitElement {
       }
       ha-card {
         flex: 1 0 100%;
+        padding-bottom: 10px;
         min-width: 0;
       }
       .device {

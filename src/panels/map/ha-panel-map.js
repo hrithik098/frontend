@@ -11,7 +11,6 @@ import "../../components/ha-menu-button";
 import { defaultRadiusColor } from "../../data/zone";
 import LocalizeMixin from "../../mixins/localize-mixin";
 import "./ha-entity-marker";
-import "../../styles/polymer-ha-style";
 
 /*
  * @appliesMixin LocalizeMixin
@@ -35,10 +34,10 @@ class HaPanelMap extends LocalizeMixin(PolymerElement) {
         <ha-menu-button hass="[[hass]]" narrow="[[narrow]]"></ha-menu-button>
         <div main-title>[[localize('panel.map')]]</div>
         <template is="dom-if" if="[[computeShowEditZone(hass)]]">
-          <ha-icon-button
+          <paper-icon-button
             icon="hass:pencil"
             on-click="openZonesEditor"
-          ></ha-icon-button>
+          ></paper-icon-button>
         </template>
       </app-toolbar>
 
@@ -124,6 +123,7 @@ class HaPanelMap extends LocalizeMixin(PolymerElement) {
       var entity = hass.states[entityId];
 
       if (
+        (entity.attributes.hidden && computeStateDomain(entity) !== "zone") ||
         entity.state === "home" ||
         !("latitude" in entity.attributes) ||
         !("longitude" in entity.attributes)

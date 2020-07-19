@@ -1,12 +1,14 @@
+import "@polymer/paper-icon-button/paper-icon-button";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 import { computeStateDomain } from "../../../common/entity/compute_state_domain";
 import { computeStateName } from "../../../common/entity/compute_state_name";
 import { sortStatesByName } from "../../../common/entity/states_sort_by_name";
+import "../../../components/ha-paper-icon-button-arrow-prev";
 import "../../../layouts/hass-tabs-subpage";
 import LocalizeMixin from "../../../mixins/localize-mixin";
-import "../../../styles/polymer-ha-style";
+import "../../../resources/ha-style";
 import "../ha-config-section";
 import "../ha-entity-config";
 import { configSections } from "../ha-panel-config";
@@ -18,7 +20,12 @@ import "./ha-form-customize";
 class HaConfigCustomize extends LocalizeMixin(PolymerElement) {
   static get template() {
     return html`
-      <style include="ha-style"></style>
+      <style include="ha-style">
+        ha-paper-icon-button-arrow-prev[hide] {
+          visibility: hidden;
+        }
+      </style>
+
       <hass-tabs-subpage
         hass="[[hass]]"
         narrow="[[narrow]]"
@@ -37,7 +44,7 @@ class HaConfigCustomize extends LocalizeMixin(PolymerElement) {
             </span>
             <ha-entity-config
               hass="[[hass]]"
-              label="[[localize('ui.panel.config.customize.picker.entity')]]"
+              label="Entity"
               entities="[[entities]]"
               config="[[entityConfig]]"
             >

@@ -1,7 +1,7 @@
 import "@material/mwc-button";
-import "@material/mwc-list/mwc-list-item";
-import "@material/mwc-icon-button";
-import "../../../components/ha-button-menu";
+import "@polymer/paper-icon-button/paper-icon-button";
+import "@polymer/paper-listbox/paper-listbox";
+import "@polymer/paper-menu-button/paper-menu-button";
 import {
   css,
   CSSResult,
@@ -10,30 +10,24 @@ import {
   LitElement,
   property,
   TemplateResult,
-  queryAssignedNodes,
 } from "lit-element";
+import { LovelaceCardConfig } from "../../../data/lovelace";
 import { HomeAssistant } from "../../../types";
 import { showEditCardDialog } from "../editor/card-editor/show-edit-card-dialog";
 import { showMoveCardViewDialog } from "../editor/card-editor/show-move-card-view-dialog";
 import { swapCard } from "../editor/config-util";
 import { confDeleteCard } from "../editor/delete-card";
-import { Lovelace, LovelaceCard } from "../types";
-import { computeCardSize } from "../common/compute-card-size";
-import { mdiDotsVertical, mdiArrowDown, mdiArrowUp } from "@mdi/js";
+import { Lovelace } from "../types";
 
 @customElement("hui-card-options")
 export class HuiCardOptions extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  public cardConfig?: LovelaceCardConfig;
 
-  @property({ attribute: false }) public lovelace?: Lovelace;
+  @property() public hass?: HomeAssistant;
+
+  @property() public lovelace?: Lovelace;
 
   @property() public path?: [number, number];
-
-  @queryAssignedNodes() private _assignedNodes?: NodeListOf<LovelaceCard>;
-
-  public getCardSize() {
-    return this._assignedNodes ? computeCardSize(this._assignedNodes[0]) : 1;
-  }
 
   protected render(): TemplateResult {
     return html`
@@ -48,55 +42,53 @@ export class HuiCardOptions extends LitElement {
             >
           </div>
           <div class="secondary-actions">
-            <mwc-icon-button
+            <paper-icon-button
               title="Move card down"
               class="move-arrow"
+              icon="hass:arrow-down"
               @click=${this._cardDown}
               ?disabled=${this.lovelace!.config.views[this.path![0]].cards!
                 .length ===
               this.path![1] + 1}
-            >
-              <ha-svg-icon path=${mdiArrowDown}></ha-svg-icon>
-            </mwc-icon-button>
-            <mwc-icon-button
+            ></paper-icon-button>
+            <paper-icon-button
               title="Move card up"
               class="move-arrow"
+              icon="hass:arrow-up"
               @click=${this._cardUp}
               ?disabled=${this.path![1] === 0}
-              ><ha-svg-icon path=${mdiArrowUp}></ha-svg-icon
-            ></mwc-icon-button>
-            <ha-button-menu corner="BOTTOM_START">
-              <mwc-icon-button
-                slot="trigger"
+            ></paper-icon-button>
+            <paper-menu-button
+              horizontal-align="right"
+              vertical-align="bottom"
+              vertical-offset="40"
+              close-on-activate
+            >
+              <paper-icon-button
+                icon="hass:dots-vertical"
+                slot="dropdown-trigger"
                 aria-label=${this.hass!.localize(
                   "ui.panel.lovelace.editor.edit_card.options"
                 )}
-                title="${this.hass!.localize(
-                  "ui.panel.lovelace.editor.edit_card.options"
-                )}"
-              >
-                <ha-svg-icon path=${mdiDotsVertical}></ha-svg-icon>
-              </mwc-icon-button>
-
-              <mwc-list-item @request-selected=${this._moveCard}>
-                ${this.hass!.localize(
-                  "ui.panel.lovelace.editor.edit_card.move"
-                )}</mwc-list-item
-              >
-              <mwc-list-item @request-selected=${this._duplicateCard}
-                >${this.hass!.localize(
-                  "ui.panel.lovelace.editor.edit_card.duplicate"
-                )}</mwc-list-item
-              >
-              <mwc-list-item
-                class="delete-item"
-                @request-selected=${this._deleteCard}
-              >
-                ${this.hass!.localize(
-                  "ui.panel.lovelace.editor.edit_card.delete"
-                )}</mwc-list-item
-              >
-            </ha-button-menu>
+              ></paper-icon-button>
+              <paper-listbox slot="dropdown-content">
+                <paper-item @tap=${this._moveCard}>
+                  ${this.hass!.localize(
+                    "ui.panel.lovelace.editor.edit_card.move"
+                  )}</paper-item
+                >
+                <paper-item @tap=${this._duplicateCard}
+                  >${this.hass!.localize(
+                    "ui.panel.lovelace.editor.edit_card.duplicate"
+                  )}</paper-item
+                >
+                <paper-item class="delete-item" @tap=${this._deleteCard}>
+                  ${this.hass!.localize(
+                    "ui.panel.lovelace.editor.edit_card.delete"
+                  )}</paper-item
+                >
+              </paper-listbox>
+            </paper-menu-button>
           </div>
         </div>
       </ha-card>
@@ -106,12 +98,16 @@ export class HuiCardOptions extends LitElement {
   static get styles(): CSSResult {
     return css`
       :host(:hover) {
+        overflow: hidden;
         outline: 2px solid var(--primary-color);
       }
 
       ha-card {
         border-top-right-radius: 0;
         border-top-left-radius: 0;
+        box-shadow: rgba(0, 0, 0, 0.14) 0px 2px 2px 0px,
+          rgba(0, 0, 0, 0.12) 0px 1px 5px -4px,
+          rgba(0, 0, 0, 0.2) 0px 3px 1px -2px;
       }
 
       div.options {
@@ -131,20 +127,36 @@ export class HuiCardOptions extends LitElement {
         text-align: right;
       }
 
-      mwc-icon-button {
+      paper-icon-button {
         color: var(--primary-text-color);
       }
 
-      mwc-icon-button.move-arrow[disabled] {
+      paper-icon-button.move-arrow[disabled] {
         color: var(--disabled-text-color);
       }
 
-      mwc-list-item {
+      paper-menu-button {
+        color: var(--secondary-text-color);
+        padding: 0;
+      }
+
+      paper-listbox {
+        padding: 0;
+      }
+
+      paper-item.header {
+        color: var(--primary-text-color);
+        text-transform: uppercase;
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      paper-item {
         cursor: pointer;
         white-space: nowrap;
       }
 
-      mwc-list-item.delete-item {
+      paper-item.delete-item {
         color: var(--error-color);
       }
     `;

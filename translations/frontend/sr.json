@@ -57,12 +57,7 @@
                 "automation": {
                     "editor": {
                         "triggers": {
-                            "learn_more": "Сазнајте више о окидачима",
-                            "type": {
-                                "mqtt": {
-                                    "label": "MQTT"
-                                }
-                            }
+                            "learn_more": "Сазнајте више о окидачима"
                         }
                     },
                     "picker": {
@@ -80,9 +75,6 @@
                         }
                     }
                 },
-                "mqtt": {
-                    "title": "MQTT"
-                },
                 "users": {
                     "add_user": {
                         "caption": "Додај корисника",
@@ -99,6 +91,13 @@
                     "caption": "Z-Wave",
                     "node_config": {
                         "set_config_parameter": "Подесите параметар Цонфиг"
+                    }
+                }
+            },
+            "developer-tools": {
+                "tabs": {
+                    "mqtt": {
+                        "title": "MQTT"
                     }
                 }
             },

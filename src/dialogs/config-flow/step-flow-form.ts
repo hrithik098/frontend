@@ -1,5 +1,5 @@
 import "@material/mwc-button";
-import "../../components/ha-circular-progress";
+import "@polymer/paper-spinner/paper-spinner";
 import "@polymer/paper-tooltip/paper-tooltip";
 import {
   css,
@@ -16,6 +16,7 @@ import "../../components/ha-form/ha-form";
 import type { HaFormSchema } from "../../components/ha-form/ha-form";
 import "../../components/ha-markdown";
 import type { DataEntryFlowStepForm } from "../../data/data_entry_flow";
+import "../../resources/ha-style";
 import type { HomeAssistant } from "../../types";
 import type { FlowConfig } from "./show-dialog-data-entry-flow";
 import { configFlowContentStyles } from "./styles";
@@ -76,7 +77,7 @@ class StepFlowForm extends LitElement {
         ${this._loading
           ? html`
               <div class="submit-spinner">
-                <ha-circular-progress active></ha-circular-progress>
+                <paper-spinner active></paper-spinner>
               </div>
             `
           : html`

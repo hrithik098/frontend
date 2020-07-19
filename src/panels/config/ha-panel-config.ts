@@ -1,12 +1,7 @@
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
 import { PolymerElement } from "@polymer/polymer";
-import {
-  customElement,
-  property,
-  internalProperty,
-  PropertyValues,
-} from "lit-element";
+import { customElement, property, PropertyValues } from "lit-element";
 import { isComponentLoaded } from "../../common/config/is_component_loaded";
 import { listenMediaQuery } from "../../common/dom/media_query";
 import { CloudStatus, fetchCloudStatus } from "../../data/cloud";
@@ -14,25 +9,6 @@ import "../../layouts/hass-loading-screen";
 import { HassRouterPage, RouterOptions } from "../../layouts/hass-router-page";
 import { PageNavigation } from "../../layouts/hass-tabs-subpage";
 import { HomeAssistant, Route } from "../../types";
-import {
-  mdiPuzzle,
-  mdiDevices,
-  mdiShape,
-  mdiSofa,
-  mdiRobot,
-  mdiPalette,
-  mdiScriptText,
-  mdiTools,
-  mdiViewDashboard,
-  mdiAccount,
-  mdiMapMarkerRadius,
-  mdiBadgeAccountHorizontal,
-  mdiHomeAssistant,
-  mdiServer,
-  mdiInformation,
-  mdiMathLog,
-  mdiPencil,
-} from "@mdi/js";
 
 declare global {
   // for fire event
@@ -47,28 +23,28 @@ export const configSections: { [name: string]: PageNavigation[] } = {
       component: "integrations",
       path: "/config/integrations",
       translationKey: "ui.panel.config.integrations.caption",
-      iconPath: mdiPuzzle,
+      icon: "hass:puzzle",
       core: true,
     },
     {
       component: "devices",
       path: "/config/devices",
       translationKey: "ui.panel.config.devices.caption",
-      iconPath: mdiDevices,
+      icon: "hass:devices",
       core: true,
     },
     {
       component: "entities",
       path: "/config/entities",
       translationKey: "ui.panel.config.entities.caption",
-      iconPath: mdiShape,
+      icon: "hass:shape",
       core: true,
     },
     {
       component: "areas",
       path: "/config/areas",
       translationKey: "ui.panel.config.areas.caption",
-      iconPath: mdiSofa,
+      icon: "hass:sofa",
       core: true,
     },
   ],
@@ -77,25 +53,25 @@ export const configSections: { [name: string]: PageNavigation[] } = {
       component: "automation",
       path: "/config/automation",
       translationKey: "ui.panel.config.automation.caption",
-      iconPath: mdiRobot,
+      icon: "hass:robot",
     },
     {
       component: "scene",
       path: "/config/scene",
       translationKey: "ui.panel.config.scene.caption",
-      iconPath: mdiPalette,
+      icon: "hass:palette",
     },
     {
       component: "script",
       path: "/config/script",
       translationKey: "ui.panel.config.script.caption",
-      iconPath: mdiScriptText,
+      icon: "hass:script-text",
     },
     {
       component: "helpers",
       path: "/config/helpers",
       translationKey: "ui.panel.config.helpers.caption",
-      iconPath: mdiTools,
+      icon: "hass:tools",
       core: true,
     },
   ],
@@ -104,7 +80,7 @@ export const configSections: { [name: string]: PageNavigation[] } = {
       component: "lovelace",
       path: "/config/lovelace/dashboards",
       translationKey: "ui.panel.config.lovelace.caption",
-      iconPath: mdiViewDashboard,
+      icon: "hass:view-dashboard",
     },
   ],
   persons: [
@@ -112,19 +88,19 @@ export const configSections: { [name: string]: PageNavigation[] } = {
       component: "person",
       path: "/config/person",
       translationKey: "ui.panel.config.person.caption",
-      iconPath: mdiAccount,
+      icon: "hass:account",
     },
     {
       component: "zone",
       path: "/config/zone",
       translationKey: "ui.panel.config.zone.caption",
-      iconPath: mdiMapMarkerRadius,
+      icon: "hass:map-marker-radius",
     },
     {
       component: "users",
       path: "/config/users",
       translationKey: "ui.panel.config.users.caption",
-      iconPath: mdiBadgeAccountHorizontal,
+      icon: "hass:account-badge-horizontal",
       core: true,
     },
   ],
@@ -133,46 +109,44 @@ export const configSections: { [name: string]: PageNavigation[] } = {
       component: "core",
       path: "/config/core",
       translationKey: "ui.panel.config.core.caption",
-      iconPath: mdiHomeAssistant,
+      icon: "hass:home-assistant",
       core: true,
     },
     {
       component: "server_control",
       path: "/config/server_control",
       translationKey: "ui.panel.config.server_control.caption",
-      iconPath: mdiServer,
+      icon: "hass:server",
       core: true,
     },
-    {
-      component: "logs",
-      path: "/config/logs",
-      translationKey: "ui.panel.config.logs.caption",
-      iconPath: mdiMathLog,
-      core: true,
-    },
-    {
-      component: "info",
-      path: "/config/info",
-      translationKey: "ui.panel.config.info.caption",
-      iconPath: mdiInformation,
-      core: true,
-    },
-  ],
-  advanced: [
     {
       component: "customize",
       path: "/config/customize",
       translationKey: "ui.panel.config.customize.caption",
-      iconPath: mdiPencil,
+      icon: "hass:pencil",
       core: true,
       advancedOnly: true,
+    },
+  ],
+  other: [
+    {
+      component: "zha",
+      path: "/config/zha",
+      translationKey: "component.zha.title",
+      icon: "hass:zigbee",
+    },
+    {
+      component: "zwave",
+      path: "/config/zwave",
+      translationKey: "component.zwave.title",
+      icon: "hass:z-wave",
     },
   ],
 };
 
 @customElement("ha-panel-config")
 class HaPanelConfig extends HassRouterPage {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public narrow!: boolean;
 
@@ -221,20 +195,6 @@ class HaPanelConfig extends HassRouterPage {
         load: () =>
           import(
             /* webpackChunkName: "panel-config-server-control" */ "./server_control/ha-config-server-control"
-          ),
-      },
-      logs: {
-        tag: "ha-config-logs",
-        load: () =>
-          import(
-            /* webpackChunkName: "panel-config-logs" */ "./logs/ha-config-logs"
-          ),
-      },
-      info: {
-        tag: "ha-config-info",
-        load: () =>
-          import(
-            /* webpackChunkName: "panel-config-info" */ "./info/ha-config-info"
           ),
       },
       customize: {
@@ -318,31 +278,24 @@ class HaPanelConfig extends HassRouterPage {
         tag: "zha-config-dashboard-router",
         load: () =>
           import(
-            /* webpackChunkName: "panel-config-zha" */ "./integrations/integration-panels/zha/zha-config-dashboard-router"
+            /* webpackChunkName: "panel-config-zha" */ "./zha/zha-config-dashboard-router"
           ),
       },
       zwave: {
         tag: "ha-config-zwave",
         load: () =>
           import(
-            /* webpackChunkName: "panel-config-zwave" */ "./integrations/integration-panels/zwave/ha-config-zwave"
-          ),
-      },
-      mqtt: {
-        tag: "mqtt-config-panel",
-        load: () =>
-          import(
-            /* webpackChunkName: "panel-config-mqtt" */ "./integrations/integration-panels/mqtt/mqtt-config-panel"
+            /* webpackChunkName: "panel-config-zwave" */ "./zwave/ha-config-zwave"
           ),
       },
     },
   };
 
-  @internalProperty() private _wideSidebar = false;
+  @property() private _wideSidebar = false;
 
-  @internalProperty() private _wide = false;
+  @property() private _wide = false;
 
-  @internalProperty() private _cloudStatus?: CloudStatus;
+  @property() private _cloudStatus?: CloudStatus;
 
   private _listeners: Array<() => void> = [];
 

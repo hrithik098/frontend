@@ -5,7 +5,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   query,
   TemplateResult,
@@ -27,7 +26,7 @@ export interface StateSpecificConfig {
 
 @customElement("hui-image")
 export class HuiImage extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public entity?: string;
 
@@ -45,9 +44,9 @@ export class HuiImage extends LitElement {
 
   @property() public stateFilter?: StateSpecificConfig;
 
-  @internalProperty() private _loadError?: boolean;
+  @property() private _loadError?: boolean;
 
-  @internalProperty() private _cameraImageSrc?: string;
+  @property() private _cameraImageSrc?: string;
 
   @query("img") private _image!: HTMLImageElement;
 
@@ -55,8 +54,11 @@ export class HuiImage extends LitElement {
 
   private _cameraUpdater?: number;
 
+  private _attached?: boolean;
+
   public connectedCallback(): void {
     super.connectedCallback();
+    this._attached = true;
     if (this.cameraImage && this.cameraView !== "live") {
       this._startUpdateCameraInterval();
     }
@@ -64,6 +66,7 @@ export class HuiImage extends LitElement {
 
   public disconnectedCallback(): void {
     super.disconnectedCallback();
+    this._attached = false;
     this._stopUpdateCameraInterval();
   }
 
@@ -167,7 +170,7 @@ export class HuiImage extends LitElement {
 
   private _startUpdateCameraInterval(): void {
     this._stopUpdateCameraInterval();
-    if (this.cameraImage && this.isConnected) {
+    if (this.cameraImage && this._attached) {
       this._cameraUpdater = window.setInterval(
         () => this._updateCameraImageSrc(),
         UPDATE_INTERVAL
@@ -178,7 +181,6 @@ export class HuiImage extends LitElement {
   private _stopUpdateCameraInterval(): void {
     if (this._cameraUpdater) {
       clearInterval(this._cameraUpdater);
-      this._cameraUpdater = undefined;
     }
   }
 

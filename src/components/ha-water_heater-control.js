@@ -1,5 +1,5 @@
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
-import "./ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
@@ -20,7 +20,7 @@ class HaWaterHeaterControl extends EventsMixin(PolymerElement) {
           @apply --layout-justified;
         }
         .in-flux#target_temperature {
-          color: var(--error-color);
+          color: var(--google-red-500);
         }
         #target_temperature {
           @apply --layout-self-center;
@@ -30,7 +30,7 @@ class HaWaterHeaterControl extends EventsMixin(PolymerElement) {
           font-size: 200%;
           text-align: right;
         }
-        ha-icon-button {
+        paper-icon-button {
           height: 48px;
           width: 48px;
         }
@@ -40,16 +40,16 @@ class HaWaterHeaterControl extends EventsMixin(PolymerElement) {
       <div id="target_temperature">[[value]] [[units]]</div>
       <div class="control-buttons">
         <div>
-          <ha-icon-button
+          <paper-icon-button
             icon="hass:chevron-up"
             on-click="incrementValue"
-          ></ha-icon-button>
+          ></paper-icon-button>
         </div>
         <div>
-          <ha-icon-button
+          <paper-icon-button
             icon="hass:chevron-down"
             on-click="decrementValue"
-          ></ha-icon-button>
+          ></paper-icon-button>
         </div>
       </div>
     `;

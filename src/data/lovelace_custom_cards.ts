@@ -3,7 +3,6 @@ export interface CustomCardEntry {
   name?: string;
   description?: string;
   preview?: boolean;
-  documentationURL?: string;
 }
 
 export interface CustomCardsWindow {

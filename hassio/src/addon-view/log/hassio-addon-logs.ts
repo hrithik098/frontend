@@ -1,4 +1,5 @@
 import "@material/mwc-button";
+import "@polymer/paper-card/paper-card";
 import {
   css,
   CSSResult,
@@ -6,10 +7,8 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
-import "../../../../src/components/ha-card";
 import {
   fetchHassioAddonLogs,
   HassioAddonDetails,
@@ -25,9 +24,9 @@ class HassioAddonLogs extends LitElement {
 
   @property({ attribute: false }) public addon!: HassioAddonDetails;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _content?: string;
+  @property() private _content?: string;
 
   public async connectedCallback(): Promise<void> {
     super.connectedCallback();
@@ -37,7 +36,7 @@ class HassioAddonLogs extends LitElement {
   protected render(): TemplateResult {
     return html`
       <h1>${this.addon.name}</h1>
-      <ha-card>
+      <paper-card>
         ${this._error ? html` <div class="errors">${this._error}</div> ` : ""}
         <div class="card-content">
           ${this._content
@@ -49,7 +48,7 @@ class HassioAddonLogs extends LitElement {
         <div class="card-actions">
           <mwc-button @click=${this._refresh}>Refresh</mwc-button>
         </div>
-      </ha-card>
+      </paper-card>
     `;
   }
 
@@ -59,11 +58,11 @@ class HassioAddonLogs extends LitElement {
       hassioStyle,
       css`
         :host,
-        ha-card {
+        paper-card {
           display: block;
         }
         .errors {
-          color: var(--error-color);
+          color: var(--google-red-500);
           margin-bottom: 16px;
         }
       `,

@@ -3,10 +3,7 @@ import { navigate } from "../../common/navigate";
 import { CustomPanelInfo } from "../../data/panel_custom";
 import { HomeAssistant, Route } from "../../types";
 import { createCustomPanelElement } from "../../util/custom-panel/create-custom-panel-element";
-import {
-  loadCustomPanel,
-  getUrl,
-} from "../../util/custom-panel/load-custom-panel";
+import { loadCustomPanel } from "../../util/custom-panel/load-custom-panel";
 import { setCustomPanelProperties } from "../../util/custom-panel/set-custom-panel-properties";
 
 declare global {
@@ -16,7 +13,7 @@ declare global {
 }
 
 export class HaPanelCustom extends UpdatingElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public narrow!: boolean;
 
@@ -46,8 +43,7 @@ export class HaPanelCustom extends UpdatingElement {
     this._cleanupPanel();
   }
 
-  protected update(changedProps: PropertyValues) {
-    super.update(changedProps);
+  protected updated(changedProps: PropertyValues) {
     if (changedProps.has("panel")) {
       // Clean up old things if we had a panel
       if (changedProps.get("panel")) {
@@ -77,10 +73,9 @@ export class HaPanelCustom extends UpdatingElement {
 
   private _createPanel(panel: CustomPanelInfo) {
     const config = panel.config!._panel_custom;
-    const panelUrl = getUrl(config);
 
     const tempA = document.createElement("a");
-    tempA.href = panelUrl.url;
+    tempA.href = config.html_url || config.js_url || config.module_url || "";
 
     if (
       !config.trust_external &&

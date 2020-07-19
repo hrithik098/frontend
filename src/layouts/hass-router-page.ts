@@ -147,8 +147,6 @@ export class HassRouterPage extends UpdatingElement {
       ? routeOptions.load()
       : Promise.resolve();
 
-    let showLoadingScreenTimeout: undefined | number;
-
     // Check when loading the page source failed.
     loadProm.catch((err) => {
       // eslint-disable-next-line
@@ -160,18 +158,12 @@ export class HassRouterPage extends UpdatingElement {
       }
 
       // Removes either loading screen or the panel
-      if (this.lastChild) {
-        this.removeChild(this.lastChild!);
-      }
-
-      if (showLoadingScreenTimeout) {
-        clearTimeout(showLoadingScreenTimeout);
-      }
+      this.removeChild(this.lastChild!);
 
       // Show error screen
-      this.appendChild(
-        this.createErrorScreen(`Error while loading page ${newPage}.`)
-      );
+      const errorEl = document.createElement("hass-error-screen");
+      errorEl.error = `Error while loading page ${newPage}.`;
+      this.appendChild(errorEl);
     });
 
     // If we don't show loading screen, just show the panel.
@@ -185,7 +177,7 @@ export class HassRouterPage extends UpdatingElement {
     // That way we won't have a double fast flash on fast connections.
     let created = false;
 
-    showLoadingScreenTimeout = window.setTimeout(() => {
+    setTimeout(() => {
       if (created || this._currentPage !== newPage) {
         return;
       }
@@ -250,12 +242,6 @@ export class HassRouterPage extends UpdatingElement {
 
   protected createLoadingScreen() {
     return document.createElement("hass-loading-screen");
-  }
-
-  protected createErrorScreen(error: string) {
-    const errorEl = document.createElement("hass-error-screen");
-    errorEl.error = error;
-    return errorEl;
   }
 
   /**

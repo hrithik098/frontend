@@ -9,7 +9,7 @@ import {
 
 @customElement("ha-automation-condition-time")
 export class HaTimeCondition extends LitElement implements ConditionElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public condition!: TimeCondition;
 

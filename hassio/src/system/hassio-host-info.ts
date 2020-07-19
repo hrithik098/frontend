@@ -1,4 +1,5 @@
 import "@material/mwc-button";
+import "@polymer/paper-card/paper-card";
 import {
   css,
   CSSResult,
@@ -6,46 +7,42 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import "../../../src/components/buttons/ha-call-api-button";
 import { fetchHassioHardwareInfo } from "../../../src/data/hassio/hardware";
 import {
-  changeHostOptions,
   fetchHassioHostInfo,
   HassioHassOSInfo,
   HassioHostInfo as HassioHostInfoType,
   rebootHost,
   shutdownHost,
   updateOS,
+  changeHostOptions,
 } from "../../../src/data/hassio/host";
-import { HassioInfo } from "../../../src/data/hassio/supervisor";
-import {
-  showAlertDialog,
-  showConfirmationDialog,
-  showPromptDialog,
-} from "../../../src/dialogs/generic/show-dialog-box";
 import { haStyle } from "../../../src/resources/styles";
 import { HomeAssistant } from "../../../src/types";
 import { showHassioMarkdownDialog } from "../dialogs/markdown/show-dialog-hassio-markdown";
 import { hassioStyle } from "../resources/hassio-style";
+import {
+  showConfirmationDialog,
+  showAlertDialog,
+  showPromptDialog,
+} from "../../../src/dialogs/generic/show-dialog-box";
 
 @customElement("hassio-host-info")
 class HassioHostInfo extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public hostInfo!: HassioHostInfoType;
 
-  @property({ attribute: false }) public hassioInfo!: HassioInfo;
+  @property() public hassOsInfo!: HassioHassOSInfo;
 
-  @property({ attribute: false }) public hassOsInfo!: HassioHassOSInfo;
-
-  @internalProperty() private _errors?: string;
+  @property() private _errors?: string;
 
   public render(): TemplateResult | void {
     return html`
-      <ha-card>
+      <paper-card>
         <div class="card-content">
           <h2>Host system</h2>
           <table class="info">
@@ -58,12 +55,6 @@ class HassioHostInfo extends LitElement {
                 <td>System</td>
                 <td>${this.hostInfo.operating_system}</td>
               </tr>
-              ${!this.hostInfo.features.includes("hassos")
-                ? html`<tr>
-                    <td>Docker version</td>
-                    <td>${this.hassioInfo.docker}</td>
-                  </tr>`
-                : ""}
               ${this.hostInfo.deployment
                 ? html`
                     <tr>
@@ -122,7 +113,7 @@ class HassioHostInfo extends LitElement {
             ? html` <mwc-button @click=${this._updateOS}>Update</mwc-button> `
             : ""}
         </div>
-      </ha-card>
+      </paper-card>
     `;
   }
 
@@ -131,7 +122,7 @@ class HassioHostInfo extends LitElement {
       haStyle,
       hassioStyle,
       css`
-        ha-card {
+        paper-card {
           height: 100%;
           width: 100%;
         }
@@ -147,7 +138,7 @@ class HassioHostInfo extends LitElement {
           text-align: right;
         }
         .errors {
-          color: var(--error-color);
+          color: var(--google-red-500);
           margin-top: 16px;
         }
         mwc-button.info {
@@ -157,7 +148,7 @@ class HassioHostInfo extends LitElement {
           margin-bottom: 10px;
         }
         .warning {
-          --mdc-theme-primary: var(--error-color);
+          --mdc-theme-primary: var(--google-red-500);
         }
       `,
     ];

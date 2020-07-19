@@ -6,12 +6,11 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { compare } from "../../../common/string/compare";
 import "../../../components/ha-card";
-import "@material/mwc-fab";
+import "../../../components/ha-fab";
 import {
   createPerson,
   deletePerson,
@@ -30,12 +29,9 @@ import {
   loadPersonDetailDialog,
   showPersonDetailDialog,
 } from "./show-dialog-person-detail";
-import "../../../components/ha-svg-icon";
-import { mdiPlus } from "@mdi/js";
-import { computeRTL } from "../../../common/util/compute_rtl";
 
 class HaConfigPerson extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public isWide?: boolean;
 
@@ -43,9 +39,9 @@ class HaConfigPerson extends LitElement {
 
   @property() public route!: Route;
 
-  @internalProperty() private _storageItems?: Person[];
+  @property() private _storageItems?: Person[];
 
-  @internalProperty() private _configItems?: Person[];
+  @property() private _configItems?: Person[];
 
   private _usersLoad?: Promise<User[]>;
 
@@ -125,15 +121,13 @@ class HaConfigPerson extends LitElement {
         </ha-config-section>
       </hass-tabs-subpage>
 
-      <mwc-fab
+      <ha-fab
         ?is-wide=${this.isWide}
         ?narrow=${this.narrow}
-        ?rtl=${computeRTL(this.hass!)}
+        icon="hass:plus"
         title="${hass.localize("ui.panel.config.person.add_person")}"
         @click=${this._createPerson}
-      >
-        <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-      </mwc-fab>
+      ></ha-fab>
     `;
   }
 
@@ -243,27 +237,18 @@ class HaConfigPerson extends LitElement {
       ha-card.storage paper-item {
         cursor: pointer;
       }
-      mwc-fab {
+      ha-fab {
         position: fixed;
         bottom: 16px;
         right: 16px;
         z-index: 1;
       }
-      mwc-fab[narrow] {
+      ha-fab[narrow] {
         bottom: 84px;
       }
-      mwc-fab[is-wide] {
+      ha-fab[is-wide] {
         bottom: 24px;
         right: 24px;
-      }
-      mwc-fab[rtl] {
-        right: auto;
-        left: 16px;
-      }
-      mwc-fab[is-wide][rtl] {
-        bottom: 24px;
-        left: 24px;
-        right: auto;
       }
     `;
   }

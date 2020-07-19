@@ -23,10 +23,10 @@ import { EntitiesCardEntityConfig } from "../cards/types";
 import { actionHandler } from "../common/directives/action-handler-directive";
 import { handleAction } from "../common/handle-action";
 import { hasAction } from "../common/has-action";
-import { createEntityNotFoundWarning } from "./hui-warning";
+import "./hui-warning";
 
 class HuiGenericEntityRow extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public config?: EntitiesCardEntityConfig;
 
@@ -42,9 +42,13 @@ class HuiGenericEntityRow extends LitElement {
 
     if (!stateObj) {
       return html`
-        <hui-warning>
-          ${createEntityNotFoundWarning(this.hass, this.config.entity)}
-        </hui-warning>
+        <hui-warning
+          >${this.hass.localize(
+            "ui.panel.lovelace.warning.entity_not_found",
+            "entity",
+            this.config.entity
+          )}</hui-warning
+        >
       `;
     }
 
@@ -118,11 +122,6 @@ class HuiGenericEntityRow extends LitElement {
                   ? `${this.hass.localize("ui.card.cover.tilt_position")}: ${
                       stateObj.attributes.current_tilt_position
                     }`
-                  : this.config.secondary_info === "brightness" &&
-                    stateObj.attributes.brightness
-                  ? html`${Math.round(
-                      (stateObj.attributes.brightness / 255) * 100
-                    )}%`
                   : "")}
               </div>
             `
@@ -179,6 +178,11 @@ class HuiGenericEntityRow extends LitElement {
       }
       state-badge {
         flex: 0 0 40px;
+      }
+      state-badge:focus {
+        outline: none;
+        background: var(--divider-color);
+        border-radius: 100%;
       }
       :host([rtl]) .flex {
         margin-left: 0;

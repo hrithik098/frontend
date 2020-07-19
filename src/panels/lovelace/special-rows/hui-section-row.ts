@@ -4,7 +4,7 @@ import {
   customElement,
   html,
   LitElement,
-  internalProperty,
+  property,
   TemplateResult,
 } from "lit-element";
 import "../../../components/ha-icon";
@@ -15,7 +15,7 @@ import { LovelaceRow, SectionConfig } from "../entity-rows/types";
 class HuiSectionRow extends LitElement implements LovelaceRow {
   public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: SectionConfig;
+  @property() private _config?: SectionConfig;
 
   public setConfig(config: SectionConfig): void {
     if (!config) {

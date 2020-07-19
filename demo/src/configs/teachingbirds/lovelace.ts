@@ -63,7 +63,8 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
                   elements: [
                     {
                       style: {
-                        "--mdc-icon-size": "100%",
+                        "--iron-icon-width": "100px",
+                        "--iron-icon-height": "100px",
                         top: "50%",
                         left: "50%",
                       },

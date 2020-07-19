@@ -1,5 +1,4 @@
-import "@material/mwc-icon-button";
-import { mdiMenu } from "@mdi/js";
+import "@polymer/paper-icon-button/paper-icon-button";
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import {
   css,
@@ -8,14 +7,12 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../common/dom/fire_event";
 import { computeDomain } from "../common/entity/compute_domain";
 import { subscribeNotifications } from "../data/persistent_notification";
 import { HomeAssistant } from "../types";
-import "./ha-svg-icon";
 
 @customElement("ha-menu-button")
 class HaMenuButton extends LitElement {
@@ -23,9 +20,9 @@ class HaMenuButton extends LitElement {
 
   @property() public narrow!: boolean;
 
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _hasNotifications = false;
+  @property() private _hasNotifications = false;
 
   private _alwaysVisible = false;
 
@@ -58,12 +55,11 @@ class HaMenuButton extends LitElement {
           (entityId) => computeDomain(entityId) === "configurator"
         ));
     return html`
-      <mwc-icon-button
+      <paper-icon-button
         aria-label=${this.hass.localize("ui.sidebar.sidebar_toggle")}
+        .icon=${this.hassio ? "hassio:menu" : "hass:menu"}
         @click=${this._toggleMenu}
-      >
-        <ha-svg-icon path=${mdiMenu}></ha-svg-icon>
-      </mwc-icon-button>
+      ></paper-icon-button>
       ${hasNotifications ? html` <div class="dot"></div> ` : ""}
     `;
   }
@@ -137,8 +133,8 @@ class HaMenuButton extends LitElement {
         background-color: var(--accent-color);
         width: 12px;
         height: 12px;
-        top: 9px;
-        right: 7px;
+        top: 5px;
+        right: 2px;
         border-radius: 50%;
         border: 2px solid var(--app-header-background-color);
       }

@@ -1,14 +1,12 @@
 import "@polymer/app-layout/app-header/app-header";
-import "@polymer/paper-dropdown-menu/paper-dropdown-menu-light";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import {
   css,
   CSSResult,
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -17,15 +15,13 @@ import { computeObjectId } from "../../../common/entity/compute_object_id";
 import { navigate } from "../../../common/navigate";
 import { computeRTL } from "../../../common/util/compute_rtl";
 import "../../../components/ha-card";
-import "../../../components/ha-icon-input";
-import "@material/mwc-fab";
+import "../../../components/ha-fab";
+import "../../../components/ha-paper-icon-button-arrow-prev";
 import {
   Action,
   deleteScript,
   getScriptEditorInitData,
   ScriptConfig,
-  MODES,
-  MODES_MAX,
 } from "../../../data/script";
 import { showConfirmationDialog } from "../../../dialogs/generic/show-dialog-box";
 import "../../../layouts/ha-app-layout";
@@ -35,13 +31,9 @@ import "../automation/action/ha-automation-action";
 import { HaDeviceAction } from "../automation/action/types/ha-automation-action-device_id";
 import "../ha-config-section";
 import { configSections } from "../ha-panel-config";
-import "../../../components/ha-svg-icon";
-import { mdiContentSave } from "@mdi/js";
-import { PaperListboxElement } from "@polymer/paper-listbox";
-import { slugify } from "../../../common/string/slugify";
 
 export class HaScriptEditor extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public scriptEntityId!: string;
 
@@ -51,15 +43,11 @@ export class HaScriptEditor extends LitElement {
 
   @property() public narrow!: boolean;
 
-  @internalProperty() private _config?: ScriptConfig;
+  @property() private _config?: ScriptConfig;
 
-  @internalProperty() private _entityId?: string;
+  @property() private _dirty?: boolean;
 
-  @internalProperty() private _idError = false;
-
-  @internalProperty() private _dirty?: boolean;
-
-  @internalProperty() private _errors?: string;
+  @property() private _errors?: string;
 
   protected render(): TemplateResult {
     return html`
@@ -73,14 +61,14 @@ export class HaScriptEditor extends LitElement {
         ${!this.scriptEntityId
           ? ""
           : html`
-              <ha-icon-button
+              <paper-icon-button
                 slot="toolbar-icon"
                 title="${this.hass.localize(
                   "ui.panel.config.script.editor.delete_script"
                 )}"
                 icon="hass:delete"
                 @click=${this._deleteConfirm}
-              ></ha-icon-button>
+              ></paper-icon-button>
             `}
         ${this.narrow
           ? html` <span slot="header">${this._config?.alias}</span> `
@@ -114,83 +102,8 @@ export class HaScriptEditor extends LitElement {
                           name="alias"
                           .value=${this._config.alias}
                           @value-changed=${this._valueChanged}
-                          @change=${this._aliasChanged}
                         >
                         </paper-input>
-                        <ha-icon-input
-                          .label=${this.hass.localize(
-                            "ui.panel.config.script.editor.icon"
-                          )}
-                          .name=${"icon"}
-                          .value=${this._config.icon}
-                          @value-changed=${this._valueChanged}
-                        >
-                        </ha-icon-input>
-                        ${!this.scriptEntityId
-                          ? html` <paper-input
-                              .label=${this.hass.localize(
-                                "ui.panel.config.script.editor.id"
-                              )}
-                              .errorMessage=${this.hass.localize(
-                                "ui.panel.config.script.editor.id_already_exists"
-                              )}
-                              .invalid=${this._idError}
-                              .value=${this._entityId}
-                              @value-changed=${this._idChanged}
-                            >
-                            </paper-input>`
-                          : ""}
-                        <p>
-                          ${this.hass.localize(
-                            "ui.panel.config.script.editor.modes.description",
-                            "documentation_link",
-                            html`<a
-                              href="https://www.home-assistant.io/integrations/script/#script-modes"
-                              target="_blank"
-                              rel="noreferrer"
-                              >${this.hass.localize(
-                                "ui.panel.config.script.editor.modes.documentation"
-                              )}</a
-                            >`
-                          )}
-                        </p>
-                        <paper-dropdown-menu-light
-                          .label=${this.hass.localize(
-                            "ui.panel.config.script.editor.modes.label"
-                          )}
-                          no-animations
-                        >
-                          <paper-listbox
-                            slot="dropdown-content"
-                            .selected=${this._config.mode
-                              ? MODES.indexOf(this._config.mode)
-                              : 0}
-                            @iron-select=${this._modeChanged}
-                          >
-                            ${MODES.map(
-                              (mode) => html`
-                                <paper-item .mode=${mode}>
-                                  ${this.hass.localize(
-                                    `ui.panel.config.script.editor.modes.${mode}`
-                                  ) || mode}
-                                </paper-item>
-                              `
-                            )}
-                          </paper-listbox>
-                        </paper-dropdown-menu-light>
-                        ${this._config.mode &&
-                        MODES_MAX.includes(this._config.mode)
-                          ? html` <paper-input
-                              .label=${this.hass.localize(
-                                `ui.panel.config.script.editor.max.${this._config.mode}`
-                              )}
-                              type="number"
-                              name="max"
-                              .value=${this._config.max || "10"}
-                              @value-changed=${this._valueChanged}
-                            >
-                            </paper-input>`
-                          : html``}
                       </div>
                     </ha-card>
                   </ha-config-section>
@@ -227,18 +140,17 @@ export class HaScriptEditor extends LitElement {
               : ""}
           </div>
         </div>
-        <mwc-fab
+        <ha-fab
           ?is-wide=${this.isWide}
           ?narrow=${this.narrow}
           ?dirty=${this._dirty}
+          icon="hass:content-save"
           .title="${this.hass.localize("ui.common.save")}"
           @click=${this._saveScript}
           class="${classMap({
             rtl: computeRTL(this.hass),
           })}"
-        >
-          <ha-svg-icon slot="icon" path=${mdiContentSave}></ha-svg-icon>
-        </mwc-fab>
+        ></ha-fab>
       </hass-tabs-subpage>
     `;
   }
@@ -302,52 +214,14 @@ export class HaScriptEditor extends LitElement {
     }
   }
 
-  private _modeChanged(ev: CustomEvent) {
-    const mode = ((ev.target as PaperListboxElement)?.selectedItem as any)
-      ?.mode;
-
-    this._config = { ...this._config!, mode };
-    if (!MODES_MAX.includes(mode)) {
-      delete this._config.max;
-    }
-    this._dirty = true;
-  }
-
-  private _aliasChanged(ev: CustomEvent) {
-    if (this.scriptEntityId || this._entityId) {
-      return;
-    }
-    const aliasSlugify = slugify((ev.target as any).value, "_");
-    let id = aliasSlugify;
-    let i = 2;
-    while (this.hass.states[`script.${id}`]) {
-      id = `${aliasSlugify}_${i}`;
-      i++;
-    }
-    this._entityId = id;
-  }
-
-  private _idChanged(ev: CustomEvent) {
-    ev.stopPropagation();
-    this._entityId = (ev.target as any).value;
-    if (this.hass.states[`script.${this._entityId}`]) {
-      this._idError = true;
-    } else {
-      this._idError = false;
-    }
-  }
-
   private _valueChanged(ev: CustomEvent) {
     ev.stopPropagation();
-    const target = ev.target as any;
-    const name = target.name;
+    const name = (ev.target as any)?.name;
     if (!name) {
       return;
     }
-    let newVal = ev.detail.value;
-    if (target.type === "number") {
-      newVal = Number(newVal);
-    }
+    const newVal = ev.detail.value;
+
     if ((this._config![name] || "") === newVal) {
       return;
     }
@@ -391,15 +265,9 @@ export class HaScriptEditor extends LitElement {
   }
 
   private _saveScript(): void {
-    if (this._idError) {
-      this._errors = this.hass.localize(
-        "ui.panel.config.script.editor.id_already_exists_save_error"
-      );
-      return;
-    }
     const id = this.scriptEntityId
       ? computeObjectId(this.scriptEntityId)
-      : this._entityId || Date.now();
+      : Date.now();
     this.hass!.callApi("POST", "config/script/config/" + id, this._config).then(
       () => {
         this._dirty = false;
@@ -422,13 +290,10 @@ export class HaScriptEditor extends LitElement {
         ha-card {
           overflow: hidden;
         }
-        p {
-          margin-bottom: 0;
-        }
         .errors {
           padding: 20px;
           font-weight: bold;
-          color: var(--error-color);
+          color: var(--google-red-500);
         }
         .content {
           padding-bottom: 20px;
@@ -436,7 +301,7 @@ export class HaScriptEditor extends LitElement {
         span[slot="introduction"] a {
           color: var(--primary-color);
         }
-        mwc-fab {
+        ha-fab {
           position: fixed;
           bottom: 16px;
           right: 16px;
@@ -445,24 +310,24 @@ export class HaScriptEditor extends LitElement {
           transition: margin-bottom 0.3s;
         }
 
-        mwc-fab[is-wide] {
+        ha-fab[is-wide] {
           bottom: 24px;
           right: 24px;
         }
-        mwc-fab[narrow] {
+        ha-fab[narrow] {
           bottom: 84px;
           margin-bottom: -140px;
         }
-        mwc-fab[dirty] {
+        ha-fab[dirty] {
           margin-bottom: 0;
         }
 
-        mwc-fab.rtl {
+        ha-fab.rtl {
           right: auto;
           left: 16px;
         }
 
-        mwc-fab[is-wide].rtl {
+        ha-fab[is-wide].rtl {
           bottom: 24px;
           right: auto;
           left: 24px;

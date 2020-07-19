@@ -6,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -15,9 +14,9 @@ import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_elemen
 import "../../../components/ha-card";
 import "../../../components/ha-markdown";
 import { subscribeRenderTemplate } from "../../../data/ws-templates";
-import type { HomeAssistant } from "../../../types";
-import type { LovelaceCard, LovelaceCardEditor } from "../types";
-import type { MarkdownCardConfig } from "./types";
+import { HomeAssistant } from "../../../types";
+import { LovelaceCard, LovelaceCardEditor } from "../types";
+import { MarkdownCardConfig } from "./types";
 
 @customElement("hui-markdown-card")
 export class HuiMarkdownCard extends LitElement implements LovelaceCard {
@@ -36,20 +35,19 @@ export class HuiMarkdownCard extends LitElement implements LovelaceCard {
     };
   }
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() private _config?: MarkdownCardConfig;
 
-  @internalProperty() private _config?: MarkdownCardConfig;
+  @property() private _content?: string = "";
 
-  @internalProperty() private _content = "";
+  @property() private _unsubRenderTemplate?: Promise<UnsubscribeFunc>;
 
-  @internalProperty() private _unsubRenderTemplate?: Promise<UnsubscribeFunc>;
+  @property() private _hass?: HomeAssistant;
 
   public getCardSize(): number {
     return this._config === undefined
       ? 3
       : this._config.card_size === undefined
-      ? Math.round(this._config.content.split("\n").length / 2) +
-        (this._config.title ? 1 : 0)
+      ? this._config.content.split("\n").length + (this._config.title ? 1 : 0)
       : this._config.card_size;
   }
 
@@ -58,19 +56,21 @@ export class HuiMarkdownCard extends LitElement implements LovelaceCard {
       throw new Error("Invalid Configuration: Content Required");
     }
 
-    if (this._config?.content !== config.content) {
-      this._tryDisconnect();
-    }
     this._config = config;
-  }
-
-  public connectedCallback() {
-    super.connectedCallback();
-    this._tryConnect();
+    this._disconnect().then(() => {
+      if (this._hass) {
+        this._connect();
+      }
+    });
   }
 
   public disconnectedCallback() {
-    this._tryDisconnect();
+    this._disconnect();
+  }
+
+  public set hass(hass) {
+    this._hass = hass;
+    this._connect();
   }
 
   protected render(): TemplateResult {
@@ -82,9 +82,9 @@ export class HuiMarkdownCard extends LitElement implements LovelaceCard {
       <ha-card .header="${this._config.title}">
         <ha-markdown
           breaks
-          class=${classMap({
+          class="markdown ${classMap({
             "no-header": !this._config.title,
-          })}
+          })}"
           .content="${this._content}"
         ></ha-markdown>
       </ha-card>
@@ -93,12 +93,9 @@ export class HuiMarkdownCard extends LitElement implements LovelaceCard {
 
   protected updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
-    if (!this._config || !this.hass) {
+    if (!this._config || !this._hass) {
       return;
     }
-
-    this._tryConnect();
-
     const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
     const oldConfig = changedProps.get("_config") as
       | MarkdownCardConfig
@@ -110,22 +107,14 @@ export class HuiMarkdownCard extends LitElement implements LovelaceCard {
       oldHass.themes !== this.hass.themes ||
       oldConfig.theme !== this._config.theme
     ) {
-      applyThemesOnElement(this, this.hass.themes, this._config.theme);
+      applyThemesOnElement(this, this._hass.themes, this._config.theme);
     }
   }
 
-  private async _tryConnect(): Promise<void> {
-    if (
-      this._unsubRenderTemplate !== undefined ||
-      !this.hass ||
-      !this._config
-    ) {
-      return;
-    }
-
-    try {
+  private async _connect() {
+    if (!this._unsubRenderTemplate && this._hass && this._config) {
       this._unsubRenderTemplate = subscribeRenderTemplate(
-        this.hass.connection,
+        this._hass.connection,
         (result) => {
           this._content = result;
         },
@@ -134,30 +123,29 @@ export class HuiMarkdownCard extends LitElement implements LovelaceCard {
           entity_ids: this._config.entity_id,
           variables: {
             config: this._config,
-            user: this.hass.user!.name,
+            user: this._hass.user!.name,
           },
         }
       );
-    } catch (_err) {
-      this._content = this._config!.content;
-      this._unsubRenderTemplate = undefined;
+      this._unsubRenderTemplate.catch(() => {
+        this._content = this._config!.content;
+        this._unsubRenderTemplate = undefined;
+      });
     }
   }
 
-  private async _tryDisconnect(): Promise<void> {
-    if (!this._unsubRenderTemplate) {
-      return;
-    }
-
-    try {
-      const unsub = await this._unsubRenderTemplate;
-      unsub();
-      this._unsubRenderTemplate = undefined;
-    } catch (e) {
-      if (e.code === "not_found") {
-        // If we get here, the connection was probably already closed. Ignore.
-      } else {
-        throw e;
+  private async _disconnect() {
+    if (this._unsubRenderTemplate) {
+      try {
+        const unsub = await this._unsubRenderTemplate;
+        this._unsubRenderTemplate = undefined;
+        await unsub();
+      } catch (e) {
+        if (e.code === "not_found") {
+          // If we get here, the connection was probably already closed. Ignore.
+        } else {
+          throw e;
+        }
       }
     }
   }
@@ -165,10 +153,26 @@ export class HuiMarkdownCard extends LitElement implements LovelaceCard {
   static get styles(): CSSResult {
     return css`
       ha-markdown {
+        display: block;
         padding: 0 16px 16px;
+        -ms-user-select: initial;
+        -webkit-user-select: initial;
+        -moz-user-select: initial;
       }
-      ha-markdown.no-header {
+      .markdown.no-header {
         padding-top: 16px;
+      }
+      ha-markdown > *:first-child {
+        margin-top: 0;
+      }
+      ha-markdown > *:last-child {
+        margin-bottom: 0;
+      }
+      ha-markdown a {
+        color: var(--primary-color);
+      }
+      ha-markdown img {
+        max-width: 100%;
       }
     `;
   }

@@ -1,5 +1,5 @@
 import "@material/mwc-button/mwc-button";
-import "../ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-input/paper-input";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
@@ -13,7 +13,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -62,7 +61,7 @@ const rowRenderer = (
         margin: -10px 0;
         padding: 0;
       }
-      ha-icon-button {
+      paper-icon-button {
         float: right;
       }
       .devices {
@@ -88,7 +87,7 @@ const rowRenderer = (
 
 @customElement("ha-area-devices-picker")
 export class HaAreaDevicesPicker extends SubscribeMixin(LitElement) {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public label?: string;
 
@@ -125,13 +124,13 @@ export class HaAreaDevicesPicker extends SubscribeMixin(LitElement) {
   @property({ type: Boolean })
   private _opened?: boolean;
 
-  @internalProperty() private _areaPicker = true;
+  @property() private _areaPicker = true;
 
-  @internalProperty() private _devices?: DeviceRegistryEntry[];
+  @property() private _devices?: DeviceRegistryEntry[];
 
-  @internalProperty() private _areas?: AreaRegistryEntry[];
+  @property() private _areas?: AreaRegistryEntry[];
 
-  @internalProperty() private _entities?: EntityRegistryEntry[];
+  @property() private _entities?: EntityRegistryEntry[];
 
   private _selectedDevices: string[] = [];
 
@@ -326,7 +325,7 @@ export class HaAreaDevicesPicker extends SubscribeMixin(LitElement) {
         >
           ${this.value
             ? html`
-                <ha-icon-button
+                <paper-icon-button
                   aria-label=${this.hass.localize(
                     "ui.components.device-picker.clear"
                   )}
@@ -337,12 +336,12 @@ export class HaAreaDevicesPicker extends SubscribeMixin(LitElement) {
                   no-ripple
                 >
                   Clear
-                </ha-icon-button>
+                </paper-icon-button>
               `
             : ""}
           ${areas.length > 0
             ? html`
-                <ha-icon-button
+                <paper-icon-button
                   aria-label=${this.hass.localize(
                     "ui.components.device-picker.show_devices"
                   )}
@@ -351,7 +350,7 @@ export class HaAreaDevicesPicker extends SubscribeMixin(LitElement) {
                   .icon=${this._opened ? "hass:menu-up" : "hass:menu-down"}
                 >
                   Toggle
-                </ha-icon-button>
+                </paper-icon-button>
               `
             : ""}
         </paper-input>
@@ -409,7 +408,7 @@ export class HaAreaDevicesPicker extends SubscribeMixin(LitElement) {
 
   static get styles(): CSSResult {
     return css`
-      paper-input > ha-icon-button {
+      paper-input > paper-icon-button {
         width: 24px;
         height: 24px;
         padding: 2px;

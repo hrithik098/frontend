@@ -2,7 +2,18 @@
 <html>
   <head>
     <link rel="preload" href="<%= latestCoreJS %>" as="script" crossorigin="use-credentials" />
-    <link rel="preload" href="<%= latestAppJS %>" as="script" crossorigin="use-credentials" />
+    <link
+      rel="preload"
+      href="/static/fonts/roboto/Roboto-Regular.woff2"
+      as="font"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/static/fonts/roboto/Roboto-Medium.woff2"
+      as="font"
+      crossorigin
+    />
     <%= renderTemplate('_header') %>
     <title>Home Assistant</title>
     <link
@@ -50,44 +61,33 @@
     <home-assistant> </home-assistant>
 
     <%= renderTemplate('_js_base') %>
-    <%= renderTemplate('_preload_roboto') %>
 
-    <script crossorigin="use-credentials">
-      import("<%= latestCoreJS %>");
-      import("<%= latestAppJS %>");
+    <script type="module" crossorigin="use-credentials">
+      import "<%= latestCoreJS %>";
+      import "<%= latestAppJS %>";
+      import "<%= latestHassIconsJS %>";
       window.customPanelJS = "<%= latestCustomPanelJS %>";
-      window.latestJS = true;
     </script>
-    <script>
     {% for extra_module in extra_modules -%}
-    import("{{ extra_module }}");
+    <script type="module" crossorigin="use-credentials" src="{{ extra_module }}"></script>
     {% endfor -%}
-    </script>
+    
 
-    <script>
-        if (!window.latestJS) {
+    <script nomodule>
+      (function() {
+        // // Safari 10.1 supports type=module but ignores nomodule, so we add this check.
+        if (!isS101) {
           window.customPanelJS = "<%= es5CustomPanelJS %>";
-
-          <% if (useRollup) { %>
-            _ls("/static/js/s.min.js").onload = function() {
-              // Although core and app can load in any order, we need to
-              // force loading core first because it contains polyfills
-              return System.import("<%= es5CoreJS %>").then(function() {
-                System.import("<%= es5AppJS %>");
-              });
-            }
-          <% } else { %>
-            _ls("<%= es5CoreJS %>");
-            _ls("<%= es5AppJS %>");
-          <% } %>
+          _ls("/static/polyfills/custom-elements-es5-adapter.js");
+          _ls("<%= es5Compatibility %>");
+          _ls("<%= es5CoreJS %>");
+          _ls("<%= es5AppJS %>");
+          _ls("<%= es5HassIconsJS %>");
+          {% for extra_script in extra_js_es5 -%}
+          _ls("{{ extra_script }}");
+          {% endfor -%}
         }
-    </script>
-    <script>
-      if (!window.latestJS) {
-        {% for extra_script in extra_js_es5 -%}
-        _ls("{{ extra_script }}");
-        {% endfor -%}
-      }
+      })();
     </script>
 
     {% for extra_url in extra_urls -%}

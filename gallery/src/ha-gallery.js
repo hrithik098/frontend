@@ -1,8 +1,8 @@
 import "@polymer/app-layout/app-header-layout/app-header-layout";
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "../../src/components/ha-icon-button";
-import "../../src/components/ha-icon";
+import "@polymer/iron-icon/iron-icon";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
@@ -10,8 +10,9 @@ import { html } from "@polymer/polymer/lib/utils/html-tag";
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 import "../../src/components/ha-card";
 import "../../src/managers/notification-manager";
-import "../../src/styles/polymer-ha-style";
-import { DEMOS } from "../build/import-demos";
+
+// eslint-disable-next-line no-undef
+const DEMOS = require.context("./demos", true, /^(.*\.(ts$))[^.]*$/im);
 
 const fixPath = (path) => path.substr(2, path.length - 5);
 
@@ -27,7 +28,7 @@ class HaGallery extends PolymerElement {
       app-header-layout {
         min-height: 100vh;
       }
-      ha-icon-button.invisible {
+      paper-icon-button.invisible {
         visibility: hidden;
       }
 
@@ -66,11 +67,11 @@ class HaGallery extends PolymerElement {
       <app-header-layout>
         <app-header slot="header" fixed>
           <app-toolbar>
-            <ha-icon-button
+            <paper-icon-button
               icon="hass:arrow-left"
               on-click="_backTapped"
               class$='[[_computeHeaderButtonClass(_demo)]]'
-            ></ha-icon-button>
+            ></paper-icon-button>
             <div main-title>[[_withDefault(_demo, "Home Assistant Gallery")]]</div>
           </app-toolbar>
         </app-header>
@@ -97,7 +98,7 @@ class HaGallery extends PolymerElement {
                   <a href='#[[item]]'>
                     <paper-item>
                       <paper-item-body>{{ item }}</paper-item-body>
-                      <ha-icon icon="hass:chevron-right"></ha-icon>
+                      <iron-icon icon="hass:chevron-right"></iron-icon>
                     </paper-item>
                   </a>
                 </template>
@@ -113,7 +114,7 @@ class HaGallery extends PolymerElement {
                   <a href='#[[item]]'>
                     <paper-item>
                       <paper-item-body>{{ item }}</paper-item-body>
-                      <ha-icon icon="hass:chevron-right"></ha-icon>
+                      <iron-icon icon="hass:chevron-right"></iron-icon>
                     </paper-item>
                   </a>
                 </template>
@@ -129,7 +130,7 @@ class HaGallery extends PolymerElement {
                   <a href='#[[item]]'>
                     <paper-item>
                       <paper-item-body>{{ item }}</paper-item-body>
-                      <ha-icon icon="hass:chevron-right"></ha-icon>
+                      <iron-icon icon="hass:chevron-right"></iron-icon>
                     </paper-item>
                   </a>
                 </template>
@@ -161,7 +162,7 @@ class HaGallery extends PolymerElement {
       },
       _demos: {
         type: Array,
-        value: Object.keys(DEMOS),
+        value: DEMOS.keys().map(fixPath),
       },
       _lovelaceDemos: {
         type: Array,
@@ -208,7 +209,7 @@ class HaGallery extends PolymerElement {
     while (root.lastChild) root.removeChild(root.lastChild);
 
     if (demo) {
-      DEMOS[demo]();
+      DEMOS(`./${demo}.ts`);
       const el = document.createElement(demo);
       root.appendChild(el);
     }

@@ -1,6 +1,6 @@
 import "@material/mwc-button";
 import "@polymer/paper-input/paper-input";
-import "../../../components/ha-circular-progress";
+import "@polymer/paper-spinner/paper-spinner";
 import {
   css,
   CSSResult,
@@ -8,13 +8,11 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
 import "../../../components/ha-dialog";
 import "../../../components/ha-switch";
-import "../../../components/ha-formfield";
 import { createAuthForUser } from "../../../data/auth";
 import {
   createUser,
@@ -27,26 +25,25 @@ import { PolymerChangedEvent } from "../../../polymer-types";
 import { haStyleDialog } from "../../../resources/styles";
 import { HomeAssistant } from "../../../types";
 import { AddUserDialogParams } from "./show-dialog-add-user";
-import { computeRTLDirection } from "../../../common/util/compute_rtl";
 
 @customElement("dialog-add-user")
 export class DialogAddUser extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _loading = false;
+  @property() private _loading = false;
 
   // Error message when can't talk to server etc
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _params?: AddUserDialogParams;
+  @property() private _params?: AddUserDialogParams;
 
-  @internalProperty() private _name?: string;
+  @property() private _name?: string;
 
-  @internalProperty() private _username?: string;
+  @property() private _username?: string;
 
-  @internalProperty() private _password?: string;
+  @property() private _password?: string;
 
-  @internalProperty() private _isAdmin?: boolean;
+  @property() private _isAdmin?: boolean;
 
   public showDialog(params: AddUserDialogParams) {
     this._params = params;
@@ -88,7 +85,7 @@ export class DialogAddUser extends LitElement {
             required
             auto-validate
             autocapitalize="on"
-            .errorMessage=${this.hass.localize("ui.common.error_required")}
+            error-message="Required"
             @value-changed=${this._nameChanged}
             @blur=${this._maybePopulateUsername}
           ></paper-input>
@@ -102,7 +99,7 @@ export class DialogAddUser extends LitElement {
             auto-validate
             autocapitalize="none"
             @value-changed=${this._usernameChanged}
-            .errorMessage=${this.hass.localize("ui.common.error_required")}
+            error-message="Required"
           ></paper-input>
           <paper-input
             .label=${this.hass.localize(
@@ -113,21 +110,18 @@ export class DialogAddUser extends LitElement {
             required
             auto-validate
             @value-changed=${this._passwordChanged}
-            .errorMessage=${this.hass.localize("ui.common.error_required")}
+            error-message="Required"
           ></paper-input>
-          <ha-formfield
-            .label=${this.hass.localize("ui.panel.config.users.editor.admin")}
-            .dir=${computeRTLDirection(this.hass)}
-          >
-            <ha-switch .checked=${this._isAdmin} @change=${this._adminChanged}>
-            </ha-switch>
-          </ha-formfield>
+          <ha-switch .checked=${this._isAdmin} @change=${this._adminChanged}>
+            ${this.hass.localize("ui.panel.config.users.editor.admin")}
+          </ha-switch>
           ${!this._isAdmin
             ? html`
                 <br />
-                ${this.hass.localize(
-                  "ui.panel.config.users.users_privileges_note"
-                )}
+                The users group is a work in progress. The user will be unable
+                to administer the instance via the UI. We're still auditing all
+                management API endpoints to ensure that they correctly limit
+                access to administrators.
               `
             : ""}
         </div>
@@ -141,7 +135,7 @@ export class DialogAddUser extends LitElement {
         ${this._loading
           ? html`
               <div slot="primaryAction" class="submit-spinner">
-                <ha-circular-progress active></ha-circular-progress>
+                <paper-spinner active></paper-spinner>
               </div>
             `
           : html`

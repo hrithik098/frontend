@@ -1,4 +1,6 @@
 import "@material/mwc-button";
+import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
+import "@polymer/paper-input/paper-input";
 import {
   css,
   CSSResult,
@@ -6,14 +8,13 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { ifDefined } from "lit-html/directives/if-defined";
 import memoizeOne from "memoize-one";
 import { isComponentLoaded } from "../../../common/config/is_component_loaded";
 import { computeStateName } from "../../../common/entity/compute_state_name";
-import "../../../components/ha-card";
+import "../../../components/dialog/ha-paper-dialog";
 import {
   AreaRegistryEntry,
   deleteAreaRegistryEntry,
@@ -36,7 +37,7 @@ import {
 
 @customElement("ha-config-area-page")
 class HaConfigAreaPage extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public areaId!: string;
 
@@ -52,7 +53,7 @@ class HaConfigAreaPage extends LitElement {
 
   @property() public route!: Route;
 
-  @internalProperty() private _related?: RelatedResult;
+  @property() private _related?: RelatedResult;
 
   private _area = memoizeOne((areaId: string, areas: AreaRegistryEntry[]):
     | AreaRegistryEntry
@@ -103,12 +104,12 @@ class HaConfigAreaPage extends LitElement {
             `
           : ""}
 
-        <ha-icon-button
+        <paper-icon-button
           slot="toolbar-icon"
-          icon="hass:cog"
+          icon="hass:settings"
           .entry=${area}
           @click=${this._showSettings}
-        ></ha-icon-button>
+        ></paper-icon-button>
 
         <div class="container">
           ${!this.narrow

@@ -6,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import memoizeOne from "memoize-one";
@@ -22,19 +21,19 @@ import { PersonDetailDialogParams } from "./show-dialog-person-detail";
 const includeDomains = ["device_tracker"];
 
 class DialogPersonDetail extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _name!: string;
+  @property() private _name!: string;
 
-  @internalProperty() private _userId?: string;
+  @property() private _userId?: string;
 
-  @internalProperty() private _deviceTrackers!: string[];
+  @property() private _deviceTrackers!: string[];
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _params?: PersonDetailDialogParams;
+  @property() private _params?: PersonDetailDialogParams;
 
-  @internalProperty() private _submitting = false;
+  @property() private _submitting = false;
 
   private _deviceTrackersAvailable = memoizeOne((hass) => {
     return Object.keys(hass.states).some(
@@ -66,9 +65,9 @@ class DialogPersonDetail extends LitElement {
     return html`
       <ha-dialog
         open
-        @closing=${this._close}
-        scrimClickAction
-        escapeKeyAction
+        @closing="${this._close}"
+        scrimClickAction=""
+        escapeKeyAction=""
         .heading=${createCloseHeading(
           this.hass,
           this._params.entry

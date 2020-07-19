@@ -1,4 +1,4 @@
-import { mdiHelpCircle } from "@mdi/js";
+import "@polymer/iron-icon/iron-icon";
 import {
   css,
   CSSResult,
@@ -9,12 +9,11 @@ import {
   TemplateResult,
 } from "lit-element";
 import "../../../src/components/ha-relative-time";
-import "../../../src/components/ha-svg-icon";
 import { HomeAssistant } from "../../../src/types";
 
 @customElement("hassio-card-content")
 class HassioCardContent extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public title!: string;
 
@@ -32,7 +31,7 @@ class HassioCardContent extends LitElement {
 
   @property() public iconClass?: string;
 
-  @property() public icon = mdiHelpCircle;
+  @property() public icon = "hass:help-circle";
 
   @property() public iconImage?: string;
 
@@ -49,11 +48,11 @@ class HassioCardContent extends LitElement {
             </div>
           `
         : html`
-            <ha-svg-icon
+            <iron-icon
               class=${this.iconClass}
-              .path=${this.icon}
+              .icon=${this.icon}
               .title=${this.iconTitle}
-            ></ha-svg-icon>
+            ></iron-icon>
           `}
       <div>
         <div class="title">
@@ -79,26 +78,26 @@ class HassioCardContent extends LitElement {
 
   static get styles(): CSSResult {
     return css`
-      ha-svg-icon {
+      iron-icon {
         margin-right: 24px;
         margin-left: 8px;
         margin-top: 12px;
         float: left;
         color: var(--secondary-text-color);
       }
-      ha-svg-icon.update {
+      iron-icon.update {
         color: var(--paper-orange-400);
       }
-      ha-svg-icon.running,
-      ha-svg-icon.installed {
+      iron-icon.running,
+      iron-icon.installed {
         color: var(--paper-green-400);
       }
-      ha-svg-icon.hassupdate,
-      ha-svg-icon.snapshot {
+      iron-icon.hassupdate,
+      iron-icon.snapshot {
         color: var(--paper-item-icon-color);
       }
-      ha-svg-icon.not_available {
-        color: var(--error-color);
+      iron-icon.not_available {
+        color: var(--google-red-500);
       }
       .title {
         color: var(--primary-text-color);

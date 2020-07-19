@@ -1,4 +1,4 @@
-import "../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import { HassEntity } from "home-assistant-js-websocket";
 import {
   Circle,
@@ -39,7 +39,6 @@ import { EntityConfig } from "../entity-rows/types";
 import { LovelaceCard } from "../types";
 import "../../../components/ha-card";
 import { MapCardConfig } from "./types";
-import { installResizeObserver } from "../common/install-resize-observer";
 
 @customElement("hui-map-card")
 class HuiMapCard extends LitElement implements LovelaceCard {
@@ -68,7 +67,7 @@ class HuiMapCard extends LitElement implements LovelaceCard {
     return { type: "map", entities: foundEntities };
   }
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property({ type: Boolean, reflect: true })
   public isPanel = false;
@@ -91,16 +90,17 @@ class HuiMapCard extends LitElement implements LovelaceCard {
 
   private _leafletMap?: Map;
 
+  // @ts-ignore
   private _resizeObserver?: ResizeObserver;
 
   private _debouncedResizeListener = debounce(
     () => {
-      if (!this.isConnected || !this._leafletMap) {
+      if (!this._leafletMap) {
         return;
       }
       this._leafletMap.invalidateSize();
     },
-    250,
+    100,
     false
   );
 
@@ -109,6 +109,8 @@ class HuiMapCard extends LitElement implements LovelaceCard {
   private _mapZones: Array<Marker | Circle> = [];
 
   private _mapPaths: Array<Polyline | CircleMarker> = [];
+
+  private _connected = false;
 
   private _colorDict: { [key: string]: string } = {};
 
@@ -172,14 +174,16 @@ class HuiMapCard extends LitElement implements LovelaceCard {
 
   public connectedCallback(): void {
     super.connectedCallback();
-    this._attachObserver();
+    this._connected = true;
     if (this.hasUpdated) {
       this.loadMap();
+      this._attachObserver();
     }
   }
 
   public disconnectedCallback(): void {
     super.disconnectedCallback();
+    this._connected = false;
 
     if (this._leafletMap) {
       this._leafletMap.remove();
@@ -189,6 +193,8 @@ class HuiMapCard extends LitElement implements LovelaceCard {
 
     if (this._resizeObserver) {
       this._resizeObserver.unobserve(this._mapEl);
+    } else {
+      window.removeEventListener("resize", this._debouncedResizeListener);
     }
   }
 
@@ -203,12 +209,12 @@ class HuiMapCard extends LitElement implements LovelaceCard {
             id="map"
             class=${classMap({ dark: this._config.dark_mode === true })}
           ></div>
-          <ha-icon-button
+          <paper-icon-button
             @click=${this._fitMap}
             tabindex="0"
             icon="hass:image-filter-center-focus"
             title="Reset focus"
-          ></ha-icon-button>
+          ></paper-icon-button>
         </div>
       </ha-card>
     `;
@@ -237,16 +243,16 @@ class HuiMapCard extends LitElement implements LovelaceCard {
 
   protected firstUpdated(changedProps: PropertyValues): void {
     super.firstUpdated(changedProps);
-    if (this.isConnected) {
-      this.loadMap();
-    }
+    this.loadMap();
     const root = this.shadowRoot!.getElementById("root");
 
     if (!this._config || this.isPanel || !root) {
       return;
     }
 
-    this._attachObserver();
+    if (this._connected) {
+      this._attachObserver();
+    }
 
     if (!this._config.aspect_ratio) {
       root.style.paddingBottom = "100%";
@@ -558,14 +564,20 @@ class HuiMapCard extends LitElement implements LovelaceCard {
     this._mapPaths.forEach((marker) => map.addLayer(marker));
   }
 
-  private async _attachObserver(): Promise<void> {
+  private _attachObserver(): void {
     // Observe changes to map size and invalidate to prevent broken rendering
+    // Uses ResizeObserver in Chrome, otherwise window resize event
 
-    if (!this._resizeObserver) {
-      await installResizeObserver();
-      this._resizeObserver = new ResizeObserver(this._debouncedResizeListener);
+    // @ts-ignore
+    if (typeof ResizeObserver === "function") {
+      // @ts-ignore
+      this._resizeObserver = new ResizeObserver(() =>
+        this._debouncedResizeListener()
+      );
+      this._resizeObserver.observe(this._mapEl);
+    } else {
+      window.addEventListener("resize", this._debouncedResizeListener);
     }
-    this._resizeObserver.observe(this);
   }
 
   private async _getHistory(): Promise<void> {
@@ -583,7 +595,6 @@ class HuiMapCard extends LitElement implements LovelaceCard {
     startTime.setHours(endTime.getHours() - this._config!.hours_to_show!);
     const skipInitialState = false;
     const significantChangesOnly = false;
-    const minimalResponse = false;
 
     const stateHistory = await fetchRecent(
       this.hass,
@@ -591,8 +602,7 @@ class HuiMapCard extends LitElement implements LovelaceCard {
       startTime,
       endTime,
       skipInitialState,
-      significantChangesOnly,
-      minimalResponse
+      significantChangesOnly
     );
 
     if (stateHistory.length < 1) {
@@ -656,11 +666,10 @@ class HuiMapCard extends LitElement implements LovelaceCard {
         background: #090909;
       }
 
-      ha-icon-button {
+      paper-icon-button {
         position: absolute;
         top: 75px;
-        left: 3px;
-        outline: none;
+        left: 7px;
       }
 
       #root {

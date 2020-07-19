@@ -1,4 +1,5 @@
 import "@material/mwc-button";
+import "@polymer/iron-icon";
 import "@polymer/paper-input/paper-input";
 import {
   Auth,
@@ -17,8 +18,8 @@ import {
   customElement,
   html,
   LitElement,
+  property,
   TemplateResult,
-  internalProperty,
 } from "lit-element";
 import { CastManager, getCastManager } from "../../../../src/cast/cast_manager";
 import { castSendShowDemo } from "../../../../src/cast/receiver_messages";
@@ -26,8 +27,7 @@ import {
   loadTokens,
   saveTokens,
 } from "../../../../src/common/auth/token_storage";
-import "../../../../src/components/ha-icon";
-import "../../../../src/layouts/hass-loading-screen";
+import "../../../../src/layouts/loading-screen";
 import { registerServiceWorker } from "../../../../src/util/register-service-worker";
 import "./hc-layout";
 
@@ -60,19 +60,19 @@ const INTRO = html`
 
 @customElement("hc-connect")
 export class HcConnect extends LitElement {
-  @internalProperty() private loading = false;
+  @property() private loading = false;
 
   // If we had stored credentials but we cannot connect,
   // show a screen asking retry or logout.
-  @internalProperty() private cannotConnect = false;
+  @property() private cannotConnect = false;
 
-  @internalProperty() private error?: string | TemplateResult;
+  @property() private error?: string | TemplateResult;
 
-  @internalProperty() private auth?: Auth;
+  @property() private auth?: Auth;
 
-  @internalProperty() private connection?: Connection;
+  @property() private connection?: Connection;
 
-  @internalProperty() private castManager?: CastManager | null;
+  @property() private castManager?: CastManager | null;
 
   private openDemo = false;
 
@@ -98,7 +98,7 @@ export class HcConnect extends LitElement {
     }
 
     if (this.castManager === undefined || this.loading) {
-      return html` <hass-loading-screen no-toolbar></hass-loading-screen> `;
+      return html` <loading-screen></loading-screen> `;
     }
 
     if (this.castManager === null) {
@@ -136,11 +136,11 @@ export class HcConnect extends LitElement {
           <div class="card-actions">
             <mwc-button @click=${this._handleDemo}>
               Show Demo
-              <ha-icon
+              <iron-icon
                 .icon=${this.castManager.castState === "CONNECTED"
                   ? "hass:cast-connected"
                   : "hass:cast"}
-              ></ha-icon>
+              ></iron-icon>
             </mwc-button>
             <div class="spacer"></div>
             <mwc-button @click=${this._handleConnect}>Authorize</mwc-button>
@@ -184,7 +184,7 @@ export class HcConnect extends LitElement {
         this.castManager = null;
       }
     );
-    registerServiceWorker(this, false);
+    registerServiceWorker(false);
   }
 
   private async _handleDemo() {
@@ -316,7 +316,7 @@ export class HcConnect extends LitElement {
         color: darkred;
       }
 
-      mwc-button ha-icon {
+      mwc-button iron-icon {
         margin-left: 8px;
       }
 

@@ -2,7 +2,7 @@ import "@material/mwc-button";
 import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
 import "@polymer/paper-input/paper-input";
 import type { PaperInputElement } from "@polymer/paper-input/paper-input";
-import "../../../../components/ha-circular-progress";
+import "@polymer/paper-spinner/paper-spinner";
 import {
   css,
   CSSResult,
@@ -10,7 +10,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
@@ -38,17 +37,17 @@ export interface PlaceholderContainer {
 
 @customElement("ha-dialog-thinktalk")
 class DialogThingtalk extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _params?: ThingtalkDialogParams;
+  @property() private _params?: ThingtalkDialogParams;
 
-  @internalProperty() private _submitting = false;
+  @property() private _submitting = false;
 
-  @internalProperty() private _opened = false;
+  @property() private _opened = false;
 
-  @internalProperty() private _placeholders?: PlaceholderContainer;
+  @property() private _placeholders?: PlaceholderContainer;
 
   @query("#input") private _input?: PaperInputElement;
 
@@ -133,10 +132,10 @@ class DialogThingtalk extends LitElement {
             Skip
           </mwc-button>
           <mwc-button @click="${this._generate}" .disabled=${this._submitting}>
-            <ha-circular-progress
+            <paper-spinner
               ?active="${this._submitting}"
               alt="Creating your automation..."
-            ></ha-circular-progress>
+            ></paper-spinner>
             Create automation
           </mwc-button>
         </div>
@@ -246,19 +245,19 @@ class DialogThingtalk extends LitElement {
         mwc-button.left {
           margin-right: auto;
         }
-        mwc-button ha-circular-progress {
+        mwc-button paper-spinner {
           width: 14px;
           height: 14px;
           margin-right: 20px;
         }
-        ha-circular-progress {
+        paper-spinner {
           display: none;
         }
-        ha-circular-progress[active] {
+        paper-spinner[active] {
           display: block;
         }
         .error {
-          color: var(--error-color);
+          color: var(--google-red-500);
         }
         .attribution {
           color: var(--secondary-text-color);

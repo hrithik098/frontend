@@ -1,5 +1,5 @@
 import "@material/mwc-button";
-import "../../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-input/paper-input";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
@@ -14,9 +14,8 @@ import "../../../../layouts/hass-subpage";
 import { EventsMixin } from "../../../../mixins/events-mixin";
 import LocalizeMixin from "../../../../mixins/localize-mixin";
 import NavigateMixin from "../../../../mixins/navigate-mixin";
-import "../../../../styles/polymer-ha-style";
+import "../../../../resources/ha-style";
 import "../../ha-config-section";
-import { computeRTL } from "../../../../common/util/compute_rtl";
 
 /*
  * @appliesMixin NavigateMixin
@@ -31,6 +30,7 @@ class CloudLogin extends LocalizeMixin(
       <style include="iron-flex ha-style">
         .content {
           padding-bottom: 24px;
+          direction: ltr;
         }
         [slot="introduction"] {
           margin: -1em 0;
@@ -52,7 +52,7 @@ class CloudLogin extends LocalizeMixin(
           margin: 0;
         }
         .error {
-          color: var(--error-color);
+          color: var(--google-red-500);
         }
         .card-actions {
           display: flex;
@@ -65,15 +65,11 @@ class CloudLogin extends LocalizeMixin(
         .flash-msg {
           padding-right: 44px;
         }
-        .flash-msg ha-icon-button {
+        .flash-msg paper-icon-button {
           position: absolute;
-          top: 4px;
+          top: 8px;
           right: 8px;
           color: var(--secondary-text-color);
-        }
-        :host([rtl]) .flash-msg ha-icon-button {
-          right: auto;
-          left: 8px;
         }
       </style>
       <hass-subpage header="[[localize('ui.panel.config.cloud.caption')]]">
@@ -114,8 +110,8 @@ class CloudLogin extends LocalizeMixin(
             <ha-card hidden$="[[!flashMessage]]">
               <div class="card-content flash-msg">
                 [[flashMessage]]
-                <ha-icon-button icon="hass:close" on-click="_dismissFlash"
-                  >[[localize('ui.panel.config.cloud.login.dismiss')]]</ha-icon-button
+                <paper-icon-button icon="hass:close" on-click="_dismissFlash"
+                  >[[localize('ui.panel.config.cloud.login.dismiss')]]</paper-icon-button
                 >
                 <paper-ripple id="flashRipple" noink=""></paper-ripple>
               </div>
@@ -195,11 +191,6 @@ class CloudLogin extends LocalizeMixin(
       flashMessage: {
         type: String,
         notify: true,
-      },
-      rtl: {
-        type: Boolean,
-        reflectToAttribute: true,
-        computed: "_computeRTL(hass)",
       },
       _error: String,
     };
@@ -315,10 +306,6 @@ class CloudLogin extends LocalizeMixin(
     setTimeout(() => {
       this.flashMessage = "";
     }, 200);
-  }
-
-  _computeRTL(hass) {
-    return computeRTL(hass);
   }
 }
 

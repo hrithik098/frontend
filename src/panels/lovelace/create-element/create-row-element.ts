@@ -51,7 +51,6 @@ const DOMAIN_TO_ELEMENT_TYPE = {
   cover: "cover",
   fan: "toggle",
   group: "group",
-  humidifier: "toggle",
   input_boolean: "toggle",
   input_number: "input-number",
   input_select: "input-select",

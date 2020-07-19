@@ -5,7 +5,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -20,9 +19,7 @@ import { PictureElementsCardConfig } from "./types";
 
 @customElement("hui-picture-elements-card")
 class HuiPictureElementsCard extends LitElement implements LovelaceCard {
-  @property({ attribute: false }) public hass?: HomeAssistant;
-
-  @internalProperty() private _elements?: LovelaceElement[];
+  @property() public hass?: HomeAssistant;
 
   public static getStubConfig(
     hass: HomeAssistant,
@@ -54,7 +51,7 @@ class HuiPictureElementsCard extends LitElement implements LovelaceCard {
     };
   }
 
-  @internalProperty() private _config?: PictureElementsCardConfig;
+  @property() private _config?: PictureElementsCardConfig;
 
   public getCardSize(): number {
     return 4;
@@ -73,16 +70,6 @@ class HuiPictureElementsCard extends LitElement implements LovelaceCard {
     }
 
     this._config = config;
-
-    this._elements = this._config.elements.map(
-      (elementConfig: LovelaceElementConfig) => {
-        const element = createStyledHuiElement(elementConfig);
-        if (this.hass) {
-          element.hass = this.hass;
-        }
-        return element as LovelaceElement;
-      }
-    );
   }
 
   protected updated(changedProps: PropertyValues): void {
@@ -91,8 +78,11 @@ class HuiPictureElementsCard extends LitElement implements LovelaceCard {
       return;
     }
 
-    if (this._elements && changedProps.has("hass")) {
-      for (const element of this._elements) {
+    if (changedProps.has("hass")) {
+      for (const el of Array.from(
+        this.shadowRoot!.querySelectorAll("#root > *")
+      )) {
+        const element = el as LovelaceElement;
         element.hass = this.hass;
       }
     }
@@ -130,7 +120,14 @@ class HuiPictureElementsCard extends LitElement implements LovelaceCard {
             .entity=${this._config.entity}
             .aspectRatio=${this._config.aspect_ratio}
           ></hui-image>
-          ${this._elements}
+          ${this._config.elements.map(
+            (elementConfig: LovelaceElementConfig) => {
+              const element = createStyledHuiElement(elementConfig);
+              element.hass = this.hass;
+
+              return element;
+            }
+          )}
         </div>
       </ha-card>
     `;

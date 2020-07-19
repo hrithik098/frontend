@@ -6,22 +6,17 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
-  eventOptions,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import memoizeOne from "memoize-one";
 import { isComponentLoaded } from "../common/config/is_component_loaded";
 import { navigate } from "../common/navigate";
 import "../components/ha-menu-button";
-import "../components/ha-icon-button-arrow-prev";
+import "../components/ha-paper-icon-button-arrow-prev";
 import { HomeAssistant, Route } from "../types";
-import "../components/ha-svg-icon";
 import "../components/ha-icon";
-import "../components/ha-tab";
-import { restoreScroll } from "../common/decorators/restore-scroll";
 
 export interface PageNavigation {
   path: string;
@@ -31,19 +26,18 @@ export interface PageNavigation {
   core?: boolean;
   advancedOnly?: boolean;
   icon?: string;
-  iconPath?: string;
   info?: any;
 }
 
 @customElement("hass-tabs-subpage")
 class HassTabsSubpage extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
-
-  @property({ type: Boolean }) public hassio = false;
+  @property() public hass!: HomeAssistant;
 
   @property({ type: String, attribute: "back-path" }) public backPath?: string;
 
   @property() public backCallback?: () => void;
+
+  @property({ type: Boolean }) public hassio = false;
 
   @property({ type: Boolean, attribute: "main-page" }) public mainPage = false;
 
@@ -53,10 +47,7 @@ class HassTabsSubpage extends LitElement {
 
   @property({ type: Boolean, reflect: true }) public narrow = false;
 
-  @internalProperty() private _activeTab?: PageNavigation;
-
-  // @ts-ignore
-  @restoreScroll(".content") private _savedScrollPos?: number;
+  @property() private _activeTab?: PageNavigation;
 
   private _getTabs = memoizeOne(
     (
@@ -78,23 +69,27 @@ class HassTabsSubpage extends LitElement {
       return shownTabs.map(
         (page) =>
           html`
-            <ha-tab
-              .hass=${this.hass}
+            <div
+              class="tab ${classMap({
+                active: page === activeTab,
+              })}"
               @click=${this._tabTapped}
               .path=${page.path}
-              .active=${page === activeTab}
-              .narrow=${this.narrow}
-              .name=${page.translationKey
-                ? this.hass.localize(page.translationKey)
-                : page.name}
             >
-              ${page.iconPath
-                ? html`<ha-svg-icon
-                    slot="icon"
-                    .path=${page.iconPath}
-                  ></ha-svg-icon>`
-                : html`<ha-icon slot="icon" .icon=${page.icon}></ha-icon>`}
-            </ha-tab>
+              ${this.narrow
+                ? html` <ha-icon .icon=${page.icon}></ha-icon> `
+                : ""}
+              ${!this.narrow || page === activeTab
+                ? html`
+                    <span class="name"
+                      >${page.translationKey
+                        ? this.hass.localize(page.translationKey)
+                        : page.name}</span
+                    >
+                  `
+                : ""}
+              <mwc-ripple></mwc-ripple>
+            </div>
           `
       );
     }
@@ -124,16 +119,17 @@ class HassTabsSubpage extends LitElement {
         ${this.mainPage
           ? html`
               <ha-menu-button
-                .hassio=${this.hassio}
                 .hass=${this.hass}
+                .hassio=${this.hassio}
                 .narrow=${this.narrow}
               ></ha-menu-button>
             `
           : html`
-              <ha-icon-button-arrow-prev
+              <ha-paper-icon-button-arrow-prev
                 aria-label="Back"
+                .hassio=${this.hassio}
                 @click=${this._backTapped}
-              ></ha-icon-button-arrow-prev>
+              ></ha-paper-icon-button-arrow-prev>
             `}
         ${this.narrow
           ? html` <div class="main-title"><slot name="header"></slot></div> `
@@ -149,18 +145,13 @@ class HassTabsSubpage extends LitElement {
           <slot name="toolbar-icon"></slot>
         </div>
       </div>
-      <div class="content" @scroll=${this._saveScrollPos}>
+      <div class="content">
         <slot></slot>
       </div>
     `;
   }
 
-  @eventOptions({ passive: true })
-  private _saveScrollPos(e: Event) {
-    this._savedScrollPos = (e.target as HTMLDivElement).scrollTop;
-  }
-
-  private _tabTapped(ev: Event): void {
+  private _tabTapped(ev: MouseEvent): void {
     navigate(this, (ev.currentTarget as any).path, true);
   }
 
@@ -182,10 +173,6 @@ class HassTabsSubpage extends LitElement {
         display: block;
         height: 100%;
         background-color: var(--primary-background-color);
-      }
-
-      ha-menu-button {
-        margin-right: 24px;
       }
 
       .toolbar {
@@ -225,12 +212,41 @@ class HassTabsSubpage extends LitElement {
         justify-content: center;
       }
 
+      .tab {
+        padding: 0 32px;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        height: 64px;
+        cursor: pointer;
+      }
+
+      .name {
+        white-space: nowrap;
+      }
+
+      .tab.active {
+        color: var(--primary-color);
+      }
+
+      #tabbar:not(.bottom-bar) .tab.active {
+        border-bottom: 2px solid var(--primary-color);
+      }
+
+      .bottom-bar .tab {
+        padding: 0 16px;
+        width: 20%;
+        min-width: 0;
+      }
+
       :host(:not([narrow])) #toolbar-icon {
         min-width: 40px;
       }
 
       ha-menu-button,
-      ha-icon-button-arrow-prev,
+      ha-paper-icon-button-arrow-prev,
       ::slotted([slot="toolbar-icon"]) {
         flex-shrink: 0;
         pointer-events: auto;
@@ -241,7 +257,7 @@ class HassTabsSubpage extends LitElement {
         flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-height: 58px;
+        max-height: 40px;
         line-height: 20px;
       }
 

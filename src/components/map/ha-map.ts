@@ -1,4 +1,4 @@
-import "../ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import { Circle, Layer, Map, Marker } from "leaflet";
 import {
   css,
@@ -22,7 +22,7 @@ import { HomeAssistant } from "../../types";
 
 @customElement("ha-map")
 class HaMap extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   @property() public entities?: string[];
 

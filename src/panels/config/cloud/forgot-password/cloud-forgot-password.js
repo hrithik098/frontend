@@ -7,7 +7,7 @@ import "../../../../components/ha-card";
 import "../../../../layouts/hass-subpage";
 import { EventsMixin } from "../../../../mixins/events-mixin";
 import LocalizeMixin from "../../../../mixins/localize-mixin";
-import "../../../../styles/polymer-ha-style";
+import "../../../../resources/ha-style";
 
 /*
  * @appliesMixin EventsMixin
@@ -19,6 +19,7 @@ class CloudForgotPassword extends LocalizeMixin(EventsMixin(PolymerElement)) {
       <style include="iron-flex ha-style">
         .content {
           padding-bottom: 24px;
+          direction: ltr;
         }
 
         ha-card {
@@ -31,7 +32,7 @@ class CloudForgotPassword extends LocalizeMixin(EventsMixin(PolymerElement)) {
           margin: 0;
         }
         .error {
-          color: var(--error-color);
+          color: var(--google-red-500);
         }
         .card-actions {
           display: flex;
@@ -45,13 +46,9 @@ class CloudForgotPassword extends LocalizeMixin(EventsMixin(PolymerElement)) {
           display: none;
         }
       </style>
-      <hass-subpage
-        header="[[localize('ui.panel.config.cloud.forgot_password.title')]]"
-      >
+      <hass-subpage header=[[localize('ui.panel.config.cloud.forgot_password.title')]]>
         <div class="content">
-          <ha-card
-            header="[[localize('ui.panel.config.cloud.forgot_password.subtitle')]]"
-          >
+          <ha-card header=[[localize('ui.panel.config.cloud.forgot_password.subtitle')]]>
             <div class="card-content">
               <p>
                 [[localize('ui.panel.config.cloud.forgot_password.instructions')]]
@@ -129,9 +126,8 @@ class CloudForgotPassword extends LocalizeMixin(EventsMixin(PolymerElement)) {
         () => {
           this._requestInProgress = false;
           this.fire("cloud-done", {
-            flashMessage: this.hass.localize(
-              "ui.panel.config.cloud.forgot_password.check_your_email"
-            ),
+            flashMessage:
+              "[[localize('ui.panel.config.cloud.forgot_password.check_your_email')]]",
           });
         },
         (err) =>

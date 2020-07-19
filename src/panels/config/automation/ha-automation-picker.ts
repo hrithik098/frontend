@@ -1,4 +1,4 @@
-import "../../../components/ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-tooltip/paper-tooltip";
 import {
   css,
@@ -18,7 +18,7 @@ import { computeStateName } from "../../../common/entity/compute_state_name";
 import { computeRTL } from "../../../common/util/compute_rtl";
 import { DataTableColumnContainer } from "../../../components/data-table/ha-data-table";
 import "../../../components/entity/ha-entity-toggle";
-import "@material/mwc-fab";
+import "../../../components/ha-fab";
 import {
   AutomationConfig,
   AutomationEntity,
@@ -30,12 +30,10 @@ import { haStyle } from "../../../resources/styles";
 import { HomeAssistant, Route } from "../../../types";
 import { configSections } from "../ha-panel-config";
 import { showThingtalkDialog } from "./show-dialog-thingtalk";
-import "../../../components/ha-svg-icon";
-import { mdiPlus } from "@mdi/js";
 
 @customElement("ha-automation-picker")
 class HaAutomationPicker extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public isWide!: boolean;
 
@@ -107,14 +105,14 @@ class HaAutomationPicker extends LitElement {
         title: "",
         type: "icon-button",
         template: (_info, automation) => html`
-          <ha-icon-button
+          <paper-icon-button
             .automation=${automation}
             @click=${this._showInfo}
             icon="hass:information-outline"
             title="${this.hass.localize(
               "ui.panel.config.automation.picker.show_info_automation"
             )}"
-          ></ha-icon-button>
+          ></paper-icon-button>
         `,
       };
       columns.edit = {
@@ -128,7 +126,7 @@ class HaAutomationPicker extends LitElement {
                 : undefined
             )}
           >
-            <ha-icon-button
+            <paper-icon-button
               .icon=${automation.attributes.id
                 ? "hass:pencil"
                 : "hass:pencil-off"}
@@ -136,7 +134,7 @@ class HaAutomationPicker extends LitElement {
               title="${this.hass.localize(
                 "ui.panel.config.automation.picker.show_info_automation"
               )}"
-            ></ha-icon-button>
+            ></paper-icon-button>
           </a>
           ${!automation.attributes.id
             ? html`
@@ -170,18 +168,17 @@ class HaAutomationPicker extends LitElement {
         hasFab
       >
       </hass-tabs-subpage-data-table>
-      <mwc-fab
+      <ha-fab
         slot="fab"
         ?is-wide=${this.isWide}
         ?narrow=${this.narrow}
+        icon="hass:plus"
         title=${this.hass.localize(
           "ui.panel.config.automation.picker.add_automation"
         )}
         ?rtl=${computeRTL(this.hass)}
         @click=${this._createNew}
-      >
-        <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-      </mwc-fab>
+      ></ha-fab>
     `;
   }
 
@@ -211,7 +208,7 @@ class HaAutomationPicker extends LitElement {
     return [
       haStyle,
       css`
-        mwc-fab {
+        ha-fab {
           position: fixed;
           bottom: 16px;
           right: 16px;
@@ -219,19 +216,19 @@ class HaAutomationPicker extends LitElement {
           cursor: pointer;
         }
 
-        mwc-fab[is-wide] {
+        ha-fab[is-wide] {
           bottom: 24px;
           right: 24px;
         }
-        mwc-fab[narrow] {
+        ha-fab[narrow] {
           bottom: 84px;
         }
-        mwc-fab[rtl] {
+        ha-fab[rtl] {
           right: auto;
           left: 16px;
         }
 
-        mwc-fab[rtl][is-wide] {
+        ha-fab[rtl][is-wide] {
           bottom: 24px;
           right: auto;
           left: 24px;

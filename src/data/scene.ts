@@ -40,7 +40,6 @@ export interface SceneEntity extends HassEntityBase {
 
 export interface SceneConfig {
   name: string;
-  icon?: string;
   entities: SceneEntities;
 }
 

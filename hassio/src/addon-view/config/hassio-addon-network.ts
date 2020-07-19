@@ -1,3 +1,4 @@
+import "@polymer/paper-card/paper-card";
 import { PaperInputElement } from "@polymer/paper-input/paper-input";
 import {
   css,
@@ -6,20 +7,19 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../src/common/dom/fire_event";
-import "../../../../src/components/ha-card";
 import {
   HassioAddonDetails,
   HassioAddonSetOptionParams,
   setHassioAddonOption,
 } from "../../../../src/data/hassio/addon";
+import { suggestAddonRestart } from "../../dialogs/suggestAddonRestart";
+
 import { haStyle } from "../../../../src/resources/styles";
 import { HomeAssistant } from "../../../../src/types";
-import { suggestAddonRestart } from "../../dialogs/suggestAddonRestart";
 import { hassioStyle } from "../../resources/hassio-style";
 
 interface NetworkItem {
@@ -38,9 +38,9 @@ class HassioAddonNetwork extends LitElement {
 
   @property({ attribute: false }) public addon!: HassioAddonDetails;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _config?: NetworkItem[];
+  @property() private _config?: NetworkItem[];
 
   public connectedCallback(): void {
     super.connectedCallback();
@@ -53,7 +53,7 @@ class HassioAddonNetwork extends LitElement {
     }
 
     return html`
-      <ha-card header="Network">
+      <paper-card heading="Network">
         <div class="card-content">
           ${this._error ? html` <div class="errors">${this._error}</div> ` : ""}
 
@@ -72,7 +72,7 @@ class HassioAddonNetwork extends LitElement {
                       <paper-input
                         @value-changed=${this._configChanged}
                         placeholder="disabled"
-                        .value=${item.host ? String(item.host) : ""}
+                        .value=${String(item.host)}
                         .container=${item.container}
                         no-label-float
                       ></paper-input>
@@ -90,7 +90,7 @@ class HassioAddonNetwork extends LitElement {
           </mwc-button>
           <mwc-button @click=${this._saveTapped}>Save</mwc-button>
         </div>
-      </ha-card>
+      </paper-card>
     `;
   }
 
@@ -102,11 +102,11 @@ class HassioAddonNetwork extends LitElement {
         :host {
           display: block;
         }
-        ha-card {
+        paper-card {
           display: block;
         }
         .errors {
-          color: var(--error-color);
+          color: var(--google-red-500);
           margin-bottom: 16px;
         }
         .card-actions {

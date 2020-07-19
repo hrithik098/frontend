@@ -4,20 +4,6 @@ import { hassioApiResultExtractor, HassioResponse } from "./common";
 export type HassioHomeAssistantInfo = any;
 export type HassioSupervisorInfo = any;
 
-export type HassioInfo = {
-  arch: string;
-  channel: string;
-  docker: string;
-  hassos?: string;
-  homeassistant: string;
-  hostname: string;
-  logging: string;
-  maching: string;
-  supervisor: string;
-  supported_arch: string[];
-  timezone: string;
-};
-
 export type HassioPanelInfo = PanelInfo<
   | undefined
   | {
@@ -30,8 +16,7 @@ export interface CreateSessionResponse {
 }
 
 export interface SupervisorOptions {
-  channel?: "beta" | "dev" | "stable";
-  addons_repositories?: string[];
+  channel: "beta" | "dev" | "stable";
 }
 
 export const fetchHassioHomeAssistantInfo = async (hass: HomeAssistant) => {
@@ -49,12 +34,6 @@ export const fetchHassioSupervisorInfo = async (hass: HomeAssistant) => {
       "GET",
       "hassio/supervisor/info"
     )
-  );
-};
-
-export const fetchHassioInfo = async (hass: HomeAssistant) => {
-  return hassioApiResultExtractor(
-    await hass.callApi<HassioResponse<HassioInfo>>("GET", "hassio/info")
   );
 };
 

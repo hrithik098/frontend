@@ -9,39 +9,27 @@ import {
 } from "lit-element";
 
 @customElement("ha-card")
-export class HaCard extends LitElement {
+class HaCard extends LitElement {
   @property() public header?: string;
-
-  @property({ type: Boolean, reflect: true }) public outlined = false;
 
   static get styles(): CSSResult {
     return css`
       :host {
         background: var(
           --ha-card-background,
-          var(--card-background-color, white)
+          var(--paper-card-background-color, white)
         );
-        border-radius: var(--ha-card-border-radius, 4px);
+        border-radius: var(--ha-card-border-radius, 2px);
         box-shadow: var(
           --ha-card-box-shadow,
-          0px 2px 1px -1px rgba(0, 0, 0, 0.2),
-          0px 1px 1px 0px rgba(0, 0, 0, 0.14),
-          0px 1px 3px 0px rgba(0, 0, 0, 0.12)
+          0 2px 2px 0 rgba(0, 0, 0, 0.14),
+          0 1px 5px 0 rgba(0, 0, 0, 0.12),
+          0 3px 1px -2px rgba(0, 0, 0, 0.2)
         );
         color: var(--primary-text-color);
         display: block;
         transition: all 0.3s ease-out;
         position: relative;
-      }
-
-      :host([outlined]) {
-        box-shadow: none;
-        border-width: 1px;
-        border-style: solid;
-        border-color: var(
-          --ha-card-border-color,
-          var(--divider-color, #e0e0e0)
-        );
       }
 
       .card-header,

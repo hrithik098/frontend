@@ -4,7 +4,7 @@ import {
   customElement,
   html,
   LitElement,
-  internalProperty,
+  property,
   TemplateResult,
 } from "lit-element";
 import "../../../components/ha-label-badge";
@@ -27,7 +27,7 @@ export const createErrorBadgeConfig = (error) => ({
 export class HuiErrorBadge extends LitElement implements LovelaceBadge {
   public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: ErrorBadgeConfig;
+  @property() private _config?: ErrorBadgeConfig;
 
   public setConfig(config: ErrorBadgeConfig): void {
     this._config = config;

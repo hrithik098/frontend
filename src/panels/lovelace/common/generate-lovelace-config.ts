@@ -2,7 +2,6 @@ import {
   HassConfig,
   HassEntities,
   HassEntity,
-  STATE_NOT_RUNNING,
 } from "home-assistant-js-websocket";
 import { computeDomain } from "../../../common/entity/compute_domain";
 import { computeObjectId } from "../../../common/entity/compute_object_id";
@@ -37,13 +36,12 @@ import { GroupEntity, HomeAssistant } from "../../../types";
 import {
   AlarmPanelCardConfig,
   EntitiesCardConfig,
-  HumidifierCardConfig,
   LightCardConfig,
   PictureEntityCardConfig,
   ThermostatCardConfig,
 } from "../cards/types";
 import { processEditorEntities } from "../editor/process-editor-entities";
-import { LovelaceRowConfig } from "../entity-rows/types";
+import { LovelaceRowConfig, WeblinkConfig } from "../entity-rows/types";
 
 const DEFAULT_VIEW_ENTITY_ID = "group.default_view";
 const DOMAINS_BADGES = [
@@ -60,7 +58,6 @@ const HIDE_DOMAIN = new Set([
   "device_tracker",
   "geo_location",
   "persistent_notification",
-  "zone",
 ]);
 
 let subscribedRegistries = false;
@@ -143,10 +140,13 @@ export const computeCards = (
         entity: entityId,
       };
       cards.push(cardConfig);
-    } else if (domain === "humidifier") {
-      const cardConfig: HumidifierCardConfig = {
-        type: "humidifier",
-        entity: entityId,
+    } else if (domain === "history_graph" && stateObj) {
+      const cardConfig = {
+        type: "history-graph",
+        entities: stateObj.attributes.entity_id,
+        hours_to_show: stateObj.attributes.hours_to_show,
+        title: stateObj.attributes.friendly_name,
+        refresh_interval: stateObj.attributes.refresh,
       };
       cards.push(cardConfig);
     } else if (domain === "light" && single) {
@@ -173,6 +173,15 @@ export const computeCards = (
         entity: entityId,
       };
       cards.push(cardConfig);
+    } else if (domain === "weblink" && stateObj) {
+      const conf: WeblinkConfig = {
+        type: "weblink",
+        url: stateObj.state,
+      };
+      if ("icon" in stateObj.attributes) {
+        conf.icon = stateObj.attributes.icon;
+      }
+      entities.push(conf);
     } else if (
       domain === "sensor" &&
       stateObj?.attributes.device_class === SENSOR_DEVICE_CLASS_BATTERY
@@ -210,7 +219,10 @@ const computeDefaultViewStates = (entities: HassEntities): HassEntities => {
   const states = {};
   Object.keys(entities).forEach((entityId) => {
     const stateObj = entities[entityId];
-    if (!HIDE_DOMAIN.has(computeStateDomain(stateObj))) {
+    if (
+      !stateObj.attributes.hidden &&
+      !HIDE_DOMAIN.has(computeStateDomain(stateObj))
+    ) {
       states[entityId] = entities[entityId];
     }
   });
@@ -453,31 +465,8 @@ export const generateLovelaceConfigFromData = async (
 };
 
 export const generateLovelaceConfigFromHass = async (
-  hass: HomeAssistant,
-  localize?: LocalizeFunc
+  hass: HomeAssistant
 ): Promise<LovelaceConfig> => {
-  if (hass.config.state === STATE_NOT_RUNNING) {
-    return {
-      title: hass.config.location_name,
-      views: [
-        {
-          cards: [{ type: "starting" }],
-        },
-      ],
-    };
-  }
-
-  if (hass.config.safe_mode) {
-    return {
-      title: hass.config.location_name,
-      views: [
-        {
-          cards: [{ type: "safe-mode" }],
-        },
-      ],
-    };
-  }
-
   // We want to keep the registry subscriptions alive after generating the UI
   // so that we don't serve up stale data after changing areas.
   if (!subscribedRegistries) {
@@ -499,6 +488,6 @@ export const generateLovelaceConfigFromHass = async (
     deviceEntries,
     entityEntries,
     hass.states,
-    localize || hass.localize
+    hass.localize
   );
 };

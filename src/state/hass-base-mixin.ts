@@ -3,7 +3,7 @@ import { LitElement, property } from "lit-element";
 import { HomeAssistant } from "../types";
 
 export class HassBaseEl extends LitElement {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   protected _pendingHass: Partial<HomeAssistant> = {};
 

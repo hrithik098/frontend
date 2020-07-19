@@ -6,16 +6,17 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   query,
   TemplateResult,
-  eventOptions,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { ifDefined } from "lit-html/directives/if-defined";
 import { styleMap } from "lit-html/directives/style-map";
 import { scroll } from "lit-virtualizer";
+// @ts-ignore
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import sortFilterWorker from "workerize-loader!./sort_filter_worker";
 import { fireEvent } from "../../common/dom/fire_event";
 import "../../common/search/search-input";
 import { debounce } from "../../common/util/debounce";
@@ -23,9 +24,6 @@ import { nextRender } from "../../common/util/render-status";
 import "../ha-checkbox";
 import type { HaCheckbox } from "../ha-checkbox";
 import "../ha-icon";
-import { filterData, sortData } from "./sort-filter";
-import memoizeOne from "memoize-one";
-import { restoreScroll } from "../../common/decorators/restore-scroll";
 
 declare global {
   // for fire event
@@ -69,16 +67,11 @@ export interface DataTableColumnData extends DataTableSortColumnData {
   width?: string;
   maxWidth?: string;
   grows?: boolean;
-  forceLTR?: boolean;
 }
 
 export interface DataTableRowData {
   [key: string]: any;
   selectable?: boolean;
-}
-
-export interface SortableColumnContainer {
-  [key: string]: DataTableSortColumnData;
 }
 
 @customElement("ha-data-table")
@@ -100,15 +93,15 @@ export class HaDataTable extends LitElement {
 
   @property({ type: String }) public filter = "";
 
-  @internalProperty() private _filterable = false;
+  @property({ type: Boolean }) private _filterable = false;
 
-  @internalProperty() private _filter = "";
+  @property({ type: String }) private _filter = "";
 
-  @internalProperty() private _sortColumn?: string;
+  @property({ type: String }) private _sortColumn?: string;
 
-  @internalProperty() private _sortDirection: SortingDirection = null;
+  @property({ type: String }) private _sortDirection: SortingDirection = null;
 
-  @internalProperty() private _filteredData: DataTableRowData[] = [];
+  @property({ type: Array }) private _filteredData: DataTableRowData[] = [];
 
   @query("slot[name='header']") private _header!: HTMLSlotElement;
 
@@ -118,12 +111,13 @@ export class HaDataTable extends LitElement {
 
   private _checkedRows: string[] = [];
 
-  private _sortColumns: SortableColumnContainer = {};
+  private _sortColumns: {
+    [key: string]: DataTableSortColumnData;
+  } = {};
 
   private curRequest = 0;
 
-  // @ts-ignore
-  @restoreScroll(".scroller") private _savedScrollPos?: number;
+  private _worker: any | undefined;
 
   private _debounceSearch = debounce(
     (value: string) => {
@@ -144,6 +138,11 @@ export class HaDataTable extends LitElement {
       // Force update of location of rows
       this._filteredData = [...this._filteredData];
     }
+  }
+
+  protected firstUpdated(properties: PropertyValues) {
+    super.firstUpdated(properties);
+    this._worker = sortFilterWorker();
   }
 
   protected updated(properties: PropertyValues) {
@@ -189,7 +188,7 @@ export class HaDataTable extends LitElement {
       properties.has("_sortColumn") ||
       properties.has("_sortDirection")
     ) {
-      this._sortFilterData();
+      this._filterData();
     }
   }
 
@@ -293,10 +292,7 @@ export class HaDataTable extends LitElement {
                 </div>
               `
             : html`
-                <div
-                  class="mdc-data-table__content scroller"
-                  @scroll=${this._saveScrollPos}
-                >
+                <div class="mdc-data-table__content scroller">
                   ${scroll({
                     items: !this.hasFab
                       ? this._filteredData
@@ -353,7 +349,6 @@ export class HaDataTable extends LitElement {
                                     column.type === "icon-button"
                                   ),
                                   grows: Boolean(column.grows),
-                                  forceLTR: Boolean(column.forceLTR),
                                 })}"
                                 style=${column.width
                                   ? styleMap({
@@ -383,30 +378,20 @@ export class HaDataTable extends LitElement {
     `;
   }
 
-  private async _sortFilterData() {
+  private async _filterData() {
     const startTime = new Date().getTime();
     this.curRequest++;
     const curRequest = this.curRequest;
 
-    let filteredData = this.data;
-    if (this._filter) {
-      filteredData = await this._memFilterData(
-        this.data,
-        this._sortColumns,
-        this._filter
-      );
-    }
+    const filterProm = this._worker.filterSortData(
+      this.data,
+      this._sortColumns,
+      this._filter,
+      this._sortDirection,
+      this._sortColumn
+    );
 
-    const prom = this._sortColumn
-      ? sortData(
-          filteredData,
-          this._sortColumns,
-          this._sortDirection,
-          this._sortColumn
-        )
-      : filteredData;
-
-    const [data] = await Promise.all([prom, nextRender]);
+    const [data] = await Promise.all([filterProm, nextRender]);
 
     const curTime = new Date().getTime();
     const elapsed = curTime - startTime;
@@ -419,16 +404,6 @@ export class HaDataTable extends LitElement {
     }
     this._filteredData = data;
   }
-
-  private _memFilterData = memoizeOne(
-    async (
-      data: DataTableRowData[],
-      columns: SortableColumnContainer,
-      filter: string
-    ): Promise<DataTableRowData[]> => {
-      return filterData(data, columns, filter);
-    }
-  );
 
   private _handleHeaderClick(ev: Event) {
     const columnId = ((ev.target as HTMLElement).closest(
@@ -508,11 +483,6 @@ export class HaDataTable extends LitElement {
     }
     await this.updateComplete;
     this._table.style.height = `calc(100% - ${this._header.clientHeight}px)`;
-  }
-
-  @eventOptions({ passive: true })
-  private _saveScrollPos(e: Event) {
-    this._savedScrollPos = (e.target as HTMLDivElement).scrollTop;
   }
 
   static get styles(): CSSResult {
@@ -606,8 +576,10 @@ export class HaDataTable extends LitElement {
         padding-right: 0;
         width: 56px;
       }
-      :host([dir="rtl"]) .mdc-data-table__header-cell--checkbox,
-      :host([dir="rtl"]) .mdc-data-table__cell--checkbox {
+      [dir="rtl"] .mdc-data-table__header-cell--checkbox,
+      .mdc-data-table__header-cell--checkbox[dir="rtl"],
+      [dir="rtl"] .mdc-data-table__cell--checkbox,
+      .mdc-data-table__cell--checkbox[dir="rtl"] {
         /* @noflip */
         padding-left: 0;
         /* @noflip */
@@ -633,15 +605,11 @@ export class HaDataTable extends LitElement {
         text-transform: inherit;
       }
 
-      .mdc-data-table__cell a {
-        color: inherit;
-        text-decoration: none;
-      }
-
       .mdc-data-table__cell--numeric {
         text-align: right;
       }
-      :host([dir="rtl"]) .mdc-data-table__cell--numeric {
+      [dir="rtl"] .mdc-data-table__cell--numeric,
+      .mdc-data-table__cell--numeric[dir="rtl"] {
         /* @noflip */
         text-align: left;
       }
@@ -659,32 +627,17 @@ export class HaDataTable extends LitElement {
       .mdc-data-table__header-cell.mdc-data-table__header-cell--icon {
         text-align: center;
       }
-
       .mdc-data-table__header-cell.sortable.mdc-data-table__header-cell--icon:hover,
       .mdc-data-table__header-cell.sortable.mdc-data-table__header-cell--icon:not(.not-sorted) {
         text-align: left;
-      }
-      :host([dir="rtl"])
-        .mdc-data-table__header-cell.sortable.mdc-data-table__header-cell--icon:hover,
-      :host([dir="rtl"])
-        .mdc-data-table__header-cell.sortable.mdc-data-table__header-cell--icon:not(.not-sorted) {
-        text-align: right;
       }
 
       .mdc-data-table__cell--icon:first-child ha-icon {
         margin-left: 8px;
       }
-      :host([dir="rtl"]) .mdc-data-table__cell--icon:first-child ha-icon {
-        margin-left: auto;
-        margin-right: 8px;
-      }
 
       .mdc-data-table__cell--icon:first-child state-badge {
         margin-right: -8px;
-      }
-      :host([dir="rtl"]) .mdc-data-table__cell--icon:first-child state-badge {
-        margin-right: auto;
-        margin-left: -8px;
       }
 
       .mdc-data-table__header-cell--icon-button,
@@ -693,20 +646,10 @@ export class HaDataTable extends LitElement {
         padding: 8px;
       }
 
-      .mdc-data-table__cell--icon-button {
-        color: var(--secondary-text-color);
-        text-overflow: clip;
-      }
-
       .mdc-data-table__header-cell--icon-button:first-child,
       .mdc-data-table__cell--icon-button:first-child {
         width: 64px;
         padding-left: 16px;
-      }
-      :host([dir="rtl"]) .mdc-data-table__header-cell--icon-button:first-child,
-      :host([dir="rtl"]) .mdc-data-table__cell--icon-button:first-child {
-        padding-left: auto;
-        padding-right: 16px;
       }
 
       .mdc-data-table__header-cell--icon-button:last-child,
@@ -714,14 +657,9 @@ export class HaDataTable extends LitElement {
         width: 64px;
         padding-right: 16px;
       }
-      :host([dir="rtl"]) .mdc-data-table__header-cell--icon-button:last-child,
-      :host([dir="rtl"]) .mdc-data-table__cell--icon-button:last-child {
-        padding-right: auto;
-        padding-left: 16px;
-      }
 
       .mdc-data-table__cell--icon-button a {
-        color: var(--secondary-text-color);
+        color: var(--primary-text-color);
       }
 
       .mdc-data-table__header-cell {
@@ -736,7 +674,8 @@ export class HaDataTable extends LitElement {
         text-transform: inherit;
         text-align: left;
       }
-      :host([dir="rtl"]) .mdc-data-table__header-cell {
+      [dir="rtl"] .mdc-data-table__header-cell,
+      .mdc-data-table__header-cell[dir="rtl"] {
         /* @noflip */
         text-align: right;
       }
@@ -748,14 +687,10 @@ export class HaDataTable extends LitElement {
       .mdc-data-table__header-cell--numeric.sortable:not(.not-sorted) {
         text-align: left;
       }
-      :host([dir="rtl"]) .mdc-data-table__header-cell--numeric {
+      [dir="rtl"] .mdc-data-table__header-cell--numeric,
+      .mdc-data-table__header-cell--numeric[dir="rtl"] {
         /* @noflip */
         text-align: left;
-      }
-      :host([dir="rtl"]) .mdc-data-table__header-cell--numeric.sortable:hover,
-      :host([dir="rtl"])
-        .mdc-data-table__header-cell--numeric.sortable:not(.not-sorted) {
-        text-align: right;
       }
 
       /* custom from here */
@@ -777,19 +712,12 @@ export class HaDataTable extends LitElement {
         position: relative;
         left: 0px;
       }
-      :host([dir="rtl"]) .mdc-data-table__header-cell span {
-        left: auto;
-        right: 0px;
-      }
 
       .mdc-data-table__header-cell.sortable {
         cursor: pointer;
       }
       .mdc-data-table__header-cell > * {
         transition: left 0.2s ease;
-      }
-      :host([dir="rtl"]) .mdc-data-table__header-cell > * {
-        transition: right 0.2s ease;
       }
       .mdc-data-table__header-cell ha-icon {
         top: -3px;
@@ -798,34 +726,13 @@ export class HaDataTable extends LitElement {
       .mdc-data-table__header-cell.not-sorted ha-icon {
         left: -20px;
       }
-      :host([dir="rtl"]) .mdc-data-table__header-cell.not-sorted ha-icon {
-        right: -20px;
-      }
       .mdc-data-table__header-cell.sortable:not(.not-sorted) span,
       .mdc-data-table__header-cell.sortable.not-sorted:hover span {
         left: 24px;
       }
-      :host([dir="rtl"])
-        .mdc-data-table__header-cell.sortable:not(.not-sorted)
-        span,
-      :host([dir="rtl"])
-        .mdc-data-table__header-cell.sortable.not-sorted:hover
-        span {
-        left: auto;
-        right: 24px;
-      }
       .mdc-data-table__header-cell.sortable:not(.not-sorted) ha-icon,
       .mdc-data-table__header-cell.sortable:hover.not-sorted ha-icon {
         left: 12px;
-      }
-      :host([dir="rtl"])
-        .mdc-data-table__header-cell.sortable:not(.not-sorted)
-        ha-icon,
-      :host([dir="rtl"])
-        .mdc-data-table__header-cell.sortable:hover.not-sorted
-        ha-icon {
-        left: auto;
-        right: 12px;
       }
       .table-header {
         border-bottom: 1px solid rgba(var(--rgb-primary-text-color), 0.12);
@@ -856,9 +763,6 @@ export class HaDataTable extends LitElement {
       .grows {
         flex-grow: 1;
         flex-shrink: 1;
-      }
-      .forceLTR {
-        direction: ltr;
       }
     `;
   }

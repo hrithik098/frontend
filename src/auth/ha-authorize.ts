@@ -4,20 +4,20 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
 } from "lit-element";
-import {
-  AuthProvider,
-  fetchAuthProviders,
-  AuthUrlSearchParams,
-} from "../data/auth";
+import { AuthProvider, fetchAuthProviders } from "../data/auth";
 import { litLocalizeLiteMixin } from "../mixins/lit-localize-lite-mixin";
 import { registerServiceWorker } from "../util/register-service-worker";
 import "./ha-auth-flow";
-import { extractSearchParamsObject } from "../common/url/search-params";
 
 import(/* webpackChunkName: "pick-auth-provider" */ "./ha-pick-auth-provider");
+
+interface QueryParams {
+  client_id?: string;
+  redirect_uri?: string;
+  state?: string;
+}
 
 class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
   @property() public clientId?: string;
@@ -26,14 +26,21 @@ class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
 
   @property() public oauth2State?: string;
 
-  @internalProperty() private _authProvider?: AuthProvider;
+  @property() private _authProvider?: AuthProvider;
 
-  @internalProperty() private _authProviders?: AuthProvider[];
+  @property() private _authProviders?: AuthProvider[];
 
   constructor() {
     super();
     this.translationFragment = "page-authorize";
-    const query = extractSearchParamsObject() as AuthUrlSearchParams;
+    const query: QueryParams = {};
+    const values = location.search.substr(1).split("&");
+    for (const item of values) {
+      const value = item.split("=");
+      if (value.length > 1) {
+        query[decodeURIComponent(value[0])] = decodeURIComponent(value[1]);
+      }
+    }
     if (query.client_id) {
       this.clientId = query.client_id;
     }
@@ -114,7 +121,7 @@ class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
     const tempA = document.createElement("a");
     tempA.href = this.redirectUri!;
     if (tempA.host === location.host) {
-      registerServiceWorker(this, false);
+      registerServiceWorker(false);
     }
   }
 
@@ -138,7 +145,7 @@ class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
         response.status === 400 &&
         authProviders.code === "onboarding_required"
       ) {
-        location.href = `/onboarding.html${location.search}`;
+        location.href = "/?";
         return;
       }
 

@@ -2,6 +2,7 @@ import "@material/mwc-button";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
+import "@polymer/paper-card/paper-card";
 import {
   css,
   CSSResult,
@@ -9,16 +10,16 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
-import "../../../src/components/ha-card";
-import { fetchHassioLogs } from "../../../src/data/hassio/supervisor";
-import "../../../src/layouts/hass-loading-screen";
 import { haStyle } from "../../../src/resources/styles";
 import { HomeAssistant } from "../../../src/types";
+
+import { fetchHassioLogs } from "../../../src/data/hassio/supervisor";
+
 import "../components/hassio-ansi-to-html";
 import { hassioStyle } from "../resources/hassio-style";
+import "../../../src/layouts/loading-screen";
 
 interface LogProvider {
   key: string;
@@ -56,11 +57,11 @@ const logProviders: LogProvider[] = [
 class HassioSupervisorLog extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _selectedLogProvider = "supervisor";
+  @property() private _selectedLogProvider = "supervisor";
 
-  @internalProperty() private _content?: string;
+  @property() private _content?: string;
 
   public async connectedCallback(): Promise<void> {
     super.connectedCallback();
@@ -69,7 +70,7 @@ class HassioSupervisorLog extends LitElement {
 
   public render(): TemplateResult | void {
     return html`
-      <ha-card>
+      <paper-card>
         ${this._error ? html` <div class="errors">${this._error}</div> ` : ""}
         ${this.hass.userData?.showAdvanced
           ? html`
@@ -99,12 +100,12 @@ class HassioSupervisorLog extends LitElement {
             ? html`<hassio-ansi-to-html
                 .content=${this._content}
               ></hassio-ansi-to-html>`
-            : html`<hass-loading-screen no-toolbar></hass-loading-screen>`}
+            : html`<loading-screen></loading-screen>`}
         </div>
         <div class="card-actions">
           <mwc-button @click=${this._refresh}>Refresh</mwc-button>
         </div>
-      </ha-card>
+      </paper-card>
     `;
   }
 
@@ -113,7 +114,7 @@ class HassioSupervisorLog extends LitElement {
       haStyle,
       hassioStyle,
       css`
-        ha-card {
+        paper-card {
           width: 100%;
         }
         pre {
@@ -124,7 +125,7 @@ class HassioSupervisorLog extends LitElement {
           width: 96%;
         }
         .errors {
-          color: var(--error-color);
+          color: var(--google-red-500);
           margin-bottom: 16px;
         }
         .card-content {

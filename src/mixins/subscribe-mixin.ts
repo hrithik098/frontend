@@ -10,9 +10,9 @@ export const SubscribeMixin = <T extends Constructor<UpdatingElement>>(
   superClass: T
 ) => {
   class SubscribeClass extends superClass {
-    @property({ attribute: false }) public hass?: HomeAssistant;
+    @property() public hass?: HomeAssistant;
 
-    private __unsubs?: Array<UnsubscribeFunc | Promise<UnsubscribeFunc>>;
+    private __unsubs?: UnsubscribeFunc[];
 
     public connectedCallback() {
       super.connectedCallback();
@@ -23,12 +23,7 @@ export const SubscribeMixin = <T extends Constructor<UpdatingElement>>(
       super.disconnectedCallback();
       if (this.__unsubs) {
         while (this.__unsubs.length) {
-          const unsub = this.__unsubs.pop()!;
-          if (unsub instanceof Promise) {
-            unsub.then((unsubFunc) => unsubFunc());
-          } else {
-            unsub();
-          }
+          this.__unsubs.pop()!();
         }
         this.__unsubs = undefined;
       }
@@ -41,9 +36,7 @@ export const SubscribeMixin = <T extends Constructor<UpdatingElement>>(
       }
     }
 
-    protected hassSubscribe(): Array<
-      UnsubscribeFunc | Promise<UnsubscribeFunc>
-    > {
+    protected hassSubscribe(): UnsubscribeFunc[] {
       return [];
     }
 

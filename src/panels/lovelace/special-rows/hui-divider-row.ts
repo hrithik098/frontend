@@ -2,7 +2,7 @@ import {
   customElement,
   html,
   LitElement,
-  internalProperty,
+  property,
   TemplateResult,
 } from "lit-element";
 import { HomeAssistant } from "../../../types";
@@ -12,7 +12,7 @@ import { DividerConfig, LovelaceRow } from "../entity-rows/types";
 class HuiDividerRow extends LitElement implements LovelaceRow {
   public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: DividerConfig;
+  @property() private _config?: DividerConfig;
 
   public setConfig(config): void {
     if (!config) {

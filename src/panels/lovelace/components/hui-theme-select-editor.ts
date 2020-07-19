@@ -20,7 +20,7 @@ export class HuiThemeSelectEditor extends LitElement {
 
   @property() public label?: string;
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
   protected render(): TemplateResult {
     return html`

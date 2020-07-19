@@ -13,7 +13,7 @@ import "./ha-settings-row";
 
 @customElement("ha-force-narrow-row")
 class HaForcedNarrowRow extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public narrow!: boolean;
 

@@ -1,4 +1,4 @@
-import "./ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-input/paper-input";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
@@ -12,7 +12,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../common/dom/fire_event";
@@ -62,7 +61,7 @@ const rowRenderer = (
 
 @customElement("ha-area-picker")
 export class HaAreaPicker extends SubscribeMixin(LitElement) {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public label?: string;
 
@@ -73,7 +72,7 @@ export class HaAreaPicker extends SubscribeMixin(LitElement) {
   @property({ type: Boolean, attribute: "no-add" })
   public noAdd?: boolean;
 
-  @internalProperty() private _opened?: boolean;
+  @property() private _opened?: boolean;
 
   public hassSubscribe(): UnsubscribeFunc[] {
     return [
@@ -118,7 +117,7 @@ export class HaAreaPicker extends SubscribeMixin(LitElement) {
         >
           ${this.value
             ? html`
-                <ha-icon-button
+                <paper-icon-button
                   aria-label=${this.hass.localize(
                     "ui.components.area-picker.clear"
                   )}
@@ -129,12 +128,12 @@ export class HaAreaPicker extends SubscribeMixin(LitElement) {
                   no-ripple
                 >
                   ${this.hass.localize("ui.components.area-picker.clear")}
-                </ha-icon-button>
+                </paper-icon-button>
               `
             : ""}
           ${this._areas.length > 0
             ? html`
-                <ha-icon-button
+                <paper-icon-button
                   aria-label=${this.hass.localize(
                     "ui.components.area-picker.show_areas"
                   )}
@@ -143,7 +142,7 @@ export class HaAreaPicker extends SubscribeMixin(LitElement) {
                   .icon=${this._opened ? "hass:menu-up" : "hass:menu-down"}
                 >
                   ${this.hass.localize("ui.components.area-picker.toggle")}
-                </ha-icon-button>
+                </paper-icon-button>
               `
             : ""}
         </paper-input>
@@ -215,8 +214,9 @@ export class HaAreaPicker extends SubscribeMixin(LitElement) {
 
   static get styles(): CSSResult {
     return css`
-      paper-input > ha-icon-button {
-        --mdc-icon-button-size: 24px;
+      paper-input > paper-icon-button {
+        width: 24px;
+        height: 24px;
         padding: 2px;
         color: var(--secondary-text-color);
       }

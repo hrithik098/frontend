@@ -12,7 +12,7 @@ import {
 
 @customElement("ha-automation-trigger-state")
 export class HaStateTrigger extends LitElement implements TriggerElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public trigger!: StateTrigger;
 

@@ -1,4 +1,4 @@
-import "../ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import "@polymer/paper-input/paper-input";
 import type { PaperInputElement } from "@polymer/paper-input/paper-input";
 import {
@@ -6,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
@@ -27,7 +26,7 @@ export class HaFormString extends LitElement implements HaFormElement {
 
   @property() public suffix!: string;
 
-  @internalProperty() private _unmaskedPassword = false;
+  @property() private _unmaskedPassword = false;
 
   @query("paper-input") private _input?: HTMLElement;
 
@@ -48,15 +47,16 @@ export class HaFormString extends LitElement implements HaFormElement {
             .autoValidate=${this.schema.required}
             @value-changed=${this._valueChanged}
           >
-            <ha-icon-button
+            <paper-icon-button
               toggles
+              .active=${this._unmaskedPassword}
               slot="suffix"
               .icon=${this._unmaskedPassword ? "hass:eye-off" : "hass:eye"}
               id="iconButton"
               title="Click to toggle between masked and clear password"
               @click=${this._toggleUnmaskedPassword}
             >
-            </ha-icon-button>
+            </paper-icon-button>
           </paper-input>
         `
       : html`
@@ -72,8 +72,8 @@ export class HaFormString extends LitElement implements HaFormElement {
         `;
   }
 
-  private _toggleUnmaskedPassword(): void {
-    this._unmaskedPassword = !this._unmaskedPassword;
+  private _toggleUnmaskedPassword(ev: Event): void {
+    this._unmaskedPassword = (ev.target as any).active;
   }
 
   private _valueChanged(ev: Event): void {

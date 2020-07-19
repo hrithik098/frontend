@@ -65,15 +65,14 @@ export const fetchDeviceTriggerCapabilities = (
     trigger,
   });
 
-const deviceAutomationIdentifiers = [
-  "device_id",
-  "domain",
-  "entity_id",
-  "type",
-  "subtype",
-  "event",
-  "condition",
-  "platform",
+const whitelist = [
+  "above",
+  "below",
+  "brightness_pct",
+  "code",
+  "for",
+  "position",
+  "set_brightness",
 ];
 
 export const deviceAutomationsEqual = (
@@ -85,7 +84,7 @@ export const deviceAutomationsEqual = (
   }
 
   for (const property in a) {
-    if (!deviceAutomationIdentifiers.includes(property)) {
+    if (whitelist.includes(property)) {
       continue;
     }
     if (!Object.is(a[property], b[property])) {
@@ -93,7 +92,7 @@ export const deviceAutomationsEqual = (
     }
   }
   for (const property in b) {
-    if (!deviceAutomationIdentifiers.includes(property)) {
+    if (whitelist.includes(property)) {
       continue;
     }
     if (!Object.is(a[property], b[property])) {

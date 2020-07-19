@@ -17,15 +17,14 @@ export function hasConfigOrEntityChanged(
 
   if (
     oldHass.themes !== element.hass!.themes ||
-    oldHass.language !== element.hass!.language ||
-    oldHass.localize !== element.hass.localize ||
-    oldHass.config.state !== element.hass.config.state
+    oldHass.language !== element.hass!.language
   ) {
     return true;
   }
 
   return (
     oldHass.states[element._config!.entity] !==
-    element.hass!.states[element._config!.entity]
+      element.hass!.states[element._config!.entity] ||
+    oldHass.localize !== element.hass.localize
   );
 }

@@ -1,4 +1,4 @@
-import "../../../components/ha-circular-progress";
+import "@polymer/paper-spinner/paper-spinner";
 import { timeOut } from "@polymer/polymer/lib/utils/async";
 import { Debouncer } from "@polymer/polymer/lib/utils/debounce";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
@@ -6,7 +6,7 @@ import { html } from "@polymer/polymer/lib/utils/html-tag";
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 import "../../../components/ha-code-editor";
 import LocalizeMixin from "../../../mixins/localize-mixin";
-import "../../../styles/polymer-ha-style";
+import "../../../resources/ha-style";
 
 class HaPanelDevTemplate extends LocalizeMixin(PolymerElement) {
   static get template() {
@@ -29,7 +29,7 @@ class HaPanelDevTemplate extends LocalizeMixin(PolymerElement) {
         }
 
         .edit-pane a {
-          color: var(--primary-color);
+          color: var(--dark-primary-color);
         }
 
         .horizontal .edit-pane {
@@ -92,11 +92,10 @@ class HaPanelDevTemplate extends LocalizeMixin(PolymerElement) {
         </div>
 
         <div class="render-pane">
-          <ha-circular-progress
+          <paper-spinner
             class="render-spinner"
             active="[[rendering]]"
-            size="small"
-          ></ha-circular-progress>
+          ></paper-spinner>
           <pre class$="[[computeRenderedClasses(error)]]">[[processed]]</pre>
         </div>
       </div>
@@ -159,7 +158,7 @@ For loop example:
   }
 
   computeFormClasses(narrow) {
-    return narrow ? "content" : "content layout horizontal";
+    return narrow ? "content fit" : "content fit layout horizontal";
   }
 
   computeRenderedClasses(error) {

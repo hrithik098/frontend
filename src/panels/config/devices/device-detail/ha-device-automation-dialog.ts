@@ -4,7 +4,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import "../../../../components/ha-dialog";
@@ -25,15 +24,15 @@ import { DeviceAutomationDialogParams } from "./show-dialog-device-automation";
 
 @customElement("dialog-device-automation")
 export class DialogDeviceAutomation extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _triggers: DeviceTrigger[] = [];
+  @property() private _triggers: DeviceTrigger[] = [];
 
-  @internalProperty() private _conditions: DeviceCondition[] = [];
+  @property() private _conditions: DeviceCondition[] = [];
 
-  @internalProperty() private _actions: DeviceAction[] = [];
+  @property() private _actions: DeviceAction[] = [];
 
-  @internalProperty() private _params?: DeviceAutomationDialogParams;
+  @property() private _params?: DeviceAutomationDialogParams;
 
   public async showDialog(params: DeviceAutomationDialogParams): Promise<void> {
     this._params = params;

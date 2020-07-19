@@ -1,9 +1,5 @@
-import {
-  mdiCogs,
-  mdiFileDocument,
-  mdiInformationVariant,
-  mdiMathLog,
-} from "@mdi/js";
+import "@polymer/paper-icon-button/paper-icon-button";
+import "@polymer/paper-spinner/paper-spinner-lite";
 import {
   css,
   CSSResult,
@@ -18,18 +14,18 @@ import {
   fetchHassioAddonInfo,
   HassioAddonDetails,
 } from "../../../src/data/hassio/addon";
-import "../../../src/layouts/hass-tabs-subpage";
-import "../../../src/components/ha-circular-progress";
-import type { PageNavigation } from "../../../src/layouts/hass-tabs-subpage";
 import { haStyle } from "../../../src/resources/styles";
 import { HomeAssistant, Route } from "../../../src/types";
 import { hassioStyle } from "../resources/hassio-style";
 import "./config/hassio-addon-audio";
 import "./config/hassio-addon-config";
-import "./config/hassio-addon-network";
-import "./hassio-addon-router";
 import "./info/hassio-addon-info";
 import "./log/hassio-addon-logs";
+import "./config/hassio-addon-network";
+import type { PageNavigation } from "../../../src/layouts/hass-tabs-subpage";
+import "../../../src/layouts/hass-tabs-subpage";
+
+import "./hassio-addon-router";
 
 @customElement("hassio-addon-dashboard")
 class HassioAddonDashboard extends LitElement {
@@ -56,14 +52,14 @@ class HassioAddonDashboard extends LitElement {
 
   protected render(): TemplateResult {
     if (!this.addon) {
-      return html`<ha-circular-progress active></ha-circular-progress>`;
+      return html` <paper-spinner-lite active></paper-spinner-lite> `;
     }
 
     const addonTabs: PageNavigation[] = [
       {
         name: "Info",
         path: `/hassio/addon/${this.addon.slug}/info`,
-        iconPath: mdiInformationVariant,
+        icon: "hassio:information-variant",
       },
     ];
 
@@ -71,7 +67,7 @@ class HassioAddonDashboard extends LitElement {
       addonTabs.push({
         name: "Documentation",
         path: `/hassio/addon/${this.addon.slug}/documentation`,
-        iconPath: mdiFileDocument,
+        icon: "hassio:file-document",
       });
     }
 
@@ -80,12 +76,12 @@ class HassioAddonDashboard extends LitElement {
         {
           name: "Configuration",
           path: `/hassio/addon/${this.addon.slug}/config`,
-          iconPath: mdiCogs,
+          icon: "hassio:cogs",
         },
         {
           name: "Log",
           path: `/hassio/addon/${this.addon.slug}/logs`,
-          iconPath: mdiMathLog,
+          icon: "hassio:math-log",
         }
       );
     }
@@ -119,6 +115,7 @@ class HassioAddonDashboard extends LitElement {
       css`
         :host {
           color: var(--primary-text-color);
+          --paper-card-header-color: var(--primary-text-color);
         }
         .content {
           padding: 24px 0 32px;

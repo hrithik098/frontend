@@ -8,7 +8,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
@@ -35,9 +34,9 @@ const includeDomains = ["alarm_control_panel"];
 @customElement("hui-alarm-panel-card-editor")
 export class HuiAlarmPanelCardEditor extends LitElement
   implements LovelaceCardEditor {
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: AlarmPanelCardConfig;
+  @property() private _config?: AlarmPanelCardConfig;
 
   public setConfig(config: AlarmPanelCardConfig): void {
     config = cardConfigStruct(config);

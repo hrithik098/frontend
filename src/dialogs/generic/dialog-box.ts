@@ -1,4 +1,5 @@
 import "@material/mwc-button/mwc-button";
+import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
 import "@polymer/paper-input/paper-input";
 import {
   css,
@@ -7,42 +8,29 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
-import "../../components/ha-dialog";
+import "../../components/dialog/ha-paper-dialog";
 import "../../components/ha-switch";
 import { PolymerChangedEvent } from "../../polymer-types";
 import { haStyleDialog } from "../../resources/styles";
 import { HomeAssistant } from "../../types";
 import { DialogParams } from "./show-dialog-box";
-import { fireEvent } from "../../common/dom/fire_event";
 
 @customElement("dialog-box")
 class DialogBox extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _params?: DialogParams;
+  @property() private _params?: DialogParams;
 
-  @internalProperty() private _value?: string;
+  @property() private _value?: string;
 
   public async showDialog(params: DialogParams): Promise<void> {
     this._params = params;
     if (params.prompt) {
       this._value = params.defaultValue;
     }
-  }
-
-  public closeDialog(): boolean {
-    if (this._params?.confirmation || this._params?.prompt) {
-      this._dismiss();
-      return true;
-    }
-    if (this._params) {
-      return false;
-    }
-    return true;
   }
 
   protected render(): TemplateResult {
@@ -53,17 +41,21 @@ class DialogBox extends LitElement {
     const confirmPrompt = this._params.confirmation || this._params.prompt;
 
     return html`
-      <ha-dialog
-        open
-        scrimClickAction
-        escapeKeyAction
-        @close=${this._close}
-        .heading=${this._params.title
-          ? this._params.title
-          : this._params.confirmation &&
-            this.hass.localize("ui.dialogs.generic.default_confirmation_title")}
+      <ha-paper-dialog
+        with-backdrop
+        opened
+        modal
+        @opened-changed="${this._openedChanged}"
       >
-        <div>
+        <h2>
+          ${this._params.title
+            ? this._params.title
+            : this._params.confirmation &&
+              this.hass.localize(
+                "ui.dialogs.generic.default_confirmation_title"
+              )}
+        </h2>
+        <paper-dialog-scrollable>
           ${this._params.text
             ? html`
                 <p
@@ -91,21 +83,23 @@ class DialogBox extends LitElement {
                 ></paper-input>
               `
             : ""}
-        </div>
-        ${confirmPrompt &&
-        html`
-          <mwc-button @click=${this._dismiss} slot="secondaryAction">
-            ${this._params.dismissText
-              ? this._params.dismissText
-              : this.hass.localize("ui.dialogs.generic.cancel")}
+        </paper-dialog-scrollable>
+        <div class="paper-dialog-buttons">
+          ${confirmPrompt &&
+          html`
+            <mwc-button @click="${this._dismiss}">
+              ${this._params.dismissText
+                ? this._params.dismissText
+                : this.hass.localize("ui.dialogs.generic.cancel")}
+            </mwc-button>
+          `}
+          <mwc-button @click="${this._confirm}">
+            ${this._params.confirmText
+              ? this._params.confirmText
+              : this.hass.localize("ui.dialogs.generic.ok")}
           </mwc-button>
-        `}
-        <mwc-button @click=${this._confirm} slot="primaryAction">
-          ${this._params.confirmText
-            ? this._params.confirmText
-            : this.hass.localize("ui.dialogs.generic.ok")}
-        </mwc-button>
-      </ha-dialog>
+        </div>
+      </ha-paper-dialog>
     `;
   }
 
@@ -113,11 +107,11 @@ class DialogBox extends LitElement {
     this._value = ev.detail.value;
   }
 
-  private _dismiss(): void {
+  private async _dismiss(): Promise<void> {
     if (this._params!.cancel) {
       this._params!.cancel();
     }
-    this._close();
+    this._params = undefined;
   }
 
   private _handleKeyUp(ev: KeyboardEvent) {
@@ -126,16 +120,17 @@ class DialogBox extends LitElement {
     }
   }
 
-  private _confirm(): void {
+  private async _confirm(): Promise<void> {
     if (this._params!.confirm) {
       this._params!.confirm(this._value);
     }
-    this._close();
+    this._dismiss();
   }
 
-  private _close(): void {
-    this._params = undefined;
-    fireEvent(this, "dialog-closed", { dialog: this.localName });
+  private _openedChanged(ev: PolymerChangedEvent<boolean>): void {
+    if (!(ev.detail as any).value) {
+      this._params = undefined;
+    }
   }
 
   static get styles(): CSSResult[] {
@@ -145,6 +140,15 @@ class DialogBox extends LitElement {
         :host([inert]) {
           pointer-events: initial !important;
           cursor: initial !important;
+        }
+        ha-paper-dialog {
+          min-width: 400px;
+          max-width: 500px;
+        }
+        @media (max-width: 400px) {
+          ha-paper-dialog {
+            min-width: initial;
+          }
         }
         a {
           color: var(--primary-color);
@@ -160,10 +164,6 @@ class DialogBox extends LitElement {
         }
         .secondary {
           color: var(--secondary-text-color);
-        }
-        ha-dialog {
-          /* Place above other dialogs */
-          --dialog-z-index: 104;
         }
       `,
     ];

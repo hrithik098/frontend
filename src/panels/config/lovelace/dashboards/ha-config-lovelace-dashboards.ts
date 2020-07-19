@@ -1,4 +1,3 @@
-import "@material/mwc-fab";
 import "@polymer/paper-tooltip/paper-tooltip";
 import {
   css,
@@ -7,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -18,8 +16,8 @@ import {
   DataTableColumnContainer,
   RowClickedEvent,
 } from "../../../../components/data-table/ha-data-table";
+import "../../../../components/ha-fab";
 import "../../../../components/ha-icon";
-import "../../../../components/ha-icon-button";
 import {
   createDashboard,
   deleteDashboard,
@@ -35,13 +33,10 @@ import "../../../../layouts/hass-tabs-subpage-data-table";
 import { HomeAssistant, Route } from "../../../../types";
 import { lovelaceTabs } from "../ha-config-lovelace";
 import { showDashboardDetailDialog } from "./show-dialog-lovelace-dashboard-detail";
-import "../../../../components/ha-svg-icon";
-import { mdiPlus } from "@mdi/js";
-import { computeRTL } from "../../../../common/util/compute_rtl";
 
 @customElement("ha-config-lovelace-dashboards")
 export class HaConfigLovelaceDashboards extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public isWide!: boolean;
 
@@ -49,7 +44,7 @@ export class HaConfigLovelaceDashboards extends LitElement {
 
   @property() public route!: Route;
 
-  @internalProperty() private _dashboards: LovelaceDashboard[] = [];
+  @property() private _dashboards: LovelaceDashboard[] = [];
 
   private _columns = memoize(
     (narrow: boolean, _language, dashboards): DataTableColumnContainer => {
@@ -154,15 +149,15 @@ export class HaConfigLovelaceDashboards extends LitElement {
       columns.url_path = {
         title: "",
         filterable: true,
-        width: "100px",
+        width: "75px",
         template: (urlPath) =>
           narrow
             ? html`
-                <ha-icon-button
+                <paper-icon-button
                   icon="hass:open-in-new"
                   .urlPath=${urlPath}
                   @click=${this._navigate}
-                ></ha-icon-button>
+                ></paper-icon-button>
               `
             : html`
                 <mwc-button .urlPath=${urlPath} @click=${this._navigate}
@@ -226,17 +221,15 @@ export class HaConfigLovelaceDashboards extends LitElement {
         hasFab
       >
       </hass-tabs-subpage-data-table>
-      <mwc-fab
+      <ha-fab
         ?is-wide=${this.isWide}
         ?narrow=${this.narrow}
-        ?rtl=${computeRTL(this.hass)}
+        icon="hass:plus"
         title="${this.hass.localize(
           "ui.panel.config.lovelace.dashboards.picker.add_dashboard"
         )}"
         @click=${this._addDashboard}
-      >
-        <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-      </mwc-fab>
+      ></ha-fab>
     `;
   }
 
@@ -314,22 +307,18 @@ export class HaConfigLovelaceDashboards extends LitElement {
 
   static get styles(): CSSResult {
     return css`
-      mwc-fab {
+      ha-fab {
         position: fixed;
         bottom: 16px;
         right: 16px;
         z-index: 1;
       }
-      mwc-fab[is-wide] {
+      ha-fab[is-wide] {
         bottom: 24px;
         right: 24px;
       }
-      mwc-fab[narrow] {
+      ha-fab[narrow] {
         bottom: 84px;
-      }
-      mwc-fab[rtl] {
-        left: 16px;
-        right: auto;
       }
     `;
   }

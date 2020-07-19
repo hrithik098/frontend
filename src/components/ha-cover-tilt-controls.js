@@ -1,5 +1,5 @@
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
-import "./ha-icon-button";
+import "@polymer/paper-icon-button/paper-icon-button";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
@@ -18,30 +18,30 @@ class HaCoverTiltControls extends PolymerElement {
           visibility: hidden !important;
         }
       </style>
-      <ha-icon-button
+      <paper-icon-button
         aria-label="Open cover tilt"
         icon="hass:arrow-top-right"
         on-click="onOpenTiltTap"
         title="Open tilt"
         invisible$="[[!entityObj.supportsOpenTilt]]"
         disabled="[[computeOpenDisabled(stateObj, entityObj)]]"
-      ></ha-icon-button>
-      <ha-icon-button
+      ></paper-icon-button>
+      <paper-icon-button
         aria-label="Stop cover from moving"
         icon="hass:stop"
         on-click="onStopTiltTap"
         invisible$="[[!entityObj.supportsStopTilt]]"
-        disabled="[[computeStopDisabled(stateObj)]]"
+        disabled="[[computStopDisabled(stateObj)]]"
         title="Stop tilt"
-      ></ha-icon-button>
-      <ha-icon-button
+      ></paper-icon-button>
+      <paper-icon-button
         aria-label="Close cover tilt"
         icon="hass:arrow-bottom-left"
         on-click="onCloseTiltTap"
         title="Close tilt"
         invisible$="[[!entityObj.supportsCloseTilt]]"
         disabled="[[computeClosedDisabled(stateObj, entityObj)]]"
-      ></ha-icon-button>
+      ></paper-icon-button>
     `;
   }
 

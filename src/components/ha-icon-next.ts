@@ -1,16 +1,18 @@
-import { HaSvgIcon } from "./ha-svg-icon";
-import { mdiChevronRight, mdiChevronLeft } from "@mdi/js";
+import "@polymer/iron-icon/iron-icon";
+// Not duplicate, this is for typing.
+// eslint-disable-next-line
+import { HaIcon } from "./ha-icon";
 
-export class HaIconNext extends HaSvgIcon {
+export class HaIconNext extends HaIcon {
   public connectedCallback() {
     super.connectedCallback();
 
     // wait to check for direction since otherwise direction is wrong even though top level is RTL
     setTimeout(() => {
-      this.path =
+      this.icon =
         window.getComputedStyle(this).direction === "ltr"
-          ? mdiChevronRight
-          : mdiChevronLeft;
+          ? "hass:chevron-right"
+          : "hass:chevron-left";
     }, 100);
   }
 }

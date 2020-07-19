@@ -2,14 +2,14 @@ import "@polymer/paper-input/paper-input";
 import { customElement, html, LitElement, property } from "lit-element";
 import { fireEvent } from "../../../../../common/dom/fire_event";
 import "../../../../../components/entity/ha-entity-picker";
-import "@polymer/paper-input/paper-textarea";
+import "../../../../../components/ha-textarea";
 import { ForDict, NumericStateTrigger } from "../../../../../data/automation";
 import { HomeAssistant } from "../../../../../types";
 import { handleChangeEvent } from "../ha-automation-trigger-row";
 
 @customElement("ha-automation-trigger-numeric_state")
 export default class HaNumericStateTrigger extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public trigger!: NumericStateTrigger;
 
@@ -61,7 +61,7 @@ export default class HaNumericStateTrigger extends LitElement {
         .value=${below}
         @value-changed=${this._valueChanged}
       ></paper-input>
-      <paper-textarea
+      <ha-textarea
         .label=${this.hass.localize(
           "ui.panel.config.automation.editor.triggers.type.numeric_state.value_template"
         )}
@@ -69,7 +69,7 @@ export default class HaNumericStateTrigger extends LitElement {
         .value=${value_template}
         @value-changed=${this._valueChanged}
         dir="ltr"
-      ></paper-textarea>
+      ></ha-textarea>
       <paper-input
         .label=${this.hass.localize(
           "ui.panel.config.automation.editor.triggers.type.state.for"

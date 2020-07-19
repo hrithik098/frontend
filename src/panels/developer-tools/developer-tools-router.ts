@@ -5,7 +5,7 @@ import { HomeAssistant } from "../../types";
 
 @customElement("developer-tools-router")
 class DeveloperToolsRouter extends HassRouterPage {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public narrow!: boolean;
 
@@ -14,7 +14,7 @@ class DeveloperToolsRouter extends HassRouterPage {
     beforeRender: (page) => {
       if (!page || page === "not_found") {
         // If we can, we are going to restore the last visited page.
-        return this._currentPage ? this._currentPage : "state";
+        return this._currentPage ? this._currentPage : "info";
       }
       return undefined;
     },
@@ -24,6 +24,18 @@ class DeveloperToolsRouter extends HassRouterPage {
       event: {
         tag: "developer-tools-event",
         load: () => import("./event/developer-tools-event"),
+      },
+      info: {
+        tag: "developer-tools-info",
+        load: () => import("./info/developer-tools-info"),
+      },
+      logs: {
+        tag: "developer-tools-logs",
+        load: () => import("./logs/developer-tools-logs"),
+      },
+      mqtt: {
+        tag: "developer-tools-mqtt",
+        load: () => import("./mqtt/developer-tools-mqtt"),
       },
       service: {
         tag: "developer-tools-service",
@@ -39,18 +51,6 @@ class DeveloperToolsRouter extends HassRouterPage {
       },
     },
   };
-
-  protected createLoadingScreen() {
-    const loadingScreen = super.createLoadingScreen();
-    loadingScreen.noToolbar = true;
-    return loadingScreen;
-  }
-
-  protected createErrorScreen(error: string) {
-    const errorEl = super.createErrorScreen(error);
-    errorEl.toolbar = false;
-    return errorEl;
-  }
 
   protected updatePageEl(el) {
     if ("setProperties" in el) {

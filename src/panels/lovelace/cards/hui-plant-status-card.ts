@@ -6,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -21,7 +20,6 @@ import { findEntities } from "../common/find-entites";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
 import { LovelaceCard, LovelaceCardEditor } from "../types";
 import { PlantAttributeTarget, PlantStatusCardConfig } from "./types";
-import { createEntityNotFoundWarning } from "../components/hui-warning";
 
 const SENSORS = {
   moisture: "hass:water",
@@ -58,9 +56,9 @@ class HuiPlantStatusCard extends LitElement implements LovelaceCard {
     return { type: "plant-status", entity: foundEntities[0] || "" };
   }
 
-  @property({ attribute: false }) public hass?: HomeAssistant;
+  @property() public hass?: HomeAssistant;
 
-  @internalProperty() private _config?: PlantStatusCardConfig;
+  @property() private _config?: PlantStatusCardConfig;
 
   public getCardSize(): number {
     return 3;
@@ -107,9 +105,13 @@ class HuiPlantStatusCard extends LitElement implements LovelaceCard {
 
     if (!stateObj) {
       return html`
-        <hui-warning>
-          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
-        </hui-warning>
+        <hui-warning
+          >${this.hass.localize(
+            "ui.panel.lovelace.warning.entity_not_found",
+            "entity",
+            this._config.entity
+          )}</hui-warning
+        >
       `;
     }
 
@@ -230,7 +232,7 @@ class HuiPlantStatusCard extends LitElement implements LovelaceCard {
       }
 
       .problem {
-        color: var(--error-color);
+        color: var(--google-red-500);
         font-weight: bold;
       }
 

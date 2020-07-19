@@ -8,13 +8,6 @@ import {
   RouteOptions,
   RouterOptions,
 } from "./hass-router-page";
-import {
-  STATE_STARTING,
-  STATE_NOT_RUNNING,
-  STATE_RUNNING,
-} from "home-assistant-js-websocket";
-import { CustomPanelInfo } from "../data/panel_custom";
-import { deepActiveElement } from "../common/dom/deep-active-element";
 
 const CACHE_URL_PATHS = ["lovelace", "developer-tools"];
 const COMPONENTS = {
@@ -87,29 +80,9 @@ const getRoutes = (panels: Panels): RouterOptions => {
 
 @customElement("partial-panel-resolver")
 class PartialPanelResolver extends HassRouterPage {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public narrow?: boolean;
-
-  private _waitForStart = false;
-
-  private _disconnectedPanel?: HTMLElement;
-
-  private _disconnectedActiveElement?: HTMLElement;
-
-  private _hiddenTimeout?: number;
-
-  protected firstUpdated(changedProps: PropertyValues) {
-    super.firstUpdated(changedProps);
-
-    // Attach listeners for visibility
-    document.addEventListener(
-      "visibilitychange",
-      () => this._checkVisibility(),
-      false
-    );
-    document.addEventListener("resume", () => this._checkVisibility());
-  }
 
   protected updated(changedProps: PropertyValues) {
     super.updated(changedProps);
@@ -119,15 +92,6 @@ class PartialPanelResolver extends HassRouterPage {
     }
 
     const oldHass = changedProps.get("hass") as this["hass"];
-
-    if (
-      this._waitForStart &&
-      (this.hass.config.state === STATE_STARTING ||
-        this.hass.config.state === STATE_RUNNING)
-    ) {
-      this._waitForStart = false;
-      this.rebuild();
-    }
 
     if (this.hass.panels && (!oldHass || oldHass.panels !== this.hass.panels)) {
       this._updateRoutes(oldHass?.panels);
@@ -151,91 +115,18 @@ class PartialPanelResolver extends HassRouterPage {
         hass: this.hass,
         narrow: this.narrow,
         route: this.routeTail,
-        panel: hass.panels[this._currentPage],
+        panel: hass.panels[hass.panelUrl],
       });
     } else {
       el.hass = hass;
       el.narrow = this.narrow;
       el.route = this.routeTail;
-      el.panel = hass.panels[this._currentPage];
-    }
-  }
-
-  private _checkVisibility() {
-    if (this.hass.suspendWhenHidden === false) {
-      return;
-    }
-
-    if (document.hidden) {
-      this._onHidden();
-    } else {
-      this._onVisible();
-    }
-  }
-
-  private _onHidden() {
-    this._hiddenTimeout = window.setTimeout(() => {
-      this._hiddenTimeout = undefined;
-      // setTimeout can be delayed in the background and only fire
-      // when we switch to the tab or app again (Hey Android!)
-      if (!document.hidden) {
-        return;
-      }
-      const curPanel = this.hass.panels[this._currentPage];
-      if (
-        this.lastChild &&
-        // iFrames will lose their state when disconnected
-        // Do not disconnect any iframe panel
-        curPanel.component_name !== "iframe" &&
-        // Do not disconnect any custom panel that embeds into iframe (ie hassio)
-        (curPanel.component_name !== "custom" ||
-          !(curPanel as CustomPanelInfo).config._panel_custom.embed_iframe)
-      ) {
-        this._disconnectedPanel = this.lastChild as HTMLElement;
-        const activeEl = deepActiveElement(
-          this._disconnectedPanel.shadowRoot || undefined
-        );
-        if (activeEl instanceof HTMLElement) {
-          this._disconnectedActiveElement = activeEl;
-        }
-        this.removeChild(this.lastChild);
-      }
-    }, 300000);
-    window.addEventListener("focus", () => this._onVisible(), { once: true });
-  }
-
-  private _onVisible() {
-    if (this._hiddenTimeout) {
-      clearTimeout(this._hiddenTimeout);
-      this._hiddenTimeout = undefined;
-    }
-    if (this._disconnectedPanel) {
-      this.appendChild(this._disconnectedPanel);
-      this._disconnectedPanel = undefined;
-    }
-    if (this._disconnectedActiveElement) {
-      this._disconnectedActiveElement.focus();
-      this._disconnectedActiveElement = undefined;
+      el.panel = hass.panels[hass.panelUrl];
     }
   }
 
   private async _updateRoutes(oldPanels?: HomeAssistant["panels"]) {
     this.routerOptions = getRoutes(this.hass.panels);
-
-    if (
-      !this._waitForStart &&
-      this._currentPage &&
-      !this.hass.panels[this._currentPage]
-    ) {
-      if (this.hass.config.state !== STATE_NOT_RUNNING) {
-        this._waitForStart = true;
-        if (this.lastChild) {
-          this.removeChild(this.lastChild);
-        }
-        this.appendChild(this.createLoadingScreen());
-        return;
-      }
-    }
 
     if (
       !oldPanels ||

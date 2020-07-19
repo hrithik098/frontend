@@ -14,7 +14,7 @@ import { HomeAssistant } from "../../../types";
 
 @customElement("more-info-timer")
 class MoreInfoTimer extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() public stateObj?: TimerEntity;
 

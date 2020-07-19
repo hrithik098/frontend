@@ -3,7 +3,6 @@ import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 import "../../../src/components/ha-switch";
-import "../../../src/components/ha-formfield";
 import "./demo-card";
 
 class DemoCards extends PolymerElement {
@@ -27,10 +26,9 @@ class DemoCards extends PolymerElement {
       </style>
       <app-toolbar>
         <div class="filters">
-          <ha-formfield label="Show config">
-            <ha-switch checked="[[_showConfig]]" on-change="_showConfigToggled">
-            </ha-switch>
-          </ha-formfield>
+          <ha-switch checked="[[_showConfig]]" on-change="_showConfigToggled">
+            Show config
+          </ha-switch>
         </div>
       </app-toolbar>
       <div class="cards">

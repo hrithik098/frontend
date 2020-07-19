@@ -7,7 +7,6 @@ import {
   html,
   LitElement,
   property,
-  internalProperty,
   TemplateResult,
 } from "lit-element";
 import "../../../components/dialog/ha-paper-dialog";
@@ -18,15 +17,15 @@ import { HomeAssistant } from "../../../types";
 import { AreaRegistryDetailDialogParams } from "./show-dialog-area-registry-detail";
 
 class DialogAreaDetail extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _name!: string;
+  @property() private _name!: string;
 
-  @internalProperty() private _error?: string;
+  @property() private _error?: string;
 
-  @internalProperty() private _params?: AreaRegistryDetailDialogParams;
+  @property() private _params?: AreaRegistryDetailDialogParams;
 
-  @internalProperty() private _submitting?: boolean;
+  @property() private _submitting?: boolean;
 
   public async showDialog(
     params: AreaRegistryDetailDialogParams
@@ -57,24 +56,13 @@ class DialogAreaDetail extends LitElement {
         <paper-dialog-scrollable>
           ${this._error ? html` <div class="error">${this._error}</div> ` : ""}
           <div class="form">
-            ${entry
-              ? html`
-                  <div>
-                    ${this.hass.localize(
-                      "ui.panel.config.areas.editor.area_id"
-                    )}:
-                    ${entry.area_id}
-                  </div>
-                `
-              : ""}
+            ${entry ? html` <div>Area ID: ${entry.area_id}</div> ` : ""}
 
             <paper-input
               .value=${this._name}
               @value-changed=${this._nameChanged}
-              .label=${this.hass.localize("ui.panel.config.areas.editor.name")}
-              .errorMessage=${this.hass.localize(
-                "ui.panel.config.areas.editor.name_required"
-              )}
+              label="Name"
+              error-message="Name is required"
               .invalid=${nameInvalid}
             ></paper-input>
           </div>
@@ -122,9 +110,7 @@ class DialogAreaDetail extends LitElement {
       }
       this._params = undefined;
     } catch (err) {
-      this._error =
-        err.message ||
-        this.hass.localize("ui.panel.config.areas.editor.unknown_error");
+      this._error = err.message || "Unknown error";
     } finally {
       this._submitting = false;
     }
@@ -158,7 +144,7 @@ class DialogAreaDetail extends LitElement {
           margin-right: auto;
         }
         .error {
-          color: var(--error-color);
+          color: var(--google-red-500);
         }
       `,
     ];
